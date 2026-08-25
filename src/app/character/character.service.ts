@@ -15,7 +15,11 @@ export class CharacterService {
       const savedCharacters = localStorage.getItem(this.storageKey);
       if (savedCharacters) {
         try {
-          this.characters.set(JSON.parse(savedCharacters) as Character[]);
+          const parsedCharacters = JSON.parse(savedCharacters);
+          if (!Array.isArray(parsedCharacters) || parsedCharacters.some((character) => !this.isCharacter(character))) {
+            throw new Error('Invalid character data');
+          }
+          this.characters.set(parsedCharacters.map((character) => this.normalizeCharacter(character)));
         } catch {
           localStorage.removeItem(this.storageKey);
         }
@@ -24,7 +28,9 @@ export class CharacterService {
   }
 
   add(firstName: string, lastName: string): void {
-    this.characters.update((characters) => [...characters, { id: crypto.randomUUID(), firstName, lastName }]);
+    this.characters.update((characters) => [...characters, {
+      id: crypto.randomUUID(), firstName, lastName, level: 1, experience: 0,
+    }]);
     this.saveToStorage();
   }
 
@@ -49,7 +55,7 @@ export class CharacterService {
       return false;
     }
 
-    this.characters.set(data);
+    this.characters.set(data.map((character) => this.normalizeCharacter(character)));
     this.saveToStorage();
     return true;
   }
@@ -62,7 +68,23 @@ export class CharacterService {
     const character = value as Record<string, unknown>;
     return typeof character['id'] === 'string'
       && typeof character['firstName'] === 'string'
-      && typeof character['lastName'] === 'string';
+      && typeof character['lastName'] === 'string'
+      && (character['experience'] === undefined || this.isExperience(character['experience']));
+  }
+
+  private isExperience(value: unknown): value is number {
+    return typeof value === 'number' && Number.isInteger(value) && value >= 0;
+  }
+
+  private normalizeCharacter(value: Character): Character {
+    const experience = this.isExperience(value.experience) ? value.experience : 0;
+    return {
+      id: value.id,
+      firstName: value.firstName,
+      lastName: value.lastName,
+      experience,
+      level: Math.floor(experience / 100) + 1,
+    };
   }
 
   private saveToStorage(): void {

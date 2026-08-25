@@ -14,6 +14,7 @@ export class CharacterForm {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   protected readonly characterId = this.route.snapshot.paramMap.get('id');
+  protected readonly character = this.characterId ? this.characterService.findById(this.characterId) : undefined;
   protected readonly isEditing = this.characterId !== null;
   protected readonly form = new FormGroup({
     firstName: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
@@ -22,8 +23,7 @@ export class CharacterForm {
 
   constructor() {
     if (this.characterId) {
-      const character = this.characterService.findById(this.characterId);
-      if (character) this.form.setValue({ firstName: character.firstName, lastName: character.lastName });
+      if (this.character) this.form.setValue({ firstName: this.character.firstName, lastName: this.character.lastName });
     }
   }
 

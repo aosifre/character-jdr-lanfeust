@@ -17,11 +17,12 @@
     </section>
   } @else {
     <section class="character-table" aria-label="Liste des personnages">
-      <div class="table-heading" aria-hidden="true"><span>Prénom</span><span>Nom</span><span>Actions</span></div>
+      <div class="table-heading" aria-hidden="true"><span>Prénom</span><span>Nom</span><span>Niveau / XP</span><span>Actions</span></div>
       @for (character of characters(); track character.id) {
         <article class="character-row">
           <strong>{{ character.firstName }}</strong>
           <span>{{ character.lastName }}</span>
+          <span class="character-stats">Niv. {{ character.level }} · {{ character.experience }} XP</span>
           <div class="row-actions">
             <a class="text-button" [routerLink]="['/characters', character.id, 'edit']">Modifier</a>
             <button class="text-button danger" type="button" (click)="removeCharacter(character.id, character.firstName, character.lastName)">Supprimer</button>

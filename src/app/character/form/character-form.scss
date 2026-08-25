@@ -10,6 +10,10 @@ form { display: grid; gap: .6rem; }
 label { color: #24323a; font-size: .85rem; font-weight: 800; margin-top: .8rem; }
 input { background: #fffdf8; border: 1px solid #aebbb8; border-radius: 3px; color: #24323a; font: inherit; min-height: 3.25rem; outline: none; padding: .8rem 1rem; }
 input:focus { border-color: #bd5b38; box-shadow: 0 0 0 3px rgba(189, 91, 56, .15); }
+input[readonly] { background: #e9ece7; color: #66747a; cursor: not-allowed; }
+.character-stats { display: grid; gap: 1rem; grid-template-columns: 1fr 1fr; margin-top: .8rem; }
+.character-stats label { display: block; }
+.stats-help { color: #66747a; font-size: .85rem; margin: .3rem 0 0; }
 small { color: #9d413f; }
 .form-actions { align-items: center; display: flex; gap: 1.5rem; justify-content: end; margin-top: 2rem; }
 .cancel-link { color: #66747a; text-decoration: none; }
