@@ -27,4 +27,10 @@ export interface Character {
   experience: number;
   attributes: CharacterAttributes;
   otherScores: CharacterOtherScores;
+  skills: CharacterSkill[];
+}
+
+export interface CharacterSkill {
+  skillId: string;
+  degree: number;
 }

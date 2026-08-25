@@ -1,6 +1,6 @@
 import { isPlatformBrowser } from '@angular/common';
 import { Inject, Injectable, PLATFORM_ID, signal } from '@angular/core';
-import { Character, CharacterAttributes, CharacterOtherScores, CombatBonus } from './character.model';
+import { Character, CharacterAttributes, CharacterOtherScores, CharacterSkill, CombatBonus } from './character.model';
 
 @Injectable({ providedIn: 'root' })
 export class CharacterService {
@@ -32,6 +32,7 @@ export class CharacterService {
       id: crypto.randomUUID(), firstName, lastName, description, level: 1, experience: 0,
       attributes: this.emptyAttributes(),
       otherScores: this.emptyOtherScores(),
+      skills: [],
     };
     this.characters.update((characters) => [...characters, character]);
     this.saveToStorage();
@@ -64,6 +65,13 @@ export class CharacterService {
   setOtherScores(id: string, otherScores: CharacterOtherScores): void {
     this.characters.update((characters) => characters.map((character) =>
       character.id === id ? { ...character, otherScores } : character,
+    ));
+    this.saveToStorage();
+  }
+
+  setSkills(id: string, skills: CharacterSkill[]): void {
+    this.characters.update((characters) => characters.map((character) =>
+      character.id === id ? { ...character, skills } : character,
     ));
     this.saveToStorage();
   }
@@ -106,6 +114,7 @@ export class CharacterService {
       level: Math.floor(experience / 100) + 1,
       attributes: this.isAttributes(value.attributes) ? value.attributes : this.emptyAttributes(),
       otherScores: this.isOtherScores(value.otherScores) ? value.otherScores : this.emptyOtherScores(),
+      skills: Array.isArray(value.skills) ? value.skills : [],
     };
   }
 

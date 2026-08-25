@@ -37,7 +37,7 @@ export class CharacterOtherScoresPage {
     if (!this.characterId || !this.character || this.otherScores.combatBonus === null) return;
     this.refreshCombatScores();
     this.characterService.setOtherScores(this.characterId, this.otherScores);
-    this.router.navigate(['/characters']);
+    this.router.navigate(['/characters', this.characterId, 'skills']);
   }
 
   private refreshCombatScores(): void {
