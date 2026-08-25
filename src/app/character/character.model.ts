@@ -17,6 +17,7 @@ export interface CharacterOtherScores {
   hitPoints: number;
   energyPoints: number;
   combatBonus: CombatBonus;
+  combatBonusPoints: { attack: number; defense: number; save: number };
 }
 
 export interface Character {
@@ -31,6 +32,7 @@ export interface Character {
   otherScores: CharacterOtherScores;
   skills: CharacterSkill[];
   advantages: CharacterAdvantage[];
+  flaws: CharacterFlaw[];
 }
 
 export interface CharacterSkill {
@@ -40,4 +42,8 @@ export interface CharacterSkill {
 
 export interface CharacterAdvantage {
   advantageId: string;
+}
+
+export interface CharacterFlaw {
+  flawId: string;
 }

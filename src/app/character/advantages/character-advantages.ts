@@ -45,6 +45,6 @@ export class CharacterAdvantagesPage {
     if (!this.characterId || this.selected.size !== maximum) return;
     const selected: CharacterAdvantage[] = [...this.selected].map((advantageId) => ({ advantageId }));
     this.characterService.setAdvantages(this.characterId, selected);
-    this.router.navigate(['/characters']);
+    this.router.navigate(['/characters', this.characterId, 'flaws']);
   }
 }

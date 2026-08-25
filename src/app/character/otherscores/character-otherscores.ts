@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { CharacterOtherScores as CharacterOtherScoresModel, CombatBonus } from '../character.model';
+import { CharacterOtherScores as CharacterOtherScoresModel } from '../character.model';
 import { CharacterService } from '../character.service';
 
 @Component({
@@ -22,31 +22,38 @@ export class CharacterOtherScoresPage {
     hitPoints: this.character?.otherScores.hitPoints ?? 0,
     energyPoints: this.character?.otherScores.energyPoints ?? 0,
     combatBonus: this.character?.otherScores.combatBonus ?? null,
+    combatBonusPoints: { ...(this.character?.otherScores.combatBonusPoints ?? { attack: 0, defense: 0, save: 0 }) },
   };
 
   constructor() {
     this.refreshCombatScores();
   }
 
-  protected selectCombatBonus(bonus: Exclude<CombatBonus, null>): void {
-    this.otherScores.combatBonus = this.otherScores.combatBonus === bonus ? null : bonus;
+  protected selectCombatBonus(bonus: 'attack' | 'defense' | 'save'): void {
+    const points = this.otherScores.combatBonusPoints;
+    const total = points.attack + points.defense + points.save;
+    if (points[bonus] > 0) points[bonus]--;
+    else if (total < 2) points[bonus]++;
+    this.otherScores.combatBonus = points.attack > 0 ? 'attack' : points.defense > 0 ? 'defense' : points.save > 0 ? 'save' : null;
     this.refreshCombatScores();
   }
 
   protected save(): void {
-    if (!this.characterId || !this.character || this.otherScores.combatBonus === null) return;
+    if (!this.characterId || !this.character || this.bonusPointsTotal !== 2) return;
     this.refreshCombatScores();
     this.characterService.setOtherScores(this.characterId, this.otherScores);
     this.router.navigate(['/characters', this.characterId, 'skills']);
   }
 
+  protected get bonusPointsTotal(): number { const points = this.otherScores.combatBonusPoints; return points.attack + points.defense + points.save; }
+
   private refreshCombatScores(): void {
     const attributes = this.character?.attributes;
     if (!attributes) return;
-    const bonus = this.otherScores.combatBonus;
-    this.otherScores.attack = attributes.force + attributes.intelligence + (bonus === 'attack' ? 1 : 0);
-    this.otherScores.defense = attributes.dexterite + attributes.sagesse + (bonus === 'defense' ? 1 : 0);
-    this.otherScores.save = attributes.constitution + attributes.charisme + (bonus === 'save' ? 1 : 0);
+    const points = this.otherScores.combatBonusPoints;
+    this.otherScores.attack = attributes.force + attributes.intelligence + points.attack;
+    this.otherScores.defense = attributes.dexterite + attributes.sagesse + points.defense;
+    this.otherScores.save = attributes.constitution + attributes.charisme + points.save;
     this.otherScores.hitPoints = 10 + attributes.constitution;
     this.otherScores.energyPoints = 5 + attributes.sagesse;
   }

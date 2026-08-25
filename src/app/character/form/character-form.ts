@@ -3,9 +3,10 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CharacterService } from '../character.service';
 import { CharacterOrigin } from '../character.model';
+import { CharacterEditTabs } from '../edit-tabs/character-edit-tabs';
 
 @Component({
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [CharacterEditTabs, ReactiveFormsModule, RouterLink],
   selector: 'app-character-form',
   templateUrl: './character-form.html',
   styleUrl: './character-form.scss',

@@ -9,6 +9,9 @@ import { CharacterAdvantagesPage } from './character/advantages/character-advant
 import { SettingsPage } from './settings/settings-page';
 import { AdvantageList } from './advantage/list/advantage-list';
 import { CreationSettings } from './settings/creation/creation-settings';
+import { FlawList } from './flaw/list/flaw-list';
+import { CharacterFlawsPage } from './character/flaws/character-flaws';
+import { CharacterEditPage } from './character/edit/character-edit-page';
 
 export const routes: Routes = [
 	{ path: '', pathMatch: 'full', redirectTo: 'characters' },
@@ -18,10 +21,12 @@ export const routes: Routes = [
 	{ path: 'characters/:id/otherscores', component: CharacterOtherScoresPage },
 	{ path: 'characters/:id/skills', component: CharacterSkillsPage },
 	{ path: 'characters/:id/advantages', component: CharacterAdvantagesPage },
+	{ path: 'characters/:id/flaws', component: CharacterFlawsPage },
 	{ path: 'skills', component: SkillList },
 	{ path: 'settings', component: SettingsPage },
 	{ path: 'settings/creation', component: CreationSettings },
 	{ path: 'advantages', component: AdvantageList },
-	{ path: 'characters/:id/edit', component: CharacterForm },
+	{ path: 'flaws', component: FlawList },
+	{ path: 'characters/:id/edit', component: CharacterEditPage },
 	{ path: '**', redirectTo: 'characters' },
 ];

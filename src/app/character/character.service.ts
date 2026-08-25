@@ -1,6 +1,6 @@
 import { isPlatformBrowser } from '@angular/common';
 import { Inject, Injectable, PLATFORM_ID, signal } from '@angular/core';
-import { Character, CharacterAdvantage, CharacterAttributes, CharacterOrigin, CharacterOtherScores, CharacterSkill, CombatBonus } from './character.model';
+import { Character, CharacterAdvantage, CharacterAttributes, CharacterFlaw, CharacterOrigin, CharacterOtherScores, CharacterSkill, CombatBonus } from './character.model';
 
 @Injectable({ providedIn: 'root' })
 export class CharacterService {
@@ -34,6 +34,7 @@ export class CharacterService {
       otherScores: this.emptyOtherScores(),
       skills: [],
       advantages: [],
+      flaws: [],
     };
     this.characters.update((characters) => [...characters, character]);
     this.saveToStorage();
@@ -84,6 +85,13 @@ export class CharacterService {
     this.saveToStorage();
   }
 
+  setFlaws(id: string, flaws: CharacterFlaw[]): void {
+    this.characters.update((characters) => characters.map((character) =>
+      character.id === id ? { ...character, flaws } : character,
+    ));
+    this.saveToStorage();
+  }
+
   importCharacters(data: unknown): boolean {
     if (!Array.isArray(data) || data.some((character) => !this.isCharacter(character))) {
       return false;
@@ -127,9 +135,10 @@ export class CharacterService {
       experience,
       level: Math.floor(experience / 100) + 1,
       attributes: this.isAttributes(value.attributes) ? value.attributes : this.emptyAttributes(),
-      otherScores: this.isOtherScores(value.otherScores) ? value.otherScores : this.emptyOtherScores(),
+      otherScores: this.isOtherScores(value.otherScores) ? this.normalizeOtherScores(value.otherScores) : this.emptyOtherScores(),
       skills: Array.isArray(value.skills) ? value.skills : [],
       advantages: Array.isArray(value.advantages) ? value.advantages : [],
+      flaws: Array.isArray(value.flaws) ? value.flaws : [],
     };
   }
 
@@ -138,7 +147,7 @@ export class CharacterService {
   }
 
   private emptyOtherScores(): CharacterOtherScores {
-    return { attack: 0, defense: 0, save: 0, hitPoints: 0, energyPoints: 0, combatBonus: null };
+    return { attack: 0, defense: 0, save: 0, hitPoints: 0, energyPoints: 0, combatBonus: null, combatBonusPoints: { attack: 0, defense: 0, save: 0 } };
   }
 
   private isOtherScores(value: unknown): value is CharacterOtherScores {
@@ -146,11 +155,24 @@ export class CharacterService {
     const scores = value as Record<string, unknown>;
     return ['attack', 'defense', 'save', 'hitPoints', 'energyPoints']
       .every((key) => typeof scores[key] === 'number' && Number.isInteger(scores[key]) && (scores[key] as number) >= 0)
-      && (scores['combatBonus'] === null || scores['combatBonus'] === undefined || this.isCombatBonus(scores['combatBonus']));
+      && (scores['combatBonus'] === null || scores['combatBonus'] === undefined || this.isCombatBonus(scores['combatBonus']))
+      && (scores['combatBonusPoints'] === undefined || this.isBonusPoints(scores['combatBonusPoints']));
   }
 
   private isCombatBonus(value: unknown): value is Exclude<CombatBonus, null> {
     return value === 'attack' || value === 'defense' || value === 'save';
+  }
+
+  private isBonusPoints(value: unknown): value is CharacterOtherScores['combatBonusPoints'] {
+    if (typeof value !== 'object' || value === null) return false;
+    const points = value as Record<string, unknown>;
+    return ['attack', 'defense', 'save'].every((key) => typeof points[key] === 'number' && Number.isInteger(points[key]) && (points[key] as number) >= 0)
+      && (points['attack'] as number) + (points['defense'] as number) + (points['save'] as number) === 2;
+  }
+
+  private normalizeOtherScores(value: CharacterOtherScores): CharacterOtherScores {
+    const points = value.combatBonusPoints ?? { attack: 0, defense: 0, save: 0 };
+    return { ...value, combatBonusPoints: points };
   }
 
   private isAttributes(value: unknown): value is CharacterAttributes {
