@@ -1,6 +1,6 @@
 import { isPlatformBrowser } from '@angular/common';
 import { Inject, Injectable, PLATFORM_ID, signal } from '@angular/core';
-import { Character } from './character.model';
+import { Character, CharacterAttributes } from './character.model';
 
 @Injectable({ providedIn: 'root' })
 export class CharacterService {
@@ -27,11 +27,14 @@ export class CharacterService {
     }
   }
 
-  add(firstName: string, lastName: string): void {
-    this.characters.update((characters) => [...characters, {
+  add(firstName: string, lastName: string): Character {
+    const character: Character = {
       id: crypto.randomUUID(), firstName, lastName, level: 1, experience: 0,
-    }]);
+      attributes: this.emptyAttributes(),
+    };
+    this.characters.update((characters) => [...characters, character]);
     this.saveToStorage();
+    return character;
   }
 
   update(id: string, firstName: string, lastName: string): void {
@@ -48,6 +51,13 @@ export class CharacterService {
 
   findById(id: string): Character | undefined {
     return this.characters().find((character) => character.id === id);
+  }
+
+  setAttributes(id: string, attributes: CharacterAttributes): void {
+    this.characters.update((characters) => characters.map((character) =>
+      character.id === id ? { ...character, attributes } : character,
+    ));
+    this.saveToStorage();
   }
 
   importCharacters(data: unknown): boolean {
@@ -84,7 +94,19 @@ export class CharacterService {
       lastName: value.lastName,
       experience,
       level: Math.floor(experience / 100) + 1,
+      attributes: this.isAttributes(value.attributes) ? value.attributes : this.emptyAttributes(),
     };
+  }
+
+  private emptyAttributes(): CharacterAttributes {
+    return { force: 0, dexterite: 0, constitution: 0, sagesse: 0, intelligence: 0, charisme: 0 };
+  }
+
+  private isAttributes(value: unknown): value is CharacterAttributes {
+    if (typeof value !== 'object' || value === null) return false;
+    const attributes = value as Record<string, unknown>;
+    return ['force', 'dexterite', 'constitution', 'sagesse', 'intelligence', 'charisme']
+      .every((key) => typeof attributes[key] === 'number' && Number.isInteger(attributes[key]) && (attributes[key] as number) >= 0);
   }
 
   private saveToStorage(): void {

@@ -30,8 +30,12 @@ export class CharacterForm {
   protected save(): void {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     const { firstName, lastName } = this.form.getRawValue();
-    if (this.characterId) this.characterService.update(this.characterId, firstName.trim(), lastName.trim());
-    else this.characterService.add(firstName.trim(), lastName.trim());
-    this.router.navigate(['/characters']);
+    if (this.characterId) {
+      this.characterService.update(this.characterId, firstName.trim(), lastName.trim());
+      this.router.navigate(['/characters']);
+    } else {
+      const character = this.characterService.add(firstName.trim(), lastName.trim());
+      this.router.navigate(['/characters', character.id, 'characteristics']);
+    }
   }
 }
