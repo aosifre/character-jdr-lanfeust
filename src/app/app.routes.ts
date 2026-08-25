@@ -1,3 +1,11 @@
 import { Routes } from '@angular/router';
+import { CharacterForm } from './character/form/character-form';
+import { CharacterList } from './character/list/character-list';
 
-export const routes: Routes = [];
+export const routes: Routes = [
+	{ path: '', pathMatch: 'full', redirectTo: 'characters' },
+	{ path: 'characters', component: CharacterList },
+	{ path: 'characters/new', component: CharacterForm },
+	{ path: 'characters/:id/edit', component: CharacterForm },
+	{ path: '**', redirectTo: 'characters' },
+];
