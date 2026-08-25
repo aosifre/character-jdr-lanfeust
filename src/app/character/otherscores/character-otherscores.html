@@ -1,0 +1,36 @@
+<main class="scores-shell">
+  <a class="back-link" [routerLink]="characterId ? ['/characters', characterId, 'characteristics'] : '/characters'">← Retour</a>
+  <div class="scores-heading">
+    <p class="eyebrow">{{ character?.firstName }} {{ character?.lastName }}</p>
+    <h1>Autres scores</h1>
+    <p>Choisissez un bonus de combat de +1. Les scores sont calculés automatiquement.</p>
+  </div>
+
+  <section class="score-section">
+    <h2>Bonus de combat</h2>
+    <p class="section-help">Sélectionnez une seule ligne pour lui attribuer le bonus de +1.</p>
+    <div class="bonus-grid">
+      <button class="score-card" [class.selected]="otherScores.combatBonus === 'attack'" type="button" (click)="selectCombatBonus('attack')">
+        <span>Attaque (ATT)</span><strong>{{ otherScores.attack }}</strong><small>Force + Intelligence</small>
+      </button>
+      <button class="score-card" [class.selected]="otherScores.combatBonus === 'defense'" type="button" (click)="selectCombatBonus('defense')">
+        <span>Défense (DEF)</span><strong>{{ otherScores.defense }}</strong><small>Dextérité + Sagesse</small>
+      </button>
+      <button class="score-card" [class.selected]="otherScores.combatBonus === 'save'" type="button" (click)="selectCombatBonus('save')">
+        <span>Sauvegarde (SAV)</span><strong>{{ otherScores.save }}</strong><small>Constitution + Charisme</small>
+      </button>
+    </div>
+  </section>
+
+  <section class="score-section secondary-scores">
+    <h2>Points de vie et d'énergie</h2>
+    <div class="fixed-scores">
+      <label><span>Points de vie</span><input type="number" [value]="otherScores.hitPoints" readonly /></label>
+      <label><span>Points d'énergie</span><input type="number" [value]="otherScores.energyPoints" readonly /></label>
+    </div>
+  </section>
+
+  <div class="scores-footer">
+    <button class="button button-primary" type="button" [disabled]="otherScores.combatBonus === null" (click)="save()">Valider le personnage</button>
+  </div>
+</main>

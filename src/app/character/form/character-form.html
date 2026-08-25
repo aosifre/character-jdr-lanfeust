@@ -2,7 +2,7 @@
   <a class="back-link" routerLink="/characters">← Retour aux personnages</a>
   <div class="form-heading">
     <p class="eyebrow">Fiche personnage</p>
-    <h1>{{ isEditing ? 'Modifier le personnage' : 'Nouveau personnage' }}</h1>
+    <h1>Qui suis-je ?</h1>
     <p>{{ isEditing ? 'Ajustez son identité pour la suite de l’aventure.' : 'Donnez-lui une identité avant de l’envoyer à l’aventure.' }}</p>
   </div>
   <form [formGroup]="form" (ngSubmit)="save()" novalidate>
@@ -12,6 +12,8 @@
     <label for="lastName">Nom</label>
     <input id="lastName" type="text" formControlName="lastName" autocomplete="family-name" />
     @if (form.controls.lastName.invalid && form.controls.lastName.touched) { <small>Le nom est obligatoire.</small> }
+    <label for="description">Description</label>
+    <textarea id="description" formControlName="description" rows="7" placeholder="Décrivez votre personnage..."></textarea>
     <div class="character-stats">
       <div>
         <label for="level">Niveau</label>

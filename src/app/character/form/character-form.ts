@@ -19,22 +19,27 @@ export class CharacterForm {
   protected readonly form = new FormGroup({
     firstName: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     lastName: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+    description: new FormControl('', { nonNullable: true }),
   });
 
   constructor() {
     if (this.characterId) {
-      if (this.character) this.form.setValue({ firstName: this.character.firstName, lastName: this.character.lastName });
+      if (this.character) this.form.setValue({
+        firstName: this.character.firstName,
+        lastName: this.character.lastName,
+        description: this.character.description,
+      });
     }
   }
 
   protected save(): void {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
-    const { firstName, lastName } = this.form.getRawValue();
+    const { firstName, lastName, description } = this.form.getRawValue();
     if (this.characterId) {
-      this.characterService.update(this.characterId, firstName.trim(), lastName.trim());
+      this.characterService.update(this.characterId, firstName.trim(), lastName.trim(), description.trim());
       this.router.navigate(['/characters']);
     } else {
-      const character = this.characterService.add(firstName.trim(), lastName.trim());
+      const character = this.characterService.add(firstName.trim(), lastName.trim(), description.trim());
       this.router.navigate(['/characters', character.id, 'characteristics']);
     }
   }

@@ -53,6 +53,6 @@ export class CharacterCharacteristics {
   protected save(): void {
     if (!this.characterId || this.assignedCount !== 5) return;
     this.characterService.setAttributes(this.characterId, this.values);
-    this.router.navigate(['/characters']);
+    this.router.navigate(['/characters', this.characterId, 'otherscores']);
   }
 }

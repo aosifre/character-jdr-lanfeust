@@ -1,6 +1,6 @@
 import { isPlatformBrowser } from '@angular/common';
 import { Inject, Injectable, PLATFORM_ID, signal } from '@angular/core';
-import { Character, CharacterAttributes } from './character.model';
+import { Character, CharacterAttributes, CharacterOtherScores, CombatBonus } from './character.model';
 
 @Injectable({ providedIn: 'root' })
 export class CharacterService {
@@ -27,19 +27,20 @@ export class CharacterService {
     }
   }
 
-  add(firstName: string, lastName: string): Character {
+  add(firstName: string, lastName: string, description: string): Character {
     const character: Character = {
-      id: crypto.randomUUID(), firstName, lastName, level: 1, experience: 0,
+      id: crypto.randomUUID(), firstName, lastName, description, level: 1, experience: 0,
       attributes: this.emptyAttributes(),
+      otherScores: this.emptyOtherScores(),
     };
     this.characters.update((characters) => [...characters, character]);
     this.saveToStorage();
     return character;
   }
 
-  update(id: string, firstName: string, lastName: string): void {
+  update(id: string, firstName: string, lastName: string, description: string): void {
     this.characters.update((characters) => characters.map((character) =>
-      character.id === id ? { ...character, firstName, lastName } : character,
+      character.id === id ? { ...character, firstName, lastName, description } : character,
     ));
     this.saveToStorage();
   }
@@ -56,6 +57,13 @@ export class CharacterService {
   setAttributes(id: string, attributes: CharacterAttributes): void {
     this.characters.update((characters) => characters.map((character) =>
       character.id === id ? { ...character, attributes } : character,
+    ));
+    this.saveToStorage();
+  }
+
+  setOtherScores(id: string, otherScores: CharacterOtherScores): void {
+    this.characters.update((characters) => characters.map((character) =>
+      character.id === id ? { ...character, otherScores } : character,
     ));
     this.saveToStorage();
   }
@@ -79,6 +87,7 @@ export class CharacterService {
     return typeof character['id'] === 'string'
       && typeof character['firstName'] === 'string'
       && typeof character['lastName'] === 'string'
+      && (character['description'] === undefined || typeof character['description'] === 'string')
       && (character['experience'] === undefined || this.isExperience(character['experience']));
   }
 
@@ -92,14 +101,32 @@ export class CharacterService {
       id: value.id,
       firstName: value.firstName,
       lastName: value.lastName,
+      description: typeof value.description === 'string' ? value.description : '',
       experience,
       level: Math.floor(experience / 100) + 1,
       attributes: this.isAttributes(value.attributes) ? value.attributes : this.emptyAttributes(),
+      otherScores: this.isOtherScores(value.otherScores) ? value.otherScores : this.emptyOtherScores(),
     };
   }
 
   private emptyAttributes(): CharacterAttributes {
     return { force: 0, dexterite: 0, constitution: 0, sagesse: 0, intelligence: 0, charisme: 0 };
+  }
+
+  private emptyOtherScores(): CharacterOtherScores {
+    return { attack: 0, defense: 0, save: 0, hitPoints: 0, energyPoints: 0, combatBonus: null };
+  }
+
+  private isOtherScores(value: unknown): value is CharacterOtherScores {
+    if (typeof value !== 'object' || value === null) return false;
+    const scores = value as Record<string, unknown>;
+    return ['attack', 'defense', 'save', 'hitPoints', 'energyPoints']
+      .every((key) => typeof scores[key] === 'number' && Number.isInteger(scores[key]) && (scores[key] as number) >= 0)
+      && (scores['combatBonus'] === null || scores['combatBonus'] === undefined || this.isCombatBonus(scores['combatBonus']));
+  }
+
+  private isCombatBonus(value: unknown): value is Exclude<CombatBonus, null> {
+    return value === 'attack' || value === 'defense' || value === 'save';
   }
 
   private isAttributes(value: unknown): value is CharacterAttributes {
