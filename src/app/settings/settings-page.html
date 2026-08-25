@@ -1,0 +1,6 @@
+<main class="settings-shell">
+  <a class="back-link" routerLink="/characters">← Retour aux personnages</a>
+  <header><p class="eyebrow">JDR Lanfeust de Troy</p><h1>Paramètres globaux</h1><p>Configurez les règles utilisées lors de la création des personnages.</p></header>
+  <nav class="settings-nav" aria-label="Sections des paramètres"><a routerLink="/settings/creation">Création des personnages</a><a routerLink="/advantages">Atouts</a><a routerLink="/skills">Compétences</a></nav>
+  <footer><button class="button outline" type="button" (click)="exportSettings()">Exporter</button><label class="button outline" for="settings-import">Importer</label><input id="settings-import" class="hidden" type="file" accept="application/json,.json" (change)="importSettings($event)" />@if (importError) {<p role="alert">Fichier de paramètres invalide.</p>}</footer>
+</main>

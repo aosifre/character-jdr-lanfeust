@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CharacterService } from '../character.service';
+import { CharacterOrigin } from '../character.model';
 
 @Component({
   imports: [ReactiveFormsModule, RouterLink],
@@ -20,6 +21,7 @@ export class CharacterForm {
     firstName: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     lastName: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     description: new FormControl('', { nonNullable: true }),
+    origin: new FormControl<CharacterOrigin>('human', { nonNullable: true }),
   });
 
   constructor() {
@@ -28,18 +30,19 @@ export class CharacterForm {
         firstName: this.character.firstName,
         lastName: this.character.lastName,
         description: this.character.description,
+        origin: this.character.origin,
       });
     }
   }
 
   protected save(): void {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
-    const { firstName, lastName, description } = this.form.getRawValue();
+    const { firstName, lastName, description, origin } = this.form.getRawValue();
     if (this.characterId) {
-      this.characterService.update(this.characterId, firstName.trim(), lastName.trim(), description.trim());
+      this.characterService.update(this.characterId, firstName.trim(), lastName.trim(), description.trim(), origin);
       this.router.navigate(['/characters']);
     } else {
-      const character = this.characterService.add(firstName.trim(), lastName.trim(), description.trim());
+      const character = this.characterService.add(firstName.trim(), lastName.trim(), description.trim(), origin);
       this.router.navigate(['/characters', character.id, 'characteristics']);
     }
   }

@@ -4,7 +4,12 @@ import { RouterLink } from '@angular/router';
 import { AttributeKey } from '../skill.model';
 import { SkillService } from '../skill.service';
 
-@Component({ imports: [ReactiveFormsModule, RouterLink], selector: 'app-skill-list', templateUrl: './skill-list.html', styleUrl: './skill-list.scss' })
+@Component({
+  imports: [ReactiveFormsModule, RouterLink],
+  selector: 'app-skill-list',
+  templateUrl: './skill-list.html',
+  styleUrl: './skill-list.scss',
+})
 export class SkillList {
   private readonly service = inject(SkillService);
   protected readonly skills = this.service.skillList;

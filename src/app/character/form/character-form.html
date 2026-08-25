@@ -14,6 +14,13 @@
     @if (form.controls.lastName.invalid && form.controls.lastName.touched) { <small>Le nom est obligatoire.</small> }
     <label for="description">Description</label>
     <textarea id="description" formControlName="description" rows="7" placeholder="Décrivez votre personnage..."></textarea>
+    <label for="origin">Origine</label>
+    <select id="origin" formControlName="origin">
+      <option value="human">Humain</option>
+      <option value="darshan">Humain originaire de l'empire du Darshan</option>
+      <option value="troll">Troll</option>
+      <option value="eckmul">Humain originaire de la zone d'influence d'Eckmül</option>
+    </select>
     <div class="character-stats">
       <div>
         <label for="level">Niveau</label>

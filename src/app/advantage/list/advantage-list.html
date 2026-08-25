@@ -1,0 +1,28 @@
+<main class="advantages-shell">
+  <a class="back-link" routerLink="/settings">← Retour aux paramètres</a>
+  <header><p class="eyebrow">JDR Lanfeust de Troy</p><h1>Atouts</h1><p>Gérez le catalogue des atouts disponibles lors de la création des héros.</p></header>
+  <button class="button" type="button" (click)="openModal()">Ajouter un atout</button>
+  <section class="advantage-list">
+    @for (advantage of advantages(); track advantage.id) {
+      <article><div><strong>{{ advantage.title }}</strong><p class="category">{{ categoryLabel(advantage.category) }}</p><p>{{ advantage.description }}</p></div><button class="delete" type="button" (click)="remove(advantage.id)">Supprimer</button></article>
+    }
+  </section>
+  <footer><button class="button outline" type="button" (click)="export()">Exporter</button><label class="button outline" for="advantage-import">Importer</label><input id="advantage-import" class="hidden" type="file" accept="application/json,.json" (change)="import($event)" />@if (importError) {<p role="alert">Fichier d’atouts invalide.</p>}</footer>
+</main>
+
+@if (modalOpen) {
+  <div class="modal-backdrop" role="presentation" (click)="closeModal()">
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="advantage-modal-title" (click)="$event.stopPropagation()">
+      <div class="modal-header"><h2 id="advantage-modal-title">Ajouter un atout</h2><button class="close-button" type="button" aria-label="Fermer" (click)="closeModal()">×</button></div>
+      <form [formGroup]="form" (ngSubmit)="add()">
+        <label for="advantage-title">Titre</label><input id="advantage-title" formControlName="title" placeholder="Titre de l'atout" />
+        <label for="category">Catégorie</label><select id="category" formControlName="category">@for (category of categories; track category.key) {<option [value]="category.key">{{ category.label }}</option>}</select>
+        <label for="advantage-description">Description</label><textarea id="advantage-description" formControlName="description" rows="5" placeholder="Description"></textarea>
+        <label for="condition-attribute">Caractéristique requise</label><select id="condition-attribute" formControlName="conditionAttribute"><option [ngValue]="null">Aucune condition</option>@for (attribute of attributes; track attribute.key) {<option [value]="attribute.key">{{ attribute.label }}</option>}</select>
+        <label for="condition-minimum">Seuil</label><input id="condition-minimum" formControlName="conditionMinimum" type="number" min="0" placeholder="Seuil" />
+        <label for="prerequisite">Atout prérequis</label><select id="prerequisite" formControlName="prerequisiteId"><option [ngValue]="null">Aucun prérequis</option>@for (advantage of advantages(); track advantage.id) {<option [value]="advantage.id">{{ advantage.title }}</option>}</select>
+        <div class="modal-actions"><button class="button outline" type="button" (click)="closeModal()">Annuler</button><button class="button" type="submit">Ajouter</button></div>
+      </form>
+    </section>
+  </div>
+}

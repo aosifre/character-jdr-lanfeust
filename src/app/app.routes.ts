@@ -5,6 +5,10 @@ import { CharacterCharacteristics } from './character/characteristics/character-
 import { CharacterOtherScoresPage } from './character/otherscores/character-otherscores';
 import { CharacterSkillsPage } from './character/skills/character-skills';
 import { SkillList } from './skill/list/skill-list';
+import { CharacterAdvantagesPage } from './character/advantages/character-advantages';
+import { SettingsPage } from './settings/settings-page';
+import { AdvantageList } from './advantage/list/advantage-list';
+import { CreationSettings } from './settings/creation/creation-settings';
 
 export const routes: Routes = [
 	{ path: '', pathMatch: 'full', redirectTo: 'characters' },
@@ -13,7 +17,11 @@ export const routes: Routes = [
 	{ path: 'characters/:id/characteristics', component: CharacterCharacteristics },
 	{ path: 'characters/:id/otherscores', component: CharacterOtherScoresPage },
 	{ path: 'characters/:id/skills', component: CharacterSkillsPage },
+	{ path: 'characters/:id/advantages', component: CharacterAdvantagesPage },
 	{ path: 'skills', component: SkillList },
+	{ path: 'settings', component: SettingsPage },
+	{ path: 'settings/creation', component: CreationSettings },
+	{ path: 'advantages', component: AdvantageList },
 	{ path: 'characters/:id/edit', component: CharacterForm },
 	{ path: '**', redirectTo: 'characters' },
 ];

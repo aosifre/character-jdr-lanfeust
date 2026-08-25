@@ -52,6 +52,6 @@ export class CharacterSkillsPage {
     if (!this.characterId || this.selected.size !== this.maximum) return;
     const selectedSkills: CharacterSkill[] = [...this.selected].map((skillId) => ({ skillId, degree: 1 }));
     this.characterService.setSkills(this.characterId, selectedSkills);
-    this.router.navigate(['/characters']);
+    this.router.navigate(['/characters', this.characterId, 'advantages']);
   }
 }

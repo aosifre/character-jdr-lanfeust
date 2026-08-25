@@ -1,6 +1,6 @@
 import { isPlatformBrowser } from '@angular/common';
 import { Inject, Injectable, PLATFORM_ID, signal } from '@angular/core';
-import { Character, CharacterAttributes, CharacterOtherScores, CharacterSkill, CombatBonus } from './character.model';
+import { Character, CharacterAdvantage, CharacterAttributes, CharacterOrigin, CharacterOtherScores, CharacterSkill, CombatBonus } from './character.model';
 
 @Injectable({ providedIn: 'root' })
 export class CharacterService {
@@ -27,21 +27,22 @@ export class CharacterService {
     }
   }
 
-  add(firstName: string, lastName: string, description: string): Character {
+  add(firstName: string, lastName: string, description: string, origin: CharacterOrigin): Character {
     const character: Character = {
-      id: crypto.randomUUID(), firstName, lastName, description, level: 1, experience: 0,
+      id: crypto.randomUUID(), firstName, lastName, description, origin, level: 1, experience: 0,
       attributes: this.emptyAttributes(),
       otherScores: this.emptyOtherScores(),
       skills: [],
+      advantages: [],
     };
     this.characters.update((characters) => [...characters, character]);
     this.saveToStorage();
     return character;
   }
 
-  update(id: string, firstName: string, lastName: string, description: string): void {
+  update(id: string, firstName: string, lastName: string, description: string, origin: CharacterOrigin): void {
     this.characters.update((characters) => characters.map((character) =>
-      character.id === id ? { ...character, firstName, lastName, description } : character,
+      character.id === id ? { ...character, firstName, lastName, description, origin } : character,
     ));
     this.saveToStorage();
   }
@@ -76,6 +77,13 @@ export class CharacterService {
     this.saveToStorage();
   }
 
+  setAdvantages(id: string, advantages: CharacterAdvantage[]): void {
+    this.characters.update((characters) => characters.map((character) =>
+      character.id === id ? { ...character, advantages } : character,
+    ));
+    this.saveToStorage();
+  }
+
   importCharacters(data: unknown): boolean {
     if (!Array.isArray(data) || data.some((character) => !this.isCharacter(character))) {
       return false;
@@ -96,11 +104,16 @@ export class CharacterService {
       && typeof character['firstName'] === 'string'
       && typeof character['lastName'] === 'string'
       && (character['description'] === undefined || typeof character['description'] === 'string')
+      && (character['origin'] === undefined || this.isOrigin(character['origin']))
       && (character['experience'] === undefined || this.isExperience(character['experience']));
   }
 
   private isExperience(value: unknown): value is number {
     return typeof value === 'number' && Number.isInteger(value) && value >= 0;
+  }
+
+  private isOrigin(value: unknown): value is CharacterOrigin {
+    return value === 'human' || value === 'darshan' || value === 'troll' || value === 'eckmul';
   }
 
   private normalizeCharacter(value: Character): Character {
@@ -110,11 +123,13 @@ export class CharacterService {
       firstName: value.firstName,
       lastName: value.lastName,
       description: typeof value.description === 'string' ? value.description : '',
+      origin: this.isOrigin(value.origin) ? value.origin : 'human',
       experience,
       level: Math.floor(experience / 100) + 1,
       attributes: this.isAttributes(value.attributes) ? value.attributes : this.emptyAttributes(),
       otherScores: this.isOtherScores(value.otherScores) ? value.otherScores : this.emptyOtherScores(),
       skills: Array.isArray(value.skills) ? value.skills : [],
+      advantages: Array.isArray(value.advantages) ? value.advantages : [],
     };
   }
 

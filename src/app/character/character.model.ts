@@ -8,6 +8,7 @@ export interface CharacterAttributes {
 }
 
 export type CombatBonus = 'attack' | 'defense' | 'save' | null;
+export type CharacterOrigin = 'human' | 'darshan' | 'troll' | 'eckmul';
 
 export interface CharacterOtherScores {
   attack: number;
@@ -23,14 +24,20 @@ export interface Character {
   firstName: string;
   lastName: string;
   description: string;
+  origin: CharacterOrigin;
   level: number;
   experience: number;
   attributes: CharacterAttributes;
   otherScores: CharacterOtherScores;
   skills: CharacterSkill[];
+  advantages: CharacterAdvantage[];
 }
 
 export interface CharacterSkill {
   skillId: string;
   degree: number;
+}
+
+export interface CharacterAdvantage {
+  advantageId: string;
 }

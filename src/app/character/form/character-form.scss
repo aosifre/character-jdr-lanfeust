@@ -8,7 +8,7 @@ h1 { color: #24323a; font-family: Georgia, serif; font-size: clamp(2.3rem, 6vw, 
 .form-heading p:last-child { color: #66747a; margin: 0; }
 form { display: grid; gap: .6rem; }
 label { color: #24323a; font-size: .85rem; font-weight: 800; margin-top: .8rem; }
-input, textarea { background: #fffdf8; border: 1px solid #aebbb8; border-radius: 3px; color: #24323a; font: inherit; outline: none; padding: .8rem 1rem; }
+input, textarea, select { background: #fffdf8; border: 1px solid #aebbb8; border-radius: 3px; color: #24323a; font: inherit; outline: none; padding: .8rem 1rem; }
 input { min-height: 3.25rem; }
 textarea { min-height: 10rem; resize: vertical; }
 input:focus, textarea:focus { border-color: #bd5b38; box-shadow: 0 0 0 3px rgba(189, 91, 56, .15); }
