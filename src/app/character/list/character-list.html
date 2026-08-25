@@ -30,4 +30,13 @@
       }
     </section>
   }
+
+  <section class="data-actions" aria-label="Import et export des personnages">
+    <button class="button button-outline" type="button" (click)="exportCharacters()">Exporter</button>
+    <label class="button button-outline" for="character-import">Importer</label>
+    <input id="character-import" class="visually-hidden" type="file" accept="application/json,.json" (change)="importCharacters($event)" />
+    @if (importError) {
+      <p class="import-error" role="alert">Le fichier JSON n’est pas un export de personnages valide.</p>
+    }
+  </section>
 </main>

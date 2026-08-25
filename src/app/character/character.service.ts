@@ -44,6 +44,27 @@ export class CharacterService {
     return this.characters().find((character) => character.id === id);
   }
 
+  importCharacters(data: unknown): boolean {
+    if (!Array.isArray(data) || data.some((character) => !this.isCharacter(character))) {
+      return false;
+    }
+
+    this.characters.set(data);
+    this.saveToStorage();
+    return true;
+  }
+
+  private isCharacter(value: unknown): value is Character {
+    if (typeof value !== 'object' || value === null) {
+      return false;
+    }
+
+    const character = value as Record<string, unknown>;
+    return typeof character['id'] === 'string'
+      && typeof character['firstName'] === 'string'
+      && typeof character['lastName'] === 'string';
+  }
+
   private saveToStorage(): void {
     if (this.isBrowser) {
       localStorage.setItem(this.storageKey, JSON.stringify(this.characters()));
