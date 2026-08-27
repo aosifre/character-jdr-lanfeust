@@ -92,6 +92,27 @@ export class CharacterService {
     this.saveToStorage();
   }
 
+  setExperience(id: string, experience: number): { level: number; experience: number; hitPoints: number; energyPoints: number } {
+    // Calculate the level based on experience (1 level per 100 experience points)
+    const level = Math.floor(experience / 100);
+
+    // Calculate hit points and energy points based on level and attributes
+    let hitPoints = 10 + (this.findById(id)?.attributes.constitution ?? 0);
+    let energyPoints = 5 + (this.findById(id)?.attributes.sagesse ?? 0);
+  
+    if (level > 1) {
+      hitPoints = (10 + (this.findById(id)?.attributes.constitution ?? 0)) + 5 * level; // Increase hit points by 5 for every level
+      energyPoints = (1 + (this.findById(id)?.attributes.sagesse ?? 0)) * level; // Increase energy points by 1 for every level
+    }
+
+    this.characters.update((characters) => characters.map((character) => 
+      character.id === id ? { ...character, experience, level, otherScores: { ...character.otherScores, hitPoints, energyPoints } } : character,
+    ));
+    this.saveToStorage();
+
+    return { level, experience, hitPoints, energyPoints }; // Return the updated values
+  }
+
   importCharacters(data: unknown): boolean {
     if (!Array.isArray(data) || data.some((character) => !this.isCharacter(character))) {
       return false;

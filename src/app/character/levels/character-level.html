@@ -1,0 +1,19 @@
+<main class="form-shell">
+    <a class="back-link" routerLink="/characters">← Retour aux personnages</a>
+    <header class="edit-heading">
+        <p class="eyebrow">JDR Lanfeust de Troy</p>
+        <h1>{{ character?.firstName }} {{ character?.lastName }}</h1>
+        <p>Augmentez l'expérience de votre personnage ci-dessous.</p>
+    </header>
+    <form [formGroup]="form" (ngSubmit)="save()" novalidate>
+        <label for="currentExperience">Expérience actuelle</label>
+        <input id="currentExperience" type="number" formControlName="currentExperience" min="0" readonly />
+        <label for="winExperience">Expérience gagnée</label>
+        <input id="winExperience" type="number" formControlName="winExperience" min="0" />
+        @if (form.controls.winExperience.invalid && form.controls.winExperience.touched) { <small>L'expérience gagnée doit être un nombre positif.</small> }
+        <div class="form-actions">
+            <a class="cancel-link" routerLink="/characters">Annuler</a>
+            <button class="button button-primary" type="submit">Enregistrer</button>
+        </div>
+    </form>
+</main>

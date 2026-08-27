@@ -12,6 +12,8 @@ import { CreationSettings } from './settings/creation/creation-settings';
 import { FlawList } from './flaw/list/flaw-list';
 import { CharacterFlawsPage } from './character/flaws/character-flaws';
 import { CharacterEditPage } from './character/edit/character-edit-page';
+import { CharacterLevelPage } from './character/levels/character-level';
+import { CharacterLevelUpResultPage } from './character/levelUpResults/character-level-up-result';
 
 export const routes: Routes = [
 	{ path: '', pathMatch: 'full', redirectTo: 'characters' },
@@ -22,6 +24,8 @@ export const routes: Routes = [
 	{ path: 'characters/:id/skills', component: CharacterSkillsPage },
 	{ path: 'characters/:id/advantages', component: CharacterAdvantagesPage },
 	{ path: 'characters/:id/flaws', component: CharacterFlawsPage },
+	{ path: 'characters/:id/level', component: CharacterLevelPage },
+	{ path: 'characters/:id/level/result', component: CharacterLevelUpResultPage },
 	{ path: 'skills', component: SkillList },
 	{ path: 'settings', component: SettingsPage },
 	{ path: 'settings/creation', component: CreationSettings },
