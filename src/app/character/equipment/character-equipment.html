@@ -8,33 +8,121 @@
   </header>
 
   <section class="shop" aria-label="Boutique d'équipements">
-    @for (type of types; track type.key) {
-      <section class="shop-section">
-        <h2>{{ type.label }}</h2>
-        @if (type.key === 'other') {
-          <div class="equipment-grid">
-            @for (item of filteredEquipment(type.key, null); track item.id) {
-              <button class="equipment-card" [class.equipped]="isEquipped(item.id)" type="button" (click)="toggle(item)"><strong>{{ item.label }}</strong><small>{{ description(item) }}</small><small>{{ skillBonusDescription(item) }}</small><span class="equipment-state">{{ isEquipped(item.id) ? 'Dans le panier' : 'Ajouter au panier' }}</span></button>
-            }
-          </div>
-        } @else {
-          @for (category of categories; track category) {
-            <h3>{{ category === 1 ? 'Amateur' : category === 2 ? 'Professionnel' : 'Brutasse' }}</h3>
-            <div class="equipment-grid">
-              @for (item of filteredEquipment(type.key, category); track item.id) {
-                <button class="equipment-card" [class.equipped]="isEquipped(item.id)" type="button" (click)="toggle(item)"><strong>{{ item.label }}</strong><small>{{ description(item) }}</small>@if (item.attackBonus || item.defenseBonus || item.damageReduction) {<small>Combat : {{ combatDescription(item) }}</small>}@if (skillBonusDescription(item)) {<small>Compétences : {{ skillBonusDescription(item) }}</small>}<span class="equipment-state">{{ isEquipped(item.id) ? 'Dans le panier' : 'Ajouter au panier' }}</span></button>
+    <div class="search-bar">
+      <input
+        type="search"
+        placeholder="Rechercher par nom, type ou catégorie..."
+        [value]="searchQuery()"
+        (input)="onSearchInput($event)"
+      />
+    </div>
+
+    <table class="equipment-table">
+      <thead>
+        <tr>
+          <th>Nom</th>
+          <th>Type</th>
+          <th>Catégorie</th>
+          <th>Effets / Stats</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of paginatedEquipment(); track item.id) {
+          <tr [class.equipped]="isEquipped(item.id)">
+            <td>
+              <strong>{{ item.label }}</strong>
+            </td>
+            <td>
+              <span class="type-badge">{{ typeLabel(item.type) }}</span>
+            </td>
+            <td>{{ categoryLabel(item.category) }}</td>
+            <td>
+              <small>{{ description(item) }}</small>
+              @if (skillBonusDescription(item)) {
+                <br /><small class="skills">{{ skillBonusDescription(item) }}</small>
               }
-            </div>
-          }
+            </td>
+            <td>
+              <button
+                type="button"
+                class="button button-small"
+                [class.button-outline]="isEquipped(item.id)"
+                (click)="toggle(item)"
+              >
+                {{ isEquipped(item.id) ? 'Retirer' : 'Équiper' }}
+              </button>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="5" class="empty-cell">Aucun équipement trouvé.</td>
+          </tr>
         }
-      </section>
+      </tbody>
+    </table>
+
+    <!-- Pagination -->
+    @if (totalPages() > 1) {
+      <div class="pagination">
+        <button
+          type="button"
+          class="button button-outline button-small"
+          [disabled]="currentPage() === 1"
+          (click)="changePage(-1)"
+        >
+          Précédent
+        </button>
+        <span>Page {{ currentPage() }} sur {{ totalPages() }}</span>
+        <button
+          type="button"
+          class="button button-outline button-small"
+          [disabled]="currentPage() === totalPages()"
+          (click)="changePage(1)"
+        >
+          Suivant
+        </button>
+      </div>
     }
   </section>
 
-  <section class="active-equipment" aria-label="Résumé de l'équipement">
-    <h2>Bonus actifs</h2>
-    <p>{{ cart.size }} équipement(s) dans le panier</p>
-    <p>Attaque +{{ combatBonuses.attack }} · Défense +{{ combatBonuses.defense }} · Réduction des dégâts {{ combatBonuses.damageReduction }}</p>
+<section class="active-equipment" aria-label="Résumé de l'équipement">
+    <h2>Équipements sélectionnés ({{ cart.size }})</h2>
+
+    @if (cartItems.length > 0) {
+      <ul class="cart-list">
+        @for (item of cartItems; track item.id) {
+          <li class="cart-item">
+            <div class="cart-item-info">
+              <strong>{{ item.label }}</strong>
+              <span class="cart-item-meta">
+                {{ typeLabel(item.type) }} · {{ categoryLabel(item.category) }}
+              </span>
+              <small>{{ description(item) }}</small>
+              @if (skillBonusDescription(item)) {
+                <small class="cart-item-skills">{{ skillBonusDescription(item) }}</small>
+              }
+            </div>
+            <button
+              type="button"
+              class="button button-outline button-small button-danger"
+              (click)="toggle(item)"
+              title="Retirer du panier"
+            >
+              Retirer
+            </button>
+          </li>
+        }
+      </ul>
+
+      <div class="active-summary">
+        <h3>Cumul des bonus</h3>
+        <p>Attaque +{{ combatBonuses.attack }} · Défense +{{ combatBonuses.defense }} · Réduction des dégâts {{ combatBonuses.damageReduction }}</p>
+      </div>
+    } @else {
+      <p class="empty-cart-message">Aucun équipement sélectionné pour le moment.</p>
+    }
+
     <button class="button button-primary" type="button" (click)="save()">Valider l'équipement</button>
   </section>
 
@@ -44,11 +132,32 @@
         <h2 id="equipment-modal-title">Ajouter un équipement</h2>
         <form [formGroup]="form" (ngSubmit)="addEquipment()">
           <label>Nom <input formControlName="label" placeholder="Ex. Dague dentelée" /></label>
-          <label>Catégorie d'objet <select formControlName="type"><option value="weapon">Arme</option><option value="shield">Bouclier</option><option value="armor">Armure</option><option value="other">Autre</option></select></label>
-          <label>Catégorie de puissance <select formControlName="category"><option value="1">Amateur</option><option value="2">Professionnel</option><option value="3">Brutasse</option><option value="none">Aucune</option></select></label>
-          <div class="form-row"><label>Bonus ATT <input type="number" formControlName="attackBonus" /></label><label>Bonus DEF <input type="number" formControlName="defenseBonus" /></label><label>Réduction dégâts <input type="number" formControlName="damageReduction" /></label></div>
+          <label>Catégorie d'objet 
+            <select formControlName="type">
+              <option value="weapon">Arme</option>
+              <option value="shield">Bouclier</option>
+              <option value="armor">Armure</option>
+              <option value="other">Autre</option>
+            </select>
+          </label>
+          <label>Catégorie de puissance 
+            <select formControlName="category">
+              <option value="1">Amateur</option>
+              <option value="2">Professionnel</option>
+              <option value="3">Brutasse</option>
+              <option value="none">Aucune</option>
+            </select>
+          </label>
+          <div class="form-row">
+            <label>Bonus ATT <input type="number" formControlName="attackBonus" /></label>
+            <label>Bonus DEF <input type="number" formControlName="defenseBonus" /></label>
+            <label>Réduction dégâts <input type="number" formControlName="damageReduction" /></label>
+          </div>
           <label>Bonus compétences <input formControlName="skillBonus" placeholder="acrobaties:1, survie:2" /></label>
-          <div class="modal-actions"><button class="button button-outline" type="button" (click)="closeModal()">Annuler</button><button class="button button-primary" type="submit" [disabled]="form.invalid">Ajouter au panier</button></div>
+          <div class="modal-actions">
+            <button class="button button-outline" type="button" (click)="closeModal()">Annuler</button>
+            <button class="button button-primary" type="submit" [disabled]="form.invalid">Ajouter au panier</button>
+          </div>
         </form>
       </section>
     </div>

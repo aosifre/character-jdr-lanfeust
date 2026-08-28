@@ -33,4 +33,85 @@ h1 { color: #24323a; font-family: Georgia, serif; font-size: clamp(2.3rem, 6vw, 
 .modal input, .modal select { background: #fff; border: 1px solid #aebbb8; border-radius: 3px; font: inherit; min-height: 2.75rem; padding: .5rem; }
 .form-row { display: grid; gap: .75rem; grid-template-columns: repeat(3, 1fr); }
 .modal-actions { display: flex; gap: .75rem; justify-content: flex-end; }
+
+/* À ajouter à la suite des styles originaux */
+
+.search-bar {
+  margin-bottom: 1.5rem;
+
+  input {
+    background: #fff;
+    border: 1px solid #aebbb8;
+    border-radius: 4px;
+    font: inherit;
+    padding: 0.75rem 1rem;
+    width: 100%;
+
+    &:focus {
+      border-color: #bd5b38;
+      outline: none;
+    }
+  }
+}
+
+.equipment-table {
+  border-collapse: collapse;
+  margin-bottom: 1.5rem;
+  width: 100%;
+
+  th, td {
+    border-bottom: 1px solid #cfd6d4;
+    padding: 0.85rem 0.75rem;
+    text-align: left;
+  }
+
+  th {
+    color: #24323a;
+    font-size: 0.85rem;
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+
+  tr.equipped {
+    background-color: #e4f1e5;
+  }
+
+  .type-badge {
+    color: #bd5b38;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+
+  .skills {
+    color: #bd5b38;
+  }
+
+  .empty-cell {
+    color: #66747a;
+    padding: 2rem;
+    text-align: center;
+  }
+}
+
+.button-small {
+  font-size: 0.85rem;
+  min-height: 2.25rem;
+  padding: 0.4rem 0.85rem;
+}
+
+.pagination {
+  align-items: center;
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1.5rem;
+
+  span {
+    color: #66747a;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+}
+
 @media (max-width: 650px) { .equipment-shell { padding-inline: 1rem; } .equipment-grid { grid-template-columns: repeat(2, 1fr); } }
