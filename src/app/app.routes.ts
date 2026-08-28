@@ -15,14 +15,18 @@ import { CharacterEditPage } from './character/edit/character-edit-page';
 import { CharacterLevelPage } from './character/levels/character-level';
 import { CharacterLevelUpResultPage } from './character/levelUpResults/character-level-up-result';
 import { CharacterAdvantagesAddPage } from './character/advantages-add/character-advantages-add';
+import { CharacterSkillsAddPage } from './character/skills-add/character-skills-add';
+import { CharacterCharacteristicsAddPage } from './character/characteristics-add/character-characteristics-add';
 
 export const routes: Routes = [
 	{ path: '', pathMatch: 'full', redirectTo: 'characters' },
 	{ path: 'characters', component: CharacterList },
 	{ path: 'characters/new', component: CharacterForm },
 	{ path: 'characters/:id/characteristics', component: CharacterCharacteristics },
+	{ path: 'characters/:id/characteristics/add', component: CharacterCharacteristicsAddPage },
 	{ path: 'characters/:id/otherscores', component: CharacterOtherScoresPage },
 	{ path: 'characters/:id/skills', component: CharacterSkillsPage },
+	{ path: 'characters/:id/skills/add', component: CharacterSkillsAddPage },
 	{ path: 'characters/:id/advantages', component: CharacterAdvantagesPage },
 	{ path: 'characters/:id/advantages/add', component: CharacterAdvantagesAddPage },
 	{ path: 'characters/:id/flaws', component: CharacterFlawsPage },

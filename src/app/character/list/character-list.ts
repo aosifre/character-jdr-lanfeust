@@ -22,7 +22,6 @@ export class CharacterList {
     }
   }
 
-
   protected isCreationComplete(character: Character): boolean {
     return this.getMissingSteps(character).length === 0;
   }
@@ -37,21 +36,26 @@ export class CharacterList {
   private getMissingSteps(character: Character): string[] {
     const missingSteps: string[] = [];
     const attributes = Object.values(character.attributes);
-    const attributesComplete = attributes.length === 6
-      && attributes.filter((value) => value > 0).length === 5
-      && [1, 2, 3, 4, 5].every((value) => attributes.includes(value));
+    const attributesComplete =
+      attributes.length === 6 &&
+      attributes.filter((value) => value > 0).length === 5 &&
+      [1, 2, 3, 4, 5].every((value) => attributes.includes(value));
     const requiredAdvantages = this.settingsService.currentSettings().availableAdvantages;
-    if (!character.firstName.trim() || !character.lastName.trim()) missingSteps.push('Qui suis-je ?');
+    if (!character.firstName.trim() || !character.lastName.trim())
+      missingSteps.push('Qui suis-je ?');
     if (!attributesComplete) missingSteps.push('Caractéristiques');
     if (character.otherScores.combatBonus === null) missingSteps.push('Autres scores');
-    if (character.skills.length !== 4 + character.attributes.intelligence) missingSteps.push('Compétences');
+    if (character.skills.length < 4 + character.attributes.intelligence)
+      missingSteps.push('Compétences');
     if (character.advantages.length < requiredAdvantages) missingSteps.push('Atouts');
     if (character.flaws.length === 0) missingSteps.push('Travers');
     return missingSteps;
   }
 
   protected exportCharacters(): void {
-    const file = new Blob([JSON.stringify(this.characters(), null, 2)], { type: 'application/json' });
+    const file = new Blob([JSON.stringify(this.characters(), null, 2)], {
+      type: 'application/json',
+    });
     const downloadUrl = URL.createObjectURL(file);
     const link = document.createElement('a');
     link.href = downloadUrl;
@@ -70,7 +74,9 @@ export class CharacterList {
     const reader = new FileReader();
     reader.onload = () => {
       try {
-        this.importError = !this.characterService.importCharacters(JSON.parse(String(reader.result)));
+        this.importError = !this.characterService.importCharacters(
+          JSON.parse(String(reader.result)),
+        );
       } catch {
         this.importError = true;
       }

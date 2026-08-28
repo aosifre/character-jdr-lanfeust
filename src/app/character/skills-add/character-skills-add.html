@@ -1,0 +1,24 @@
+<main class="skills-shell">
+  <a class="back-link" [routerLink]="characterId ? ['/characters', characterId, 'level/result'] : '/characters'">← Retour</a>
+  <div class="heading">
+    <p class="eyebrow">
+      {{ character?.firstName }} {{ character?.lastName }}
+    </p>
+    <h1>Compétences</h1>
+    <p>Choisissez 1 nouvelle compétence et ajoutez +1 degré à {{ maximumDegrees }} compétences.</p></div>
+  <form class="custom-skill-form" [formGroup]="skillForm" (ngSubmit)="addCustomSkill()">
+    <label for="custom-skill-label">Ajouter une compétence personnalisée</label>
+    <input id="custom-skill-label" formControlName="label" placeholder="Nom de la compétence" />
+    <select formControlName="attributeOne" aria-label="Première caractéristique">@for (attribute of attributes; track attribute.key) {<option [value]="attribute.key">{{ attribute.label }}</option>}</select>
+    <select formControlName="attributeTwo" aria-label="Deuxième caractéristique">@for (attribute of attributes; track attribute.key) {<option [value]="attribute.key">{{ attribute.label }}</option>}</select>
+    <button class="button outline" type="submit">Ajouter</button>
+  </form>
+  <section class="skill-grid" aria-label="Choix des compétences">
+    @for (skill of skills(); track skill.id) {
+      <button class="skill-card" [class.selected]="isDegreeSelected(skill.id) || isNewSelected(skill.id)" [class.known-skill]="isKnown(skill.id)" [class.new-skill]="isNewSelected(skill.id)" type="button" (click)="selectSkill(skill)">
+        <span>{{ skill.label }}</span><strong>{{ getBonus(skill) + (isKnown(skill.id) ? (isDegreeSelected(skill.id) ? 1 : 0) : (isNewSelected(skill.id) ? 1 : 0)) }}</strong><small>@if (isKnown(skill.id)) { Degré {{ (character?.skills?.find((knownSkill) => knownSkill.skillId === skill.id)?.degree ?? 0) + (isDegreeSelected(skill.id) ? 1 : 0) }} · {{ isDegreeSelected(skill.id) ? '+1 choisi' : 'Choisir +1 degré' }} } @else { Nouvelle compétence{{ isNewSelected(skill.id) ? ' sélectionnée' : '' }} }</small>
+      </button>
+    }
+  </section>
+  <footer><p>{{ selectedDegreeSkills.size }} / {{ maximumDegrees }} degrés · {{ selectedNewSkill ? '1 / 1 nouvelle compétence' : '0 / 1 nouvelle compétence' }}</p><button class="button" type="button" [disabled]="!selectedNewSkill || selectedDegreeSkills.size !== maximumDegrees" (click)="save()">Valider le personnage</button></footer>
+</main>

@@ -36,7 +36,7 @@ export class CharacterLevelUpResultPage {
 
     switch (this.form.getRawValue().nextLevelChoice) {
       case 'skills':
-        this.router.navigate(['/characters', { id: this.characterId, tab: 'skills' }]);
+        this.router.navigate(['/characters', this.characterId, 'skills', 'add']);
         break;
       case 'advantages':
         this.router.navigate(['/characters', this.characterId, 'advantages', 'add']);
