@@ -11,6 +11,13 @@ h1 { color: #24323a; font-family: Georgia, serif; font-size: clamp(2.3rem, 6vw, 
 .characteristic-card:hover, .characteristic-card.assigned { border-color: #bd5b38; transform: translateY(-2px); }
 .characteristic-card span { font-weight: 800; }
 .characteristic-card strong { color: #bd5b38; font-family: Georgia, serif; font-size: 2.5rem; font-weight: 500; }
+.preview { background: #e9ece7; border: 1px solid #cfd6d4; margin-top: 2.5rem; padding: 1.5rem; }
+.preview h2, .preview h3 { color: #24323a; margin: 0 0 .75rem; }
+.preview h3 { border-top: 1px solid #cfd6d4; font-size: 1rem; margin-top: 1.5rem; padding-top: 1.25rem; }
+.preview-intro { color: #66747a; margin: 0; }
+.score-preview, .skill-preview { display: grid; gap: .5rem; margin-top: 1rem; }
+.score-change, .skill-change { align-items: center; background: #fffdf8; display: flex; justify-content: space-between; padding: .7rem .8rem; }
+.score-change strong, .skill-change strong { color: #bd5b38; }
 .allocation-footer { align-items: center; border-top: 1px solid #cfd6d4; display: flex; justify-content: space-between; margin-top: 2.5rem; padding-top: 1.5rem; }
 .allocation-footer p { color: #66747a; margin: 0; }
 .button { background: #24323a; border: 0; border-radius: 4px; color: #fff; cursor: pointer; font: inherit; font-weight: 800; min-height: 3rem; padding: .75rem 1.5rem; }

@@ -35,15 +35,9 @@ export class CharacterList {
 
   private getMissingSteps(character: Character): string[] {
     const missingSteps: string[] = [];
-    const attributes = Object.values(character.attributes);
-    const attributesComplete =
-      attributes.length === 6 &&
-      attributes.filter((value) => value > 0).length === 5 &&
-      [1, 2, 3, 4, 5].every((value) => attributes.includes(value));
     const requiredAdvantages = this.settingsService.currentSettings().availableAdvantages;
     if (!character.firstName.trim() || !character.lastName.trim())
       missingSteps.push('Qui suis-je ?');
-    if (!attributesComplete) missingSteps.push('Caractéristiques');
     if (character.otherScores.combatBonus === null) missingSteps.push('Autres scores');
     if (character.skills.length < 4 + character.attributes.intelligence)
       missingSteps.push('Compétences');

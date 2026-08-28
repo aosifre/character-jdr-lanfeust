@@ -59,9 +59,21 @@ export class CharacterService {
 
   setAttributes(id: string, attributes: CharacterAttributes): void {
     this.characters.update((characters) => characters.map((character) =>
-      character.id === id ? { ...character, attributes } : character,
+      character.id === id ? { ...character, attributes, otherScores: this.recalculateOtherScores(attributes, character.level, character.otherScores) } : character,
     ));
     this.saveToStorage();
+  }
+
+  recalculateOtherScores(attributes: CharacterAttributes, level: number, currentScores: CharacterOtherScores): CharacterOtherScores {
+    const points = currentScores.combatBonusPoints;
+    return {
+      ...currentScores,
+      attack: attributes.force + attributes.intelligence + points.attack,
+      defense: attributes.dexterite + attributes.sagesse + points.defense,
+      save: attributes.constitution + attributes.charisme + points.save,
+      hitPoints: level > 1 ? 10 + attributes.constitution + 5 * level : 10 + attributes.constitution,
+      energyPoints: level > 1 ? (1 + attributes.sagesse) * level : 5 + attributes.sagesse,
+    };
   }
 
   setOtherScores(id: string, otherScores: CharacterOtherScores): void {
@@ -96,21 +108,15 @@ export class CharacterService {
     // Calculate the level based on experience (1 level per 100 experience points)
     const level = Math.floor(experience / 100);
 
-    // Calculate hit points and energy points based on level and attributes
-    let hitPoints = 10 + (this.findById(id)?.attributes.constitution ?? 0);
-    let energyPoints = 5 + (this.findById(id)?.attributes.sagesse ?? 0);
-  
-    if (level > 1) {
-      hitPoints = (10 + (this.findById(id)?.attributes.constitution ?? 0)) + 5 * level; // Increase hit points by 5 for every level
-      energyPoints = (1 + (this.findById(id)?.attributes.sagesse ?? 0)) * level; // Increase energy points by 1 for every level
-    }
+    const character = this.findById(id);
+    const scores = character ? this.recalculateOtherScores(character.attributes, level, character.otherScores) : undefined;
 
     this.characters.update((characters) => characters.map((character) => 
-      character.id === id ? { ...character, experience, level, otherScores: { ...character.otherScores, hitPoints, energyPoints } } : character,
+      character.id === id && scores ? { ...character, experience, level, otherScores: scores } : character,
     ));
     this.saveToStorage();
 
-    return { level, experience, hitPoints, energyPoints }; // Return the updated values
+    return { level, experience, hitPoints: scores?.hitPoints ?? 0, energyPoints: scores?.energyPoints ?? 0 };
   }
 
   importCharacters(data: unknown): boolean {

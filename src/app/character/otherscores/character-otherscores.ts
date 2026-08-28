@@ -49,12 +49,7 @@ export class CharacterOtherScoresPage {
 
   private refreshCombatScores(): void {
     const attributes = this.character?.attributes;
-    if (!attributes) return;
-    const points = this.otherScores.combatBonusPoints;
-    this.otherScores.attack = attributes.force + attributes.intelligence + points.attack;
-    this.otherScores.defense = attributes.dexterite + attributes.sagesse + points.defense;
-    this.otherScores.save = attributes.constitution + attributes.charisme + points.save;
-    this.otherScores.hitPoints = 10 + attributes.constitution;
-    this.otherScores.energyPoints = 5 + attributes.sagesse;
+    if (!attributes || !this.character) return;
+    Object.assign(this.otherScores, this.characterService.recalculateOtherScores(attributes, this.character.level, this.otherScores));
   }
 }

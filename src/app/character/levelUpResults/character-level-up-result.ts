@@ -42,7 +42,7 @@ export class CharacterLevelUpResultPage {
         this.router.navigate(['/characters', this.characterId, 'advantages', 'add']);
         break;
       case 'characteristics':
-        this.router.navigate(['/characters', { id: this.characterId, tab: 'characteristics' }]);
+        this.router.navigate(['/characters', this.characterId, 'characteristics', 'add']);
         break;
       default:
         break;
