@@ -84,6 +84,7 @@ export class CharacterCharacteristicsAddPage {
       this.values,
       this.character.level,
       this.character.otherScores,
+      this.character.equipment.filter((item) => item.equipped).map((item) => item.equipmentId),
     );
   }
 

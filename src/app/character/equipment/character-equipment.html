@@ -1,0 +1,56 @@
+<main class="equipment-shell">
+  <a class="back-link" routerLink="/characters">← Retour</a>
+  <header class="equipment-heading">
+    <p class="eyebrow">{{ character?.firstName }} {{ character?.lastName }}</p>
+    <h1>Équipements</h1>
+    <p>Équipez votre personnage et consultez les bonus actifs.</p>
+    <button class="button button-primary" type="button" (click)="openModal()">+ Ajouter un équipement</button>
+  </header>
+
+  <section class="shop" aria-label="Boutique d'équipements">
+    @for (type of types; track type.key) {
+      <section class="shop-section">
+        <h2>{{ type.label }}</h2>
+        @if (type.key === 'other') {
+          <div class="equipment-grid">
+            @for (item of filteredEquipment(type.key, null); track item.id) {
+              <button class="equipment-card" [class.equipped]="isEquipped(item.id)" type="button" (click)="toggle(item)"><strong>{{ item.label }}</strong><small>{{ description(item) }}</small><small>{{ skillBonusDescription(item) }}</small><span class="equipment-state">{{ isEquipped(item.id) ? 'Dans le panier' : 'Ajouter au panier' }}</span></button>
+            }
+          </div>
+        } @else {
+          @for (category of categories; track category) {
+            <h3>{{ category === 1 ? 'Amateur' : category === 2 ? 'Professionnel' : 'Brutasse' }}</h3>
+            <div class="equipment-grid">
+              @for (item of filteredEquipment(type.key, category); track item.id) {
+                <button class="equipment-card" [class.equipped]="isEquipped(item.id)" type="button" (click)="toggle(item)"><strong>{{ item.label }}</strong><small>{{ description(item) }}</small>@if (item.attackBonus || item.defenseBonus || item.damageReduction) {<small>Combat : {{ combatDescription(item) }}</small>}@if (skillBonusDescription(item)) {<small>Compétences : {{ skillBonusDescription(item) }}</small>}<span class="equipment-state">{{ isEquipped(item.id) ? 'Dans le panier' : 'Ajouter au panier' }}</span></button>
+              }
+            </div>
+          }
+        }
+      </section>
+    }
+  </section>
+
+  <section class="active-equipment" aria-label="Résumé de l'équipement">
+    <h2>Bonus actifs</h2>
+    <p>{{ cart.size }} équipement(s) dans le panier</p>
+    <p>Attaque +{{ combatBonuses.attack }} · Défense +{{ combatBonuses.defense }} · Réduction des dégâts {{ combatBonuses.damageReduction }}</p>
+    <button class="button button-primary" type="button" (click)="save()">Valider l'équipement</button>
+  </section>
+
+  @if (modalOpen) {
+    <div class="modal-backdrop" role="presentation" (click)="closeModal()">
+      <section class="modal" role="dialog" aria-modal="true" aria-labelledby="equipment-modal-title" (click)="$event.stopPropagation()">
+        <h2 id="equipment-modal-title">Ajouter un équipement</h2>
+        <form [formGroup]="form" (ngSubmit)="addEquipment()">
+          <label>Nom <input formControlName="label" placeholder="Ex. Dague dentelée" /></label>
+          <label>Catégorie d'objet <select formControlName="type"><option value="weapon">Arme</option><option value="shield">Bouclier</option><option value="armor">Armure</option><option value="other">Autre</option></select></label>
+          <label>Catégorie de puissance <select formControlName="category"><option value="1">Amateur</option><option value="2">Professionnel</option><option value="3">Brutasse</option><option value="none">Aucune</option></select></label>
+          <div class="form-row"><label>Bonus ATT <input type="number" formControlName="attackBonus" /></label><label>Bonus DEF <input type="number" formControlName="defenseBonus" /></label><label>Réduction dégâts <input type="number" formControlName="damageReduction" /></label></div>
+          <label>Bonus compétences <input formControlName="skillBonus" placeholder="acrobaties:1, survie:2" /></label>
+          <div class="modal-actions"><button class="button button-outline" type="button" (click)="closeModal()">Annuler</button><button class="button button-primary" type="submit" [disabled]="form.invalid">Ajouter au panier</button></div>
+        </form>
+      </section>
+    </div>
+  }
+</main>

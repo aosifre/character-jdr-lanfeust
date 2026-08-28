@@ -33,6 +33,7 @@ export interface Character {
   skills: CharacterSkill[];
   advantages: CharacterAdvantage[];
   flaws: CharacterFlaw[];
+  equipment: CharacterEquipment[];
 }
 
 export interface CharacterSkill {
@@ -46,4 +47,9 @@ export interface CharacterAdvantage {
 
 export interface CharacterFlaw {
   flawId: string;
+}
+
+export interface CharacterEquipment {
+  equipmentId: string;
+  equipped: boolean;
 }

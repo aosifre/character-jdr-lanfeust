@@ -50,6 +50,6 @@ export class CharacterOtherScoresPage {
   private refreshCombatScores(): void {
     const attributes = this.character?.attributes;
     if (!attributes || !this.character) return;
-    Object.assign(this.otherScores, this.characterService.recalculateOtherScores(attributes, this.character.level, this.otherScores));
+    Object.assign(this.otherScores, this.characterService.recalculateOtherScores(attributes, this.character.level, this.otherScores, this.character.equipment.filter((item) => item.equipped).map((item) => item.equipmentId)));
   }
 }

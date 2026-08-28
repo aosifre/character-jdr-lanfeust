@@ -5,6 +5,7 @@ import { CharacterSkill } from '../character.model';
 import { CharacterService } from '../character.service';
 import { Skill } from '../../skill/skill.model';
 import { SkillService } from '../../skill/skill.service';
+import { EquipmentService } from '../../equipment/equipment.service';
 
 @Component({
   imports: [ReactiveFormsModule, RouterLink],
@@ -15,6 +16,7 @@ import { SkillService } from '../../skill/skill.service';
 export class CharacterSkillsPage {
   private readonly characterService = inject(CharacterService);
   private readonly skillService = inject(SkillService);
+  private readonly equipmentService = inject(EquipmentService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   protected readonly characterId = this.route.snapshot.paramMap.get('id');
@@ -46,7 +48,8 @@ export class CharacterSkillsPage {
   }
   protected getBonus(skill: Skill): number {
     const attributes = this.character?.attributes;
-    return attributes ? attributes[skill.attributeOne] + attributes[skill.attributeTwo] : 0;
+    const equipmentIds = this.character?.equipment.filter((item) => item.equipped).map((item) => item.equipmentId) ?? [];
+    return attributes ? attributes[skill.attributeOne] + attributes[skill.attributeTwo] + this.equipmentService.skillBonus(skill.id, equipmentIds) : 0;
   }
   protected save(): void {
     if (!this.characterId || this.selected.size !== this.maximum) return;

@@ -25,6 +25,7 @@
           <span>{{ character.lastName }}</span>
           <span class="character-stats">Niv. {{ character.level }} · {{ character.experience }} XP</span>
           <div class="row-actions">
+            <a class="action-icon equipment-action" [routerLink]="['/characters', character.id, 'equipment']" aria-label="Gérer les équipements" title="Équipements">⚔</a>
             <!-- Action button for editing -->
             <a class="action-icon edit-action" [routerLink]="['/characters', character.id, 'edit']" aria-label="Modifier le personnage" title="Modifier">✎</a>
             <!-- Action button for viewing -->

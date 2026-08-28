@@ -1,12 +1,14 @@
 import { isPlatformBrowser } from '@angular/common';
-import { Inject, Injectable, PLATFORM_ID, signal } from '@angular/core';
-import { Character, CharacterAdvantage, CharacterAttributes, CharacterFlaw, CharacterOrigin, CharacterOtherScores, CharacterSkill, CombatBonus } from './character.model';
+import { Inject, Injectable, PLATFORM_ID, inject, signal } from '@angular/core';
+import { Character, CharacterAdvantage, CharacterAttributes, CharacterEquipment, CharacterFlaw, CharacterOrigin, CharacterOtherScores, CharacterSkill, CombatBonus } from './character.model';
+import { EquipmentService } from '../equipment/equipment.service';
 
 @Injectable({ providedIn: 'root' })
 export class CharacterService {
   private readonly storageKey = 'jdr-lanfeust-characters';
   private readonly isBrowser: boolean;
   private readonly characters = signal<Character[]>([]);
+  private readonly equipmentService = inject(EquipmentService);
   readonly characterList = this.characters.asReadonly();
 
   constructor(@Inject(PLATFORM_ID) platformId: object) {
@@ -35,6 +37,7 @@ export class CharacterService {
       skills: [],
       advantages: [],
       flaws: [],
+      equipment: [],
     };
     this.characters.update((characters) => [...characters, character]);
     this.saveToStorage();
@@ -59,17 +62,18 @@ export class CharacterService {
 
   setAttributes(id: string, attributes: CharacterAttributes): void {
     this.characters.update((characters) => characters.map((character) =>
-      character.id === id ? { ...character, attributes, otherScores: this.recalculateOtherScores(attributes, character.level, character.otherScores) } : character,
+      character.id === id ? { ...character, attributes, otherScores: this.recalculateOtherScores(attributes, character.level, character.otherScores, character.equipment.filter((item) => item.equipped).map((item) => item.equipmentId)) } : character,
     ));
     this.saveToStorage();
   }
 
-  recalculateOtherScores(attributes: CharacterAttributes, level: number, currentScores: CharacterOtherScores): CharacterOtherScores {
+  recalculateOtherScores(attributes: CharacterAttributes, level: number, currentScores: CharacterOtherScores, equipmentIds: string[] = []): CharacterOtherScores {
     const points = currentScores.combatBonusPoints;
+    const equipmentBonuses = this.equipmentService.combatBonuses(equipmentIds);
     return {
       ...currentScores,
-      attack: attributes.force + attributes.intelligence + points.attack,
-      defense: attributes.dexterite + attributes.sagesse + points.defense,
+      attack: attributes.force + attributes.intelligence + points.attack + equipmentBonuses.attack,
+      defense: attributes.dexterite + attributes.sagesse + points.defense + equipmentBonuses.defense,
       save: attributes.constitution + attributes.charisme + points.save,
       hitPoints: level > 1 ? 10 + attributes.constitution + 5 * level : 10 + attributes.constitution,
       energyPoints: level > 1 ? (1 + attributes.sagesse) * level : 5 + attributes.sagesse,
@@ -104,12 +108,19 @@ export class CharacterService {
     this.saveToStorage();
   }
 
+  setEquipment(id: string, equipment: CharacterEquipment[]): void {
+    this.characters.update((characters) => characters.map((character) =>
+      character.id === id ? { ...character, equipment, otherScores: this.recalculateOtherScores(character.attributes, character.level, character.otherScores, equipment.filter((item) => item.equipped).map((item) => item.equipmentId)) } : character,
+    ));
+    this.saveToStorage();
+  }
+
   setExperience(id: string, experience: number): { level: number; experience: number; hitPoints: number; energyPoints: number } {
     // Calculate the level based on experience (1 level per 100 experience points)
     const level = Math.floor(experience / 100);
 
     const character = this.findById(id);
-    const scores = character ? this.recalculateOtherScores(character.attributes, level, character.otherScores) : undefined;
+    const scores = character ? this.recalculateOtherScores(character.attributes, level, character.otherScores, character.equipment.filter((item) => item.equipped).map((item) => item.equipmentId)) : undefined;
 
     this.characters.update((characters) => characters.map((character) => 
       character.id === id && scores ? { ...character, experience, level, otherScores: scores } : character,
@@ -166,6 +177,7 @@ export class CharacterService {
       skills: Array.isArray(value.skills) ? value.skills : [],
       advantages: Array.isArray(value.advantages) ? value.advantages : [],
       flaws: Array.isArray(value.flaws) ? value.flaws : [],
+      equipment: Array.isArray(value.equipment) ? value.equipment : [],
     };
   }
 

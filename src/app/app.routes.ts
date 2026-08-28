@@ -17,6 +17,7 @@ import { CharacterLevelUpResultPage } from './character/levelUpResults/character
 import { CharacterAdvantagesAddPage } from './character/advantages-add/character-advantages-add';
 import { CharacterSkillsAddPage } from './character/skills-add/character-skills-add';
 import { CharacterCharacteristicsAddPage } from './character/characteristics-add/character-characteristics-add';
+import { CharacterEquipmentPage } from './character/equipment/character-equipment';
 
 export const routes: Routes = [
 	{ path: '', pathMatch: 'full', redirectTo: 'characters' },
@@ -24,6 +25,7 @@ export const routes: Routes = [
 	{ path: 'characters/new', component: CharacterForm },
 	{ path: 'characters/:id/characteristics', component: CharacterCharacteristics },
 	{ path: 'characters/:id/characteristics/add', component: CharacterCharacteristicsAddPage },
+	{ path: 'characters/:id/equipment', component: CharacterEquipmentPage },
 	{ path: 'characters/:id/otherscores', component: CharacterOtherScoresPage },
 	{ path: 'characters/:id/skills', component: CharacterSkillsPage },
 	{ path: 'characters/:id/skills/add', component: CharacterSkillsAddPage },
