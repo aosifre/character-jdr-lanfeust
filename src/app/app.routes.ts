@@ -14,6 +14,7 @@ import { CharacterFlawsPage } from './character/flaws/character-flaws';
 import { CharacterEditPage } from './character/edit/character-edit-page';
 import { CharacterLevelPage } from './character/levels/character-level';
 import { CharacterLevelUpResultPage } from './character/levelUpResults/character-level-up-result';
+import { CharacterAdvantagesAddPage } from './character/advantages-add/character-advantages-add';
 
 export const routes: Routes = [
 	{ path: '', pathMatch: 'full', redirectTo: 'characters' },
@@ -23,6 +24,7 @@ export const routes: Routes = [
 	{ path: 'characters/:id/otherscores', component: CharacterOtherScoresPage },
 	{ path: 'characters/:id/skills', component: CharacterSkillsPage },
 	{ path: 'characters/:id/advantages', component: CharacterAdvantagesPage },
+	{ path: 'characters/:id/advantages/add', component: CharacterAdvantagesAddPage },
 	{ path: 'characters/:id/flaws', component: CharacterFlawsPage },
 	{ path: 'characters/:id/level', component: CharacterLevelPage },
 	{ path: 'characters/:id/level/result', component: CharacterLevelUpResultPage },

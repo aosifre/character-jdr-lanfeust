@@ -45,7 +45,7 @@ export class CharacterList {
     if (!attributesComplete) missingSteps.push('Caractéristiques');
     if (character.otherScores.combatBonus === null) missingSteps.push('Autres scores');
     if (character.skills.length !== 4 + character.attributes.intelligence) missingSteps.push('Compétences');
-    if (character.advantages.length !== requiredAdvantages) missingSteps.push('Atouts');
+    if (character.advantages.length < requiredAdvantages) missingSteps.push('Atouts');
     if (character.flaws.length === 0) missingSteps.push('Travers');
     return missingSteps;
   }

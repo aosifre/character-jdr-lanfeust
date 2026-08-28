@@ -12,7 +12,7 @@
         <hr />
         <p>Vous pouvez maintenant choisir de nouvelles compétences, atouts ou travers pour votre personnage.</p>
     </div>
-    <form [formGroup]="levelUpForm" (ngSubmit)="save()" novalidate>
+    <form [formGroup]="form" (ngSubmit)="save()" novalidate>
         <label for="nextLevelChoice">Que souhaitez-vous faire ?</label>
 
         <select id="nextLevelChoice" formControlName="nextLevelChoice">
