@@ -6,6 +6,7 @@ import { EquipmentService } from '../../equipment/equipment.service';
 import { SkillService } from '../../skill/skill.service';
 import { SettingsService } from '../../settings/settings.service';
 import { Skill } from '../../skill/skill.model';
+import { Equipment } from '../../equipment/equipment.model';
 
 @Component({
   imports: [RouterLink],
@@ -66,6 +67,24 @@ export class CharacterViewPage {
   protected equipmentName(equipmentId: string): string {
     return this.equipment().find((item) => item.id === equipmentId)?.label ?? 'Équipement inconnu';
   }
+
+  protected get equippedItems(): Equipment[] {
+    const equippedIds = new Set(this.character?.equipment.filter((item) => item.equipped).map((item) => item.equipmentId) ?? []);
+    return this.equipment().filter((item) => equippedIds.has(item.id));
+  }
+
+  protected get equippedWeapons(): Equipment[] { return this.equippedItems.filter((item) => item.type === 'weapon'); }
+  protected get equippedArmor(): Equipment[] { return this.equippedItems.filter((item) => item.type === 'armor'); }
+  protected get equippedShields(): Equipment[] { return this.equippedItems.filter((item) => item.type === 'shield'); }
+  protected get unequippedItems(): Equipment[] {
+    const equippedIds = new Set(this.equippedItems.map((item) => item.id));
+    return this.character?.equipment
+      .filter((item) => !equippedIds.has(item.equipmentId))
+      .map((item) => this.equipment().find((equipment) => equipment.id === item.equipmentId))
+      .filter((item): item is Equipment => item !== undefined) ?? [];
+  }
+
+  protected damageDice(item: Equipment): string { return item.category ? `${item.category}D6` : 'Non applicable'; }
 
   protected setDamage(value: string): void { this.damageTaken = this.nonNegativeValue(value); }
   protected setEnergySpent(value: string): void { this.energySpent = this.nonNegativeValue(value); }

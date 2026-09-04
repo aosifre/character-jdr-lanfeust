@@ -22,13 +22,16 @@ export class CharacterEquipmentPage {
     ? this.characterService.findById(this.characterId)
     : undefined;
   protected readonly equipment = this.equipmentService.equipmentList;
-  protected readonly cart = new Set(
+  protected readonly cart = new Set(this.character?.equipment.map((item) => item.equipmentId) ?? []);
+  protected readonly equipped = new Set(
     this.character?.equipment.filter((item) => item.equipped).map((item) => item.equipmentId) ?? [],
   );
   protected modalOpen = false;
 
   // Signaux pour la recherche et la pagination
   protected searchQuery = signal('');
+  protected equipmentFilter = signal<'all' | 'equipped' | 'not-equipped'>('all');
+  private readonly cartVersion = signal(0);
   protected currentPage = signal(1);
   protected readonly pageSize = 10;
 
@@ -52,15 +55,19 @@ export class CharacterEquipmentPage {
 
   // Liste filtrée selon la recherche
   protected filteredEquipmentList = computed(() => {
+    this.cartVersion();
     const query = this.normalizeString(this.searchQuery());
-    if (!query) return this.equipment();
+    const filter = this.equipmentFilter();
 
     return this.equipment().filter((item) => {
+      const matchesFilter = filter === 'all'
+        || (filter === 'equipped' && this.isEquipped(item.id))
+        || (filter === 'not-equipped' && !this.isEquipped(item.id));
       const label = this.normalizeString(item.label);
       const type = this.normalizeString(this.typeLabel(item.type));
       const category = this.normalizeString(this.categoryLabel(item.category));
 
-      return label.includes(query) || type.includes(query) || category.includes(query);
+      return matchesFilter && (!query || label.includes(query) || type.includes(query) || category.includes(query));
     });
   });
 
@@ -81,6 +88,12 @@ export class CharacterEquipmentPage {
     this.currentPage.set(1); // Remet la pagination à zéro lors d'une recherche
   }
 
+  protected onEquipmentFilterChange(event: Event): void {
+    const value = (event.target as HTMLSelectElement).value as 'all' | 'equipped' | 'not-equipped';
+    this.equipmentFilter.set(value);
+    this.currentPage.set(1);
+  }
+
   protected changePage(delta: number): void {
     const newPage = this.currentPage() + delta;
     if (newPage >= 1 && newPage <= this.totalPages()) {
@@ -89,12 +102,47 @@ export class CharacterEquipmentPage {
   }
 
   protected isEquipped(id: string): boolean {
+    return this.equipped.has(id);
+  }
+
+  protected isOwned(id: string): boolean {
     return this.cart.has(id);
   }
 
-  protected toggle(item: Equipment): void {
-    if (this.cart.has(item.id)) this.cart.delete(item.id);
-    else this.cart.add(item.id);
+  protected addToInventory(item: Equipment): void {
+    this.cart.add(item.id);
+    this.cartVersion.update((version) => version + 1);
+  }
+
+  protected removeFromInventory(item: Equipment): void {
+    this.cart.delete(item.id);
+    this.equipped.delete(item.id);
+    this.cartVersion.update((version) => version + 1);
+  }
+
+  protected toggleEquipped(item: Equipment): void {
+    if (this.equipped.has(item.id)) {
+      this.equipped.delete(item.id);
+    } else if (this.canEquip(item)) {
+      this.equipped.add(item.id);
+    }
+    this.cartVersion.update((version) => version + 1);
+  }
+
+  protected canEquip(item: Equipment): boolean {
+    if (this.isEquipped(item.id)) return true;
+    if (item.type === 'other') return true;
+    const equippedCount = this.equipment()
+      .filter((equipment) => equipment.type === item.type && this.isEquipped(equipment.id))
+      .length;
+    return equippedCount < (item.type === 'weapon' ? 2 : 1);
+  }
+
+  protected equipmentLimitLabel(type: EquipmentType): string {
+    if (type === 'weapon') return 'Maximum : 2 armes';
+    if (type === 'shield') return 'Maximum : 1 bouclier';
+    if (type === 'armor') return 'Maximum : 1 armure';
+    return '';
   }
 
   protected openModal(): void {
@@ -117,6 +165,7 @@ export class CharacterEquipmentPage {
       this.parseSkillBonus(value.skillBonus),
     );
     this.cart.add(item.id);
+    this.cartVersion.update((version) => version + 1);
     this.form.reset({
       label: '',
       type: 'weapon',
@@ -133,7 +182,7 @@ export class CharacterEquipmentPage {
     if (!this.characterId) return;
     const equipment: CharacterEquipment[] = [...this.cart].map((equipmentId) => ({
       equipmentId,
-      equipped: true,
+      equipped: this.equipped.has(equipmentId),
     }));
     this.characterService.setEquipment(this.characterId, equipment);
   }

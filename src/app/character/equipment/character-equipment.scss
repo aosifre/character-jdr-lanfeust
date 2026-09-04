@@ -25,6 +25,8 @@ h1 { color: #24323a; font-family: Georgia, serif; font-size: clamp(2.3rem, 6vw, 
 .button { background: #24323a; border: 0; border-radius: 4px; color: #fff; cursor: pointer; font: inherit; font-weight: 800; min-height: 3rem; padding: .75rem 1.5rem; }
 .button:disabled { cursor: not-allowed; opacity: .45; }
 .button-outline { background: transparent; border: 1px solid #24323a; color: #24323a; }
+.button-danger { border: 1px solid #bd5b38; color: #bd5b38; }
+.equipment-actions { display: flex; flex-wrap: wrap; gap: .4rem; }
 .modal-backdrop { align-items: center; background: rgba(36, 50, 58, .55); display: flex; inset: 0; justify-content: center; padding: 1rem; position: fixed; z-index: 10; }
 .modal { background: #fffdf8; max-width: 560px; padding: 1.5rem; width: 100%; }
 .modal h2 { color: #24323a; margin-top: 0; }
@@ -37,6 +39,10 @@ h1 { color: #24323a; font-family: Georgia, serif; font-size: clamp(2.3rem, 6vw, 
 /* À ajouter à la suite des styles originaux */
 
 .search-bar {
+  align-items: end;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(0, 1fr) auto;
   margin-bottom: 1.5rem;
 
   input {
@@ -51,6 +57,23 @@ h1 { color: #24323a; font-family: Georgia, serif; font-size: clamp(2.3rem, 6vw, 
       border-color: #bd5b38;
       outline: none;
     }
+  }
+
+  label {
+    color: #24323a;
+    display: grid;
+    font-size: .85rem;
+    font-weight: 800;
+    gap: .35rem;
+  }
+
+  select {
+    background: #fff;
+    border: 1px solid #aebbb8;
+    border-radius: 4px;
+    font: inherit;
+    min-height: 2.75rem;
+    padding: .5rem .75rem;
   }
 }
 
@@ -114,4 +137,4 @@ h1 { color: #24323a; font-family: Georgia, serif; font-size: clamp(2.3rem, 6vw, 
   }
 }
 
-@media (max-width: 650px) { .equipment-shell { padding-inline: 1rem; } .equipment-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 650px) { .equipment-shell { padding-inline: 1rem; } .equipment-grid { grid-template-columns: repeat(2, 1fr); } .search-bar { grid-template-columns: 1fr; } }
