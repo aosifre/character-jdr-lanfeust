@@ -211,6 +211,7 @@ export class CharacterService {
       flaws: Array.isArray(value.flaws) ? value.flaws : [],
       equipment: Array.isArray(value.equipment) ? value.equipment.map((item) => ({
         equipmentId: item.equipmentId,
+        quantity: Number.isInteger(item.quantity) && item.quantity > 0 ? item.quantity : 1,
         equipped: item.equipped === true,
         weighted: item.weighted === true,
       })) : [],
