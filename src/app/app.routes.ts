@@ -9,6 +9,7 @@ import { CharacterAdvantagesPage } from './character/advantages/character-advant
 import { SettingsPage } from './settings/settings-page';
 import { AdvantageList } from './advantage/list/advantage-list';
 import { CreationSettings } from './settings/creation/creation-settings';
+import { AppearanceSettings } from './settings/appearance/appearance-settings';
 import { FlawList } from './flaw/list/flaw-list';
 import { CharacterFlawsPage } from './character/flaws/character-flaws';
 import { CharacterLevelPage } from './character/levels/character-level';
@@ -18,11 +19,13 @@ import { CharacterSkillsAddPage } from './character/skills-add/character-skills-
 import { CharacterCharacteristicsAddPage } from './character/characteristics-add/character-characteristics-add';
 import { CharacterEquipmentPage } from './character/equipment/character-equipment';
 import { CharacterViewPage } from './character/view/character-view-page';
+import { CharacterHistoryPage } from './character/history/character-history-page';
 
 export const routes: Routes = [
 	{ path: '', pathMatch: 'full', redirectTo: 'characters' },
 	{ path: 'characters', component: CharacterList },
 	{ path: 'characters/new', component: CharacterForm },
+	{ path: 'characters/:id/history', component: CharacterHistoryPage },
 	{ path: 'characters/:id', component: CharacterViewPage },
 	{ path: 'characters/:id/characteristics', component: CharacterCharacteristics },
 	{ path: 'characters/:id/characteristics/add', component: CharacterCharacteristicsAddPage },
@@ -38,6 +41,7 @@ export const routes: Routes = [
 	{ path: 'skills', component: SkillList },
 	{ path: 'settings', component: SettingsPage },
 	{ path: 'settings/creation', component: CreationSettings },
+	{ path: 'settings/appearance', component: AppearanceSettings },
 	{ path: 'advantages', component: AdvantageList },
 	{ path: 'flaws', component: FlawList },
 	{ path: '**', redirectTo: 'characters' },

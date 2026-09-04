@@ -1,5 +1,72 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Alegreya+Sans:wght@400;500;600;700;800&family=Bree+Serif&display=swap');
+
+:root {
+	--ink: #172c3b;
+	--ink-soft: #3d5965;
+	--copper: #b95532;
+	--gold: #e7a84e;
+	--gold-light: #f7d78e;
+	--paper: #f6edda;
+	--paper-light: #fffaf0;
+	--paper-dark: #e8d8b9;
+	--line: #c8b58f;
+	--success: #3f7757;
+	--danger: #a5403e;
+}
+
 * { box-sizing: border-box; }
 html, body { margin: 0; min-height: 100%; }
-body { background: #f4f1e9; font-family: 'DM Sans', sans-serif; }
-button, input { font-family: inherit; }
+body {
+	background: var(--paper);
+	background-image: linear-gradient(rgba(255, 250, 240, .2), rgba(255, 250, 240, .2)), repeating-linear-gradient(0deg, rgba(116, 76, 35, .035) 0, rgba(116, 76, 35, .035) 1px, transparent 1px, transparent 5px);
+	color: var(--ink);
+	font-family: 'Alegreya Sans', sans-serif;
+}
+html[data-font-style='lanfeust'] body { font-family: 'Texte d\'écriture Lanfeust', 'Alegreya Sans', sans-serif; }
+html[data-font-style='classic'] body { font-family: 'Alegreya Sans', sans-serif; }
+html[data-font-style='storybook'] body { font-family: Georgia, 'Times New Roman', serif; }
+html[data-font-style='manuscript'] body { font-family: 'Comic Sans MS', 'Segoe Print', cursive; }
+html[data-font-style='lanfeust'] h1, html[data-font-style='lanfeust'] h2, html[data-font-style='lanfeust'] h3, html[data-font-style='lanfeust'] h4 { font-family: 'Texte d\'écriture Lanfeust', 'Bree Serif', Georgia, serif !important; }
+html[data-font-style='classic'] h1, html[data-font-style='classic'] h2, html[data-font-style='classic'] h3, html[data-font-style='classic'] h4 { font-family: 'Alegreya Sans', sans-serif !important; }
+html[data-font-style='storybook'] h1, html[data-font-style='storybook'] h2, html[data-font-style='storybook'] h3, html[data-font-style='storybook'] h4 { font-family: Georgia, 'Times New Roman', serif !important; }
+html[data-font-style='manuscript'] h1, html[data-font-style='manuscript'] h2, html[data-font-style='manuscript'] h3, html[data-font-style='manuscript'] h4 { font-family: 'Comic Sans MS', 'Segoe Print', cursive !important; }
+button, input, select, textarea { font-family: inherit; }
+
+/* Shared visual language for the character sheets and reference lists. */
+h1, h2, h3, h4 { color: var(--ink) !important; font-family: 'Bree Serif', Georgia, serif !important; letter-spacing: .01em !important; }
+p, label, span, strong, small, li { color: inherit; }
+a { color: var(--copper); }
+
+.button, button.button, .settings-nav a {
+	border: 2px solid var(--ink) !important;
+	border-radius: 3px !important;
+	box-shadow: 3px 3px 0 rgba(23, 44, 59, .18);
+	font-family: 'Alegreya Sans', sans-serif !important;
+	letter-spacing: .03em;
+	transition: transform 140ms ease, box-shadow 140ms ease, background-color 140ms ease;
+}
+.button:hover, button.button:hover, .settings-nav a:hover { box-shadow: 1px 1px 0 rgba(23, 44, 59, .18); transform: translate(2px, 2px); }
+.button-primary, .button { background: var(--ink) !important; color: var(--paper-light) !important; }
+.button-secondary, .button-primary span { background: var(--gold) !important; color: var(--ink) !important; }
+.button-outline, .outline { background: transparent !important; border-color: var(--ink) !important; color: var(--ink) !important; }
+
+input, textarea, select {
+	background: var(--paper-light) !important;
+	border: 2px solid var(--line) !important;
+	border-radius: 3px !important;
+	color: var(--ink) !important;
+}
+input:focus, textarea:focus, select:focus { border-color: var(--copper) !important; box-shadow: 0 0 0 3px rgba(185, 85, 50, .18); outline: none; }
+.eyebrow, .equipment-type, .equipment-state { color: var(--copper) !important; }
+.back-link, .intro, header p:last-child, .heading p:last-child, .form-heading p:last-child, footer p { color: var(--ink-soft) !important; }
+.page-shell, .settings-shell, .skills-shell, .flaws-shell, .advantages-shell { position: relative; }
+.character-table, .data-actions, header, .heading, .form-heading, .allocation-heading, .equipment-heading, .scores-heading, section { border-color: var(--line) !important; }
+.character-row, .empty-state, .panel, .equipment-card, .score-card, .characteristic-card, .active-equipment {
+	background: rgba(255, 250, 240, .72) !important;
+	border-color: var(--line) !important;
+}
+.character-row:hover, .equipment-card:hover, .score-card:hover, .characteristic-card:hover { border-color: var(--copper) !important; }
+.character-row.creation-complete { background: rgba(224, 239, 218, .85) !important; }
+.character-row.creation-incomplete { background: rgba(247, 224, 211, .82) !important; }
+.creation-complete .creation-status { color: var(--success) !important; }
+.creation-incomplete .creation-status, .delete-action, .import-error { color: var(--danger) !important; }

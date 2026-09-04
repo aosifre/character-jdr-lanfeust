@@ -1,0 +1,31 @@
+@if (character; as currentCharacter) {
+  <main class="history-shell">
+    <a class="back-link" routerLink="/characters">← Retour aux personnages</a>
+    <header>
+      <p class="eyebrow">Versions sauvegardées</p>
+      <h1>{{ currentCharacter.firstName }} {{ currentCharacter.lastName }}</h1>
+      <p>Créez une nouvelle fiche à partir d'un niveau précédent sans modifier le personnage actuel.</p>
+    </header>
+
+    @if (history.length > 0) {
+      <section class="history-list" aria-label="Niveaux sauvegardés">
+        @for (snapshot of history; track snapshot.snapshotId) {
+          <article class="history-card">
+            @if (snapshot.portrait) { <img class="history-avatar" [src]="snapshot.portrait" alt="Portrait sauvegardé" /> }
+            <div class="history-details">
+              <p class="eyebrow">Version du {{ snapshot.capturedAt | date:'dd/MM/yyyy à HH:mm' }}</p>
+              <h2>Niveau {{ snapshot.level }}</h2>
+              <p>{{ snapshot.experience }} XP · {{ snapshot.skills.length }} compétence(s) · {{ snapshot.advantages.length }} atout(s)</p>
+            </div>
+            <button class="button" type="button" (click)="copySnapshot(snapshot.snapshotId)">Créer une copie</button>
+          </article>
+        }
+      </section>
+    } @else {
+      <section class="empty-state"><h2>Aucun niveau sauvegardé</h2><p>Une copie sera disponible après la prochaine montée de niveau.</p></section>
+    }
+    @if (copyError) { <p class="error-message" role="alert">La copie n'a pas pu être enregistrée dans la mémoire disponible.</p> }
+  </main>
+} @else {
+  <main class="history-shell"><a class="back-link" routerLink="/characters">← Retour aux personnages</a><section class="empty-state"><h1>Personnage introuvable</h1></section></main>
+}

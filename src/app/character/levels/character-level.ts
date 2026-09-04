@@ -40,7 +40,7 @@ export class CharacterLevelPage {
         //  this.characterService.setExperience(this.characterId, 10);
         this.characterService.setExperience(this.characterId, experienceTotal);
 
-        if (experienceTotal > currentExperience && Math.floor(experienceTotal / 100) + 1 > currentLevel) {
+        if (Math.floor(experienceTotal / 100) > currentLevel) {
             this.router.navigate(['/characters', this.characterId, 'level', 'result']);
         } else {
             this.router.navigate(['/characters', this.characterId]);

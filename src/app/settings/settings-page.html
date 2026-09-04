@@ -1,6 +1,11 @@
 <main class="settings-shell">
   <a class="back-link" routerLink="/characters">← Retour aux personnages</a>
   <header><p class="eyebrow">JDR Lanfeust de Troy</p><h1>Paramètres globaux</h1><p>Configurez les règles utilisées lors de la création des personnages.</p></header>
-  <nav class="settings-nav" aria-label="Sections des paramètres"><a routerLink="/settings/creation">Création des personnages</a><a routerLink="/advantages">Atouts</a><a routerLink="/skills">Compétences</a><a routerLink="/flaws">Travers</a></nav>
-  <footer><button class="button outline" type="button" (click)="exportSettings()">Exporter</button><label class="button outline" for="settings-import">Importer</label><input id="settings-import" class="hidden" type="file" accept="application/json,.json" (change)="importSettings($event)" />@if (importError) {<p role="alert">Fichier de paramètres invalide.</p>}</footer>
+  <nav class="settings-nav" aria-label="Sections des paramètres"><a routerLink="/settings/creation">Création des personnages</a><a routerLink="/settings/appearance">Apparence</a><a routerLink="/advantages">Atouts</a><a routerLink="/skills">Compétences</a><a routerLink="/flaws">Travers</a></nav>
+  <section class="data-actions" aria-label="Import et export des données de l'application">
+    <h2>Archive de l'application</h2>
+    <p>Transférez les personnages, règles, catalogues et préférences visuelles.</p>
+    <div class="archive-actions"><button class="button button-outline" type="button" (click)="exportData()">Exporter l'archive</button><label class="button button-outline" for="data-import">Importer une archive</label><input id="data-import" class="hidden" type="file" accept="application/json,.json" (change)="importData($event)" /></div>
+    @if (importError) {<p class="import-error" role="alert">Le fichier JSON n’est pas une archive Lanfeust valide.</p>}
+  </section>
 </main>

@@ -21,10 +21,14 @@
       <div class="table-heading" aria-hidden="true"><span>Prénom</span><span>Nom</span><span>Niveau / XP</span><span>État</span><span>Actions</span></div>
       @for (character of characters(); track character.id) {
         <article class="character-row" [class.creation-complete]="isCreationComplete(character)" [class.creation-incomplete]="!isCreationComplete(character)" [attr.title]="getCreationStatusMessage(character)">
-          <strong>{{ character.firstName }}</strong>
+          <div class="character-identity">
+            @if (character.portrait) { <img class="character-avatar" [src]="character.portrait" alt="Portrait" /> }
+            <strong>{{ character.firstName }}</strong>
+          </div>
           <span>{{ character.lastName }}</span>
           <span class="character-stats">Niv. {{ character.level }} · {{ character.experience }} XP</span>
           <div class="row-actions">
+            <a class="action-icon history-action" [routerLink]="['/characters', character.id, 'history']" aria-label="Créer une copie depuis un niveau sauvegardé" title="Versions sauvegardées">⟳</a>
             <a class="action-icon equipment-action" [routerLink]="['/characters', character.id, 'equipment']" aria-label="Gérer les équipements" title="Équipements">⚔</a>
             <!-- Action button for viewing -->
             <a class="action-icon view-action" [routerLink]="['/characters', character.id]" aria-label="Voir le personnage" title="Voir">👁</a>
@@ -41,12 +45,4 @@
     </section>
   }
 
-  <section class="data-actions" aria-label="Import et export des personnages">
-    <button class="button button-outline" type="button" (click)="exportCharacters()">Exporter</button>
-    <label class="button button-outline" for="character-import">Importer</label>
-    <input id="character-import" class="visually-hidden" type="file" accept="application/json,.json" (change)="importCharacters($event)" />
-    @if (importError) {
-      <p class="import-error" role="alert">Le fichier JSON n’est pas un export de personnages valide.</p>
-    }
-  </section>
 </main>

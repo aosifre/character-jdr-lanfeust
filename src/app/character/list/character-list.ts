@@ -46,36 +46,4 @@ export class CharacterList {
     return missingSteps;
   }
 
-  protected exportCharacters(): void {
-    const file = new Blob([JSON.stringify(this.characters(), null, 2)], {
-      type: 'application/json',
-    });
-    const downloadUrl = URL.createObjectURL(file);
-    const link = document.createElement('a');
-    link.href = downloadUrl;
-    link.download = 'personnages-lanfeust-de-troy.json';
-    link.click();
-    URL.revokeObjectURL(downloadUrl);
-  }
-
-  protected importCharacters(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
-    if (!file) {
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      try {
-        this.importError = !this.characterService.importCharacters(
-          JSON.parse(String(reader.result)),
-        );
-      } catch {
-        this.importError = true;
-      }
-      input.value = '';
-    };
-    reader.readAsText(file);
-  }
 }

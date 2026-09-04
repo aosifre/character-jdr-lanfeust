@@ -1,0 +1,12 @@
+:host { display: block; }
+.appearance-shell { margin: 0 auto; max-width: 700px; padding: 3rem 1.5rem 5rem; }
+.back-link { color: #66747a; text-decoration: none; }
+.eyebrow { color: #bd5b38; font-size: .75rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+header { border-bottom: 1px solid #cfd6d4; margin: 3rem 0 2rem; padding-bottom: 2rem; }
+h1 { color: #24323a; font-family: Georgia, serif; font-size: clamp(2.3rem, 6vw, 4rem); font-weight: 500; letter-spacing: 0; line-height: 1; margin: 0 0 1rem; }
+header p:last-child { color: #66747a; }
+form { display: grid; gap: .7rem; max-width: 25rem; }
+label { color: #24323a; font-weight: 800; }
+select { background: #fffdf8; border: 1px solid #aebbb8; border-radius: 3px; font: inherit; min-height: 3rem; padding: .7rem; }
+form p { color: #66747a; margin: 0; }
+@media (max-width: 650px) { .appearance-shell { padding-inline: 1rem; } }

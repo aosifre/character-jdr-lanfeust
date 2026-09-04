@@ -14,9 +14,15 @@
     @if (form.controls.lastName.invalid && form.controls.lastName.touched) { <small>Le nom est obligatoire.</small> }
     <label for="description">Description</label>
     <textarea id="description" formControlName="description" rows="7" placeholder="Décrivez votre personnage..."></textarea>
+    <label for="portrait">Portrait du personnage</label>
+    <input id="portrait" type="file" accept="image/*" (change)="selectPortrait($event)" />
+    <p class="portrait-help">L’image est recadrée en carré et compressée avant d’être enregistrée. Maximum conseillé : 4 Mo pour l’ensemble des personnages.</p>
+    @if (portrait(); as portraitUrl) { <img class="portrait-preview" [src]="portraitUrl" alt="Aperçu du portrait" /> }
+    @if (imageError) { <small>{{ imageError }}</small> }
     <label for="origin">Origine</label>
     <select id="origin" formControlName="origin">
       <option value="human">Humain</option>
+      <option value="baronies">Humain originaire des 77 Baronies</option>
       <option value="darshan">Humain originaire de l'empire du Darshan</option>
       <option value="troll">Troll</option>
       <option value="eckmul">Humain originaire de la zone d'influence d'Eckmül</option>

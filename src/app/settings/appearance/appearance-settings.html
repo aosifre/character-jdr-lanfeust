@@ -1,0 +1,14 @@
+<main class="appearance-shell">
+  <a class="back-link" routerLink="/settings">← Retour aux paramètres</a>
+  <header><p class="eyebrow">JDR Lanfeust de Troy</p><h1>Apparence</h1><p>Choisissez le style de police utilisé dans toute l'application.</p></header>
+  <form>
+    <label for="fontStyle">Style de police global</label>
+    <select id="fontStyle" [value]="fontStyle" (change)="updateFontStyle($event)">
+      <option value="lanfeust">Lanfeust (fantaisie)</option>
+      <option value="classic">Classique (sans serif)</option>
+      <option value="storybook">Conte (serif)</option>
+      <option value="manuscript">Manuscrit (écriture)</option>
+    </select>
+    <p>Le style est mémorisé dans votre navigateur et appliqué à tous les écrans.</p>
+  </form>
+</main>

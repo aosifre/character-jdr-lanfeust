@@ -3,6 +3,7 @@
     <a class="back-link" routerLink="/characters">← Retour aux personnages</a>
     <header class="view-heading">
       <div>
+        @if (currentCharacter.portrait) { <img class="profile-portrait" [src]="currentCharacter.portrait" alt="Portrait du personnage" /> }
         <p class="eyebrow">Fiche personnage</p>
         <h1>{{ currentCharacter.firstName }} {{ currentCharacter.lastName }}</h1>
         <p>{{ currentCharacter.description || 'Aucune description renseignée.' }}</p>
