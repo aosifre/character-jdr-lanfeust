@@ -86,6 +86,14 @@ export class CharacterViewPage {
 
   protected damageDice(item: Equipment): string { return item.category ? `${item.category}D6` : 'Non applicable'; }
 
+  protected isWeaponWeighted(equipmentId: string): boolean {
+    return this.character?.equipment.some((item) => item.equipmentId === equipmentId && item.weighted) ?? false;
+  }
+
+  protected damageBonus(item: Equipment): number {
+    return (this.character?.attributes.force ?? 0) + (this.isWeaponWeighted(item.id) ? 2 : 0);
+  }
+
   protected setDamage(value: string): void { this.damageTaken = this.nonNegativeValue(value); }
   protected setEnergySpent(value: string): void { this.energySpent = this.nonNegativeValue(value); }
   protected setGlobalSkillPenalty(value: string): void { this.globalSkillPenalty = this.nonNegativeValue(value); }
