@@ -1,0 +1,52 @@
+<main class="page-shell">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">JDR Lanfeust de Troy</p>
+      <h1>Personnages</h1>
+      <p class="intro">Gérez les héros et les figures de votre aventure.</p>
+    </div>
+    <a class="button button-primary" routerLink="/characters/new"><span aria-hidden="true">+</span>Ajouter un personnage</a>
+    <a class="button button-outline" routerLink="/settings">Paramètres</a>
+  </header>
+
+  @if (characters().length === 0) {
+    <section class="empty-state" aria-live="polite">
+      <div class="empty-mark" aria-hidden="true">✦</div>
+      <h2>Votre journal est encore vierge</h2>
+      <p>Créez le premier personnage de cette aventure.</p>
+      <a class="button button-secondary" routerLink="/characters/new">Créer un personnage</a>
+    </section>
+  } @else {
+    <section class="character-table" aria-label="Liste des personnages">
+      <div class="table-heading" aria-hidden="true"><span>Prénom</span><span>Nom</span><span>Niveau / XP</span><span>État</span><span>Actions</span></div>
+      @for (character of characters(); track character.id) {
+        <article class="character-row" [class.creation-complete]="isCreationComplete(character)" [class.creation-incomplete]="!isCreationComplete(character)" [attr.title]="getCreationStatusMessage(character)">
+          <strong>{{ character.firstName }}</strong>
+          <span>{{ character.lastName }}</span>
+          <span class="character-stats">Niv. {{ character.level }} · {{ character.experience }} XP</span>
+          <div class="row-actions">
+            <a class="action-icon equipment-action" [routerLink]="['/characters', character.id, 'equipment']" aria-label="Gérer les équipements" title="Équipements">⚔</a>
+            <!-- Action button for viewing -->
+            <a class="action-icon view-action" [routerLink]="['/characters', character.id]" aria-label="Voir le personnage" title="Voir">👁</a>
+            <!-- Action button for upgrading experience -->
+            <a class="action-icon level-action" [routerLink]="['/characters', character.id, 'level']" aria-label="Augmenter l'expérience" title="Augmenter l'expérience">⬆</a>
+            <!-- Action button for deletion -->
+            <button class="action-icon delete-action" type="button" aria-label="Supprimer le personnage" title="Supprimer" (click)="removeCharacter(character.id, character.firstName, character.lastName)">🗑</button>
+          </div>
+          <div class="creation-status" [attr.aria-label]="isCreationComplete(character) ? 'Création terminée' : 'Création incomplète'">
+            <span>{{ isCreationComplete(character) ? 'Terminé' : 'À compléter' }}</span>
+          </div>
+        </article>
+      }
+    </section>
+  }
+
+  <section class="data-actions" aria-label="Import et export des personnages">
+    <button class="button button-outline" type="button" (click)="exportCharacters()">Exporter</button>
+    <label class="button button-outline" for="character-import">Importer</label>
+    <input id="character-import" class="visually-hidden" type="file" accept="application/json,.json" (change)="importCharacters($event)" />
+    @if (importError) {
+      <p class="import-error" role="alert">Le fichier JSON n’est pas un export de personnages valide.</p>
+    }
+  </section>
+</main>

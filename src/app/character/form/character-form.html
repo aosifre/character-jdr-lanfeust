@@ -1,0 +1,40 @@
+<main class="form-shell">
+  <a class="back-link" routerLink="/characters">← Retour aux personnages</a>
+  <div class="form-heading">
+    <p class="eyebrow">Fiche personnage</p>
+    <h1>Qui suis-je ?</h1>
+    <p>Donnez-lui une identité avant de l’envoyer à l’aventure.</p>
+  </div>
+  <form [formGroup]="form" (ngSubmit)="save()" novalidate>
+    <label for="firstName">Prénom</label>
+    <input id="firstName" type="text" formControlName="firstName" autocomplete="given-name" />
+    @if (form.controls.firstName.invalid && form.controls.firstName.touched) { <small>Le prénom est obligatoire.</small> }
+    <label for="lastName">Nom</label>
+    <input id="lastName" type="text" formControlName="lastName" autocomplete="family-name" />
+    @if (form.controls.lastName.invalid && form.controls.lastName.touched) { <small>Le nom est obligatoire.</small> }
+    <label for="description">Description</label>
+    <textarea id="description" formControlName="description" rows="7" placeholder="Décrivez votre personnage..."></textarea>
+    <label for="origin">Origine</label>
+    <select id="origin" formControlName="origin">
+      <option value="human">Humain</option>
+      <option value="darshan">Humain originaire de l'empire du Darshan</option>
+      <option value="troll">Troll</option>
+      <option value="eckmul">Humain originaire de la zone d'influence d'Eckmül</option>
+    </select>
+    <div class="character-stats">
+      <div>
+        <label for="level">Niveau</label>
+        <input id="level" type="number" value="0" readonly aria-describedby="stats-help" />
+      </div>
+      <div>
+        <label for="experience">Expérience</label>
+        <input id="experience" type="number" value="0" readonly aria-describedby="stats-help" />
+      </div>
+    </div>
+    <p id="stats-help" class="stats-help">Le niveau progresse automatiquement tous les 100 points d’expérience.</p>
+    <div class="form-actions">
+      <a class="cancel-link" routerLink="/characters">Annuler</a>
+      <button class="button button-primary" type="submit">Ajouter</button>
+    </div>
+  </form>
+</main>

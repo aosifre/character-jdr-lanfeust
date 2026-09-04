@@ -1,0 +1,49 @@
+<main class="allocation-shell">
+  <a class="back-link" routerLink="/characters">← Annuler</a>
+  <div class="allocation-heading">
+    <p class="eyebrow">{{ character?.firstName }} {{ character?.lastName }}</p>
+    <h1>Caractéristiques</h1>
+    <p>Sélectionnez la caractéristique qui gagne 1 point.</p>
+  </div>
+
+  <section class="characteristic-grid" aria-label="Caractéristiques principales">
+    @for (characteristic of characteristics; track characteristic.key) {
+      <button
+        class="characteristic-card"
+        [class.assigned]="isSelected(characteristic.key)"
+        type="button"
+        (click)="selectCharacteristic(characteristic.key)"
+      >
+        <span>{{ characteristic.label }}</span>
+        <strong>{{ character?.attributes?.[characteristic.key] ?? 0 }}@if (isSelected(characteristic.key)) { → {{ values[characteristic.key] }}}</strong>
+      </button>
+    }
+  </section>
+
+  @if (selectedCharacteristic && previewScores && currentScores) {
+    <section class="preview" aria-label="Aperçu des modifications">
+      <h2>Modifications prévues</h2>
+      <p class="preview-intro">
+      <div class="score-preview">
+        @for (score of [{ label: 'Attaque', before: currentScores.attack, after: previewScores.attack }, { label: 'Défense', before: currentScores.defense, after: previewScores.defense }, { label: 'Sauvegarde', before: currentScores.save, after: previewScores.save }, { label: 'Points de vie', before: currentScores.hitPoints, after: previewScores.hitPoints }, { label: "Points d'énergie", before: currentScores.energyPoints, after: previewScores.energyPoints }]; track score.label) {
+          @if (score.before !== score.after) {
+            <div class="score-change"><span>{{ score.label }}</span><strong>{{ score.before }} → {{ score.after }}</strong></div>
+          }
+        }
+      </div>
+      @if (affectedSkills.length > 0) {
+        <h3>Compétences concernées</h3>
+        <div class="skill-preview">
+          @for (skill of affectedSkills; track skill.id) {
+            <div class="skill-change"><span>{{ skill.label }}</span><strong>{{ getSkillBonus(skill, character!.attributes) }} → {{ getSkillBonus(skill, values) }}</strong></div>
+          }
+        </div>
+      }
+    </section>
+  }
+
+  <div class="allocation-footer">
+    <p>{{ selectedCharacteristic ? '1 caractéristique sélectionnée' : 'Sélectionnez une caractéristique' }}</p>
+    <button class="button button-primary" type="button" [disabled]="!selectedCharacteristic" (click)="save()">Valider</button>
+  </div>
+</main>

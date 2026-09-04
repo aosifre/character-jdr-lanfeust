@@ -1,0 +1,14 @@
+<main class="flaws-shell">
+  <a class="back-link" [routerLink]="characterId ? ['/characters', characterId, 'advantages'] : '/characters'">← Retour</a>
+  <div class="heading"><p class="eyebrow">{{ character?.firstName }} {{ character?.lastName }}</p><h1>Travers</h1><p>Choisissez un ou plusieurs travers pour votre personnage.</p></div>
+  <button class="button outline" type="button" (click)="openModal()">Ajouter un travers</button>
+  <section class="flaw-grid" aria-label="Choix des travers">
+    @for (flaw of flaws(); track flaw.id) {
+      <button class="flaw-card" [class.selected]="isSelected(flaw.id)" type="button" (click)="toggle(flaw.id)"><span>{{ flaw.title }}</span><strong>{{ isSelected(flaw.id) ? '✓' : '+' }}</strong><small>{{ flaw.description || 'Aucune description' }}</small></button>
+    }
+  </section>
+  <footer><p>{{ selected.size }} travers sélectionné(s)</p><button class="button" type="button" (click)="save()">Valider le personnage</button></footer>
+</main>
+@if (modalOpen) {
+  <div class="modal-backdrop" (click)="closeModal()"><section class="modal" role="dialog" aria-modal="true" aria-labelledby="flaw-modal-title" (click)="$event.stopPropagation()"><div class="modal-header"><h2 id="flaw-modal-title">Ajouter un travers</h2><button class="close-button" type="button" aria-label="Fermer" (click)="closeModal()">×</button></div><form [formGroup]="flawForm" (ngSubmit)="addCustomFlaw()"><label for="flaw-title">Titre</label><input id="flaw-title" formControlName="title" placeholder="Titre du travers" /><label for="flaw-description">Description</label><textarea id="flaw-description" formControlName="description" rows="6" placeholder="Description du travers"></textarea><div class="modal-actions"><button class="button outline" type="button" (click)="closeModal()">Annuler</button><button class="button" type="submit">Ajouter</button></div></form></section></div>
+}

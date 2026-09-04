@@ -1,0 +1,10 @@
+<main class="advantages-shell">
+  <a class="back-link" [routerLink]="characterId ? ['/characters', characterId, 'skills'] : '/characters'">← Retour</a>
+  <div class="heading"><p class="eyebrow">{{ character?.firstName }} {{ character?.lastName }}</p><h1>Atouts</h1><p>Choisissez {{ availableAdvantages().availableAdvantages }} atout(s) pour votre personnage.</p></div>
+  <section class="advantage-grid" aria-label="Choix des atouts">
+    @for (advantage of advantages(); track advantage.id) {
+      <button class="advantage-card" [class.selected]="isSelected(advantage.id)" [disabled]="!isAvailable(advantage) && !isSelected(advantage.id)" type="button" (click)="toggle(advantage.id)"><span>{{ advantage.title }}</span><strong>{{ isSelected(advantage.id) ? '✓' : '+' }}</strong><small>{{ categoryLabel(advantage.category) }}</small><small>{{ advantage.description || 'Aucune description' }}</small><small>{{ conditionText(advantage) }}</small></button>
+    }
+  </section>
+  <footer><p>{{ selected.size }} / {{ availableAdvantages().availableAdvantages }} choisis</p><button class="button" type="button" [disabled]="selected.size !== availableAdvantages().availableAdvantages" (click)="save()">Valider le personnage</button></footer>
+</main>

@@ -1,0 +1,12 @@
+:host { display: block; }
+.creation-shell { margin: 0 auto; max-width: 700px; padding: 3rem 1.5rem 5rem; }
+.back-link { color: #66747a; text-decoration: none; }
+.eyebrow { color: #bd5b38; font-size: .75rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+header { border-bottom: 1px solid #cfd6d4; margin: 3rem 0 2rem; padding-bottom: 2rem; }
+h1 { color: #24323a; font-family: Georgia, serif; font-size: clamp(2.3rem, 6vw, 4rem); font-weight: 500; letter-spacing: 0; line-height: 1; margin: 0 0 1rem; }
+header p:last-child { color: #66747a; }
+form { align-items: end; display: flex; gap: .8rem; }
+label { color: #24323a; font-weight: 800; }
+input { background: #fffdf8; border: 1px solid #aebbb8; border-radius: 3px; font: inherit; min-height: 3rem; padding: .7rem; width: 7rem; }
+.button { background: #24323a; border: 0; border-radius: 4px; color: #fff; cursor: pointer; font: inherit; font-weight: 800; min-height: 3rem; padding: .7rem 1.2rem; }
+@media (max-width: 650px) { .creation-shell { padding-inline: 1rem; } form { align-items: stretch; flex-direction: column; } input, .button { width: 100%; } }

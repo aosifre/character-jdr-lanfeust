@@ -1,3 +1,44 @@
 import { Routes } from '@angular/router';
+import { CharacterForm } from './character/form/character-form';
+import { CharacterList } from './character/list/character-list';
+import { CharacterCharacteristics } from './character/characteristics/character-characteristics';
+import { CharacterOtherScoresPage } from './character/otherscores/character-otherscores';
+import { CharacterSkillsPage } from './character/skills/character-skills';
+import { SkillList } from './skill/list/skill-list';
+import { CharacterAdvantagesPage } from './character/advantages/character-advantages';
+import { SettingsPage } from './settings/settings-page';
+import { AdvantageList } from './advantage/list/advantage-list';
+import { CreationSettings } from './settings/creation/creation-settings';
+import { FlawList } from './flaw/list/flaw-list';
+import { CharacterFlawsPage } from './character/flaws/character-flaws';
+import { CharacterLevelPage } from './character/levels/character-level';
+import { CharacterLevelUpResultPage } from './character/levelUpResults/character-level-up-result';
+import { CharacterAdvantagesAddPage } from './character/advantages-add/character-advantages-add';
+import { CharacterSkillsAddPage } from './character/skills-add/character-skills-add';
+import { CharacterCharacteristicsAddPage } from './character/characteristics-add/character-characteristics-add';
+import { CharacterEquipmentPage } from './character/equipment/character-equipment';
+import { CharacterViewPage } from './character/view/character-view-page';
 
-export const routes: Routes = [];
+export const routes: Routes = [
+	{ path: '', pathMatch: 'full', redirectTo: 'characters' },
+	{ path: 'characters', component: CharacterList },
+	{ path: 'characters/new', component: CharacterForm },
+	{ path: 'characters/:id', component: CharacterViewPage },
+	{ path: 'characters/:id/characteristics', component: CharacterCharacteristics },
+	{ path: 'characters/:id/characteristics/add', component: CharacterCharacteristicsAddPage },
+	{ path: 'characters/:id/equipment', component: CharacterEquipmentPage },
+	{ path: 'characters/:id/otherscores', component: CharacterOtherScoresPage },
+	{ path: 'characters/:id/skills', component: CharacterSkillsPage },
+	{ path: 'characters/:id/skills/add', component: CharacterSkillsAddPage },
+	{ path: 'characters/:id/advantages', component: CharacterAdvantagesPage },
+	{ path: 'characters/:id/advantages/add', component: CharacterAdvantagesAddPage },
+	{ path: 'characters/:id/flaws', component: CharacterFlawsPage },
+	{ path: 'characters/:id/level', component: CharacterLevelPage },
+	{ path: 'characters/:id/level/result', component: CharacterLevelUpResultPage },
+	{ path: 'skills', component: SkillList },
+	{ path: 'settings', component: SettingsPage },
+	{ path: 'settings/creation', component: CreationSettings },
+	{ path: 'advantages', component: AdvantageList },
+	{ path: 'flaws', component: FlawList },
+	{ path: '**', redirectTo: 'characters' },
+];
