@@ -18,9 +18,9 @@
     </section>
   } @else {
     <section class="character-table" aria-label="Liste des personnages">
-      <div class="table-heading" aria-hidden="true"><span>Prénom</span><span>Nom</span><span>Niveau / XP</span><span>État</span><span>Actions</span></div>
+      <div class="table-heading" aria-hidden="true"><span>Prénom</span><span>Nom</span><span>Niveau / XP</span><span>Actions</span></div>
       @for (character of characters(); track character.id) {
-        <article class="character-row" [class.creation-complete]="isCreationComplete(character)" [class.creation-incomplete]="!isCreationComplete(character)" [attr.title]="getCreationStatusMessage(character)">
+        <article class="character-row">
           <div class="character-identity">
             @if (character.portrait) { <img class="character-avatar" [src]="character.portrait" alt="Portrait" /> }
             <strong>{{ character.firstName }}</strong>
@@ -36,9 +36,6 @@
             <a class="action-icon level-action" [routerLink]="['/characters', character.id, 'level']" aria-label="Augmenter l'expérience" title="Augmenter l'expérience">⬆</a>
             <!-- Action button for deletion -->
             <button class="action-icon delete-action" type="button" aria-label="Supprimer le personnage" title="Supprimer" (click)="removeCharacter(character.id, character.firstName, character.lastName)">🗑</button>
-          </div>
-          <div class="creation-status" [attr.aria-label]="isCreationComplete(character) ? 'Création terminée' : 'Création incomplète'">
-            <span>{{ isCreationComplete(character) ? 'Terminé' : 'À compléter' }}</span>
           </div>
         </article>
       }
