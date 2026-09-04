@@ -14,10 +14,10 @@
         <span>Attaque (ATT)</span><strong>{{ otherScores.attack }}</strong><small>Force + Intelligence</small>
       </button>
       <button class="score-card" [class.selected]="otherScores.combatBonusPoints.defense > 0" type="button" (click)="selectCombatBonus('defense')">
-        <span>Défense (DEF)</span><strong>{{ otherScores.defense }}</strong><small>Dextérité + Sagesse</small>
+        <span>Défense (DEF)</span><strong>{{ otherScores.defense }}</strong><small>Dextérité + Charisme</small>
       </button>
       <button class="score-card" [class.selected]="otherScores.combatBonusPoints.save > 0" type="button" (click)="selectCombatBonus('save')">
-        <span>Sauvegarde (SAV)</span><strong>{{ otherScores.save }}</strong><small>Constitution + Charisme</small>
+        <span>Sauvegarde (SAV)</span><strong>{{ otherScores.save }}</strong><small>Constitution + Sagesse</small>
       </button>
     </div>
   </section>
