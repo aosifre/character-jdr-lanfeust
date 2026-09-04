@@ -100,8 +100,8 @@ export class CharacterService {
     return {
       ...currentScores,
       attack: attributes.force + attributes.intelligence + points.attack + equipmentBonuses.attack,
-      defense: attributes.dexterite + attributes.sagesse + points.defense + equipmentBonuses.defense,
-      save: attributes.constitution + attributes.charisme + points.save,
+      defense: attributes.dexterite + attributes.charisme + points.defense + equipmentBonuses.defense,
+      save: attributes.constitution + attributes.sagesse + points.save,
       hitPoints: level > 1 ? 10 + attributes.constitution + 5 * level : 10 + attributes.constitution,
       energyPoints: level > 1 ? (1 + attributes.sagesse) * level : 5 + attributes.sagesse,
     };
