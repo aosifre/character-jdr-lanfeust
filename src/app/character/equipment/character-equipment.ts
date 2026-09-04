@@ -23,6 +23,7 @@ export class CharacterEquipmentPage {
     : undefined;
   protected readonly equipment = this.equipmentService.equipmentList;
   protected readonly cart = new Set(this.character?.equipment.map((item) => item.equipmentId) ?? []);
+  protected readonly quantities = new Map(this.character?.equipment.map((item) => [item.equipmentId, item.quantity ?? 1]) ?? []);
   protected readonly equipped = new Set(
     this.character?.equipment.filter((item) => item.equipped).map((item) => item.equipmentId) ?? [],
   );
@@ -33,7 +34,7 @@ export class CharacterEquipmentPage {
 
   // Signaux pour la recherche et la pagination
   protected searchQuery = signal('');
-  protected equipmentFilter = signal<'all' | 'equipped' | 'not-equipped'>('all');
+  protected equipmentFilter = signal<'all' | 'owned' | 'equipped' | 'not-equipped'>('all');
   private readonly cartVersion = signal(0);
   protected currentPage = signal(1);
   protected readonly pageSize = 10;
@@ -64,6 +65,7 @@ export class CharacterEquipmentPage {
 
     return this.equipment().filter((item) => {
       const matchesFilter = filter === 'all'
+        || (filter === 'owned' && this.isOwned(item.id))
         || (filter === 'equipped' && this.isEquipped(item.id))
         || (filter === 'not-equipped' && !this.isEquipped(item.id));
       const label = this.normalizeString(item.label);
@@ -92,7 +94,7 @@ export class CharacterEquipmentPage {
   }
 
   protected onEquipmentFilterChange(event: Event): void {
-    const value = (event.target as HTMLSelectElement).value as 'all' | 'equipped' | 'not-equipped';
+    const value = (event.target as HTMLSelectElement).value as 'all' | 'owned' | 'equipped' | 'not-equipped';
     this.equipmentFilter.set(value);
     this.currentPage.set(1);
   }
@@ -114,17 +116,28 @@ export class CharacterEquipmentPage {
 
   protected addToInventory(item: Equipment): void {
     this.cart.add(item.id);
+    this.quantities.set(item.id, 1);
     this.cartVersion.update((version) => version + 1);
   }
 
   protected removeFromInventory(item: Equipment): void {
     this.cart.delete(item.id);
+    this.quantities.delete(item.id);
     this.equipped.delete(item.id);
     this.weighted.delete(item.id);
     this.cartVersion.update((version) => version + 1);
   }
 
   protected isWeighted(id: string): boolean { return this.weighted.has(id); }
+
+  protected quantity(id: string): number { return this.quantities.get(id) ?? 1; }
+
+  protected updateQuantity(item: Equipment, event: Event): void {
+    if (!this.isOwned(item.id)) return;
+    const value = Math.max(1, Math.floor(Number((event.target as HTMLInputElement).value) || 1));
+    this.quantities.set(item.id, value);
+    this.cartVersion.update((version) => version + 1);
+  }
 
   protected toggleWeighted(item: Equipment): void {
     if (item.type !== 'weapon' || !this.isOwned(item.id)) return;
@@ -195,6 +208,7 @@ export class CharacterEquipmentPage {
     if (!this.characterId) return;
     const equipment: CharacterEquipment[] = [...this.cart].map((equipmentId) => ({
       equipmentId,
+      quantity: this.quantity(equipmentId),
       equipped: this.equipped.has(equipmentId),
       weighted: this.weighted.has(equipmentId),
     }));

@@ -18,6 +18,7 @@
       <label for="equipment-filter">Afficher
         <select id="equipment-filter" [value]="equipmentFilter()" (change)="onEquipmentFilterChange($event)">
           <option value="all">Tous les équipements</option>
+          <option value="owned">Équipements possédés</option>
           <option value="equipped">Équipés uniquement</option>
           <option value="not-equipped">Non équipés uniquement</option>
         </select>
@@ -28,6 +29,7 @@
       <thead>
         <tr>
           <th>Nom</th>
+          <th>Quantité</th>
           <th>Type</th>
           <th>Catégorie</th>
           <th>Effets / Stats</th>
@@ -39,6 +41,13 @@
           <tr [class.equipped]="isEquipped(item.id)">
             <td>
               <strong>{{ item.label }}</strong>
+            </td>
+            <td>
+              @if (isOwned(item.id)) {
+                <input class="quantity-input" type="number" min="1" step="1" [value]="quantity(item.id)" (change)="updateQuantity(item, $event)" [attr.aria-label]="'Quantité de ' + item.label" />
+              } @else {
+                <span>—</span>
+              }
             </td>
             <td>
               <span class="type-badge">{{ typeLabel(item.type) }}</span>
@@ -71,7 +80,7 @@
           </tr>
         } @empty {
           <tr>
-            <td colspan="5" class="empty-cell">Aucun équipement trouvé.</td>
+            <td colspan="6" class="empty-cell">Aucun équipement trouvé.</td>
           </tr>
         }
       </tbody>
@@ -101,32 +110,32 @@
     }
   </section>
 
-<section class="active-equipment" aria-label="Résumé de l'équipement">
-    <h2>Équipements possédés ({{ cart.size }})</h2>
+  <section class="active-equipment" aria-label="Résumé de l'équipement">
+    <div class="section-heading"><div><p class="eyebrow">Inventaire</p><h2>Équipements possédés ({{ cart.size }})</h2></div></div>
 
     @if (cartItems.length > 0) {
-      <ul class="cart-list">
+      <div class="equipment-cards">
         @for (item of cartItems; track item.id) {
-          <li class="cart-item">
+          <article class="owned-equipment-card">
             <div class="cart-item-info">
               <strong>{{ item.label }}</strong>
-              <span class="cart-item-meta">{{ typeLabel(item.type) }} · {{ categoryLabel(item.category) }} · {{ isEquipped(item.id) ? 'Équipé' : 'Non équipé' }}@if (item.type === 'weapon' && isWeighted(item.id)) { · Lestée (+2 dégâts)}</span>
+              <span class="cart-item-meta">{{ typeLabel(item.type) }} · {{ categoryLabel(item.category) }} · Quantité : {{ quantity(item.id) }} · {{ isEquipped(item.id) ? 'Équipé' : 'Non équipé' }}@if (item.type === 'weapon' && isWeighted(item.id)) { · Lestée (+2 dégâts)}</span>
               <small>{{ description(item) }}</small>
               @if (skillBonusDescription(item)) {
                 <small class="cart-item-skills">{{ skillBonusDescription(item) }}</small>
               }
             </div>
-            <button
-              type="button"
-              class="button button-outline button-small button-danger"
-              (click)="removeFromInventory(item)"
-              title="Retirer du panier"
-            >
-              Retirer
-            </button>
-          </li>
+              <button
+                type="button"
+                class="button button-outline button-small button-danger"
+                (click)="removeFromInventory(item)"
+                title="Retirer du panier"
+              >
+                Retirer
+              </button>
+          </article>
         }
-      </ul>
+      </div>
 
       <div class="active-summary">
         <h3>Cumul des bonus</h3>

@@ -18,8 +18,16 @@ h1 { color: #24323a; font-family: Georgia, serif; font-size: clamp(2.3rem, 6vw, 
 .equipment-card strong { font-size: 1.05rem; }
 .equipment-card small { color: #66747a; }
 .equipment-state { margin-top: auto; }
-.active-equipment { background: #e9ece7; border: 1px solid #cfd6d4; margin-top: 2.5rem; padding: 1.5rem; }
-.active-equipment h2 { color: #24323a; margin: 0 0 .75rem; }
+.active-equipment { background: #fffefa; border: 1px solid #d8dfd8; margin-top: 2.5rem; padding: 1.5rem; }
+.active-equipment h2 { color: #23302d; margin: .2rem 0 0; }
+.section-heading { align-items: start; display: flex; justify-content: space-between; margin-bottom: 1.25rem; }
+.section-heading .eyebrow { margin: 0; }
+.equipment-cards { display: grid; gap: .75rem; grid-template-columns: repeat(2, 1fr); }
+.owned-equipment-card { background: #edf3ed; border-left: 3px solid #176b63; display: grid; gap: .55rem; padding: 1rem; }
+.owned-equipment-card strong { color: #23302d; font-size: 1.05rem; }
+.cart-item-info { display: grid; gap: .55rem; }
+.cart-item-info > span, .cart-item-info > small { color: #65736d; font-size: .9rem; }
+.cart-item-info .cart-item-skills { color: #d0643b; }
 .active-equipment p { margin: .35rem 0; }
 .active-equipment .button { margin-top: 1rem; }
 .button { background: #24323a; border: 0; border-radius: 4px; color: #fff; cursor: pointer; font: inherit; font-weight: 800; min-height: 3rem; padding: .75rem 1.5rem; }
@@ -90,6 +98,15 @@ h1 { color: #24323a; font-family: Georgia, serif; font-size: clamp(2.3rem, 6vw, 
     text-align: left;
   }
 
+  .quantity-input {
+    border: 1px solid #aebbb8;
+    border-radius: 3px;
+    font: inherit;
+    min-height: 2.25rem;
+    padding: .35rem;
+    width: 4.5rem;
+  }
+
   th {
     color: #24323a;
     font-size: 0.85rem;
@@ -139,4 +156,4 @@ h1 { color: #24323a; font-family: Georgia, serif; font-size: clamp(2.3rem, 6vw, 
   }
 }
 
-@media (max-width: 650px) { .equipment-shell { padding-inline: 1rem; } .equipment-grid { grid-template-columns: repeat(2, 1fr); } .search-bar { grid-template-columns: 1fr; } }
+@media (max-width: 650px) { .equipment-shell { padding-inline: 1rem; } .equipment-grid, .equipment-cards { grid-template-columns: 1fr; } .search-bar { grid-template-columns: 1fr; } }

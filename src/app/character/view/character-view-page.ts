@@ -68,6 +68,18 @@ export class CharacterViewPage {
     return this.equipment().find((item) => item.id === equipmentId)?.label ?? 'Équipement inconnu';
   }
 
+  protected equipmentQuantity(equipmentId: string): number {
+    return this.character?.equipment.find((item) => item.equipmentId === equipmentId)?.quantity ?? 1;
+  }
+
+  protected isEquipped(equipmentId: string): boolean {
+    return this.character?.equipment.some((item) => item.equipmentId === equipmentId && item.equipped) ?? false;
+  }
+
+  protected typeLabel(type: Equipment['type']): string {
+    return { weapon: 'Arme', shield: 'Bouclier', armor: 'Armure', other: 'Autre' }[type];
+  }
+
   protected get equippedItems(): Equipment[] {
     const equippedIds = new Set(this.character?.equipment.filter((item) => item.equipped).map((item) => item.equipmentId) ?? []);
     return this.equipment().filter((item) => equippedIds.has(item.id));
@@ -76,10 +88,8 @@ export class CharacterViewPage {
   protected get equippedWeapons(): Equipment[] { return this.equippedItems.filter((item) => item.type === 'weapon'); }
   protected get equippedArmor(): Equipment[] { return this.equippedItems.filter((item) => item.type === 'armor'); }
   protected get equippedShields(): Equipment[] { return this.equippedItems.filter((item) => item.type === 'shield'); }
-  protected get unequippedItems(): Equipment[] {
-    const equippedIds = new Set(this.equippedItems.map((item) => item.id));
+  protected get ownedItems(): Equipment[] {
     return this.character?.equipment
-      .filter((item) => !equippedIds.has(item.equipmentId))
       .map((item) => this.equipment().find((equipment) => equipment.id === item.equipmentId))
       .filter((item): item is Equipment => item !== undefined) ?? [];
   }

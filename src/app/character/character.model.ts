@@ -72,6 +72,7 @@ export interface CharacterFlaw {
 
 export interface CharacterEquipment {
   equipmentId: string;
+  quantity: number;
   equipped: boolean;
   weighted: boolean;
 }
