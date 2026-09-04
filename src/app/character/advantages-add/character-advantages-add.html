@@ -7,9 +7,26 @@
       <h1>Atouts</h1>
       <p>Choisissez 1 atout supplémentaire pour votre personnage.</p>
   </div>
-  <section class="advantage-grid" aria-label="Choix des atouts">
-    @for (advantage of advantages(); track advantage.id) {
-      <button class="advantage-card" [class.selected]="isSelected(advantage.id)" [disabled]="!isAvailable(advantage) && !isSelected(advantage.id)" type="button" (click)="toggle(advantage.id)"><span>{{ advantage.title }}</span><strong>{{ isSelected(advantage.id) ? '✓' : '+' }}</strong><small>{{ categoryLabel(advantage.category) }}</small><small>{{ advantage.description || 'Aucune description' }}</small><small>{{ conditionText(advantage) }}</small></button>
+  <label class="category-filter" for="advantage-category-filter">Filtrer par catégorie
+    <select id="advantage-category-filter" [value]="selectedCategory()" (change)="onCategoryChange($event)">
+      <option value="all">Toutes les catégories</option>
+      @for (category of categories; track category) {<option [value]="category">{{ categoryLabel(category) }}</option>}
+    </select>
+  </label>
+  <section class="advantage-sections" aria-label="Choix des atouts">
+    @for (category of categories; track category) {
+      @if (isCategoryVisible(category)) {
+      <section class="advantage-category">
+        <h2>{{ categoryLabel(category) }}</h2>
+        <div class="advantage-grid">
+          @for (advantage of advantagesByCategory(category); track advantage.id) {
+            <button class="advantage-card" [class.selected]="isSelected(advantage.id)" [disabled]="!isAvailable(advantage) && !isSelected(advantage.id)" type="button" (click)="toggle(advantage.id)"><span>{{ advantage.title }}</span><strong>{{ isSelected(advantage.id) ? '✓' : '+' }}</strong><small>{{ advantage.description || 'Aucune description' }}</small><small>{{ conditionText(advantage) }}</small></button>
+          } @empty {
+            <p class="empty-category">Aucun atout dans cette catégorie.</p>
+          }
+        </div>
+      </section>
+      }
     }
   </section>
   <footer><p>{{ selected.size }} / {{ advantageMaximum }} choisis</p><button class="button" type="button" [disabled]="selected.size !== advantageMaximum" (click)="save()">

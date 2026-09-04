@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AdvantageService } from '../advantage.service';
@@ -22,6 +22,11 @@ export class AdvantageList {
     { key: 'combat', label: 'Atouts de combat' }, { key: 'origin', label: "Atouts d'origine" },
     { key: 'magic', label: 'Atouts magiques' }, { key: 'social', label: 'Atouts sociaux' }, { key: 'heroic', label: 'Atouts héroïques' },
   ];
+  protected readonly selectedCategory = signal<'all' | AdvantageCategory>('all');
+  protected readonly filteredAdvantages = computed(() => {
+    const category = this.selectedCategory();
+    return category === 'all' ? this.advantages() : this.advantages().filter((advantage) => advantage.category === category);
+  });
   protected readonly form = new FormGroup({
     title: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     category: new FormControl<AdvantageCategory>('heroic', { nonNullable: true }),
@@ -47,6 +52,10 @@ export class AdvantageList {
   protected remove(id: string): void { this.service.remove(id); }
   protected categoryLabel(category: AdvantageCategory): string {
     return this.categories.find((item) => item.key === category)?.label ?? category;
+  }
+
+  protected onCategoryChange(event: Event): void {
+    this.selectedCategory.set((event.target as HTMLSelectElement).value as 'all' | AdvantageCategory);
   }
 
   protected export(): void {

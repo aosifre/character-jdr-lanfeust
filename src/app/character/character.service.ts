@@ -177,7 +177,11 @@ export class CharacterService {
       skills: Array.isArray(value.skills) ? value.skills : [],
       advantages: Array.isArray(value.advantages) ? value.advantages : [],
       flaws: Array.isArray(value.flaws) ? value.flaws : [],
-      equipment: Array.isArray(value.equipment) ? value.equipment : [],
+      equipment: Array.isArray(value.equipment) ? value.equipment.map((item) => ({
+        equipmentId: item.equipmentId,
+        equipped: item.equipped === true,
+        weighted: item.weighted === true,
+      })) : [],
     };
   }
 

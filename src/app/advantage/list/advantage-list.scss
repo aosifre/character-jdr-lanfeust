@@ -11,6 +11,9 @@ textarea { min-height: 5rem; }
 form input { flex: 1; }
 .button { background: #24323a; border: 0; border-radius: 4px; color: #fff; cursor: pointer; font: inherit; font-weight: 800; min-height: 3rem; padding: .7rem 1.2rem; }
 .outline { background: transparent; border: 1px solid #24323a; color: #24323a; }
+.category-filter { display: grid; gap: .4rem; margin: 2rem 0 1rem; max-width: 360px; color: #24323a; font-weight: 800; }
+.category-filter select { width: 100%; }
+.empty-filter { color: #66747a; padding: 1.5rem 1rem; }
 .advantage-list { border-top: 1px solid #cfd6d4; }
 .advantage-list article { align-items: center; border-bottom: 1px solid #cfd6d4; display: flex; gap: 1rem; justify-content: space-between; padding: 1rem; }.advantage-list p { color: #66747a; margin: .4rem 0 0; }
 .delete { background: none; border: 0; color: #9d413f; cursor: pointer; text-decoration: underline; }

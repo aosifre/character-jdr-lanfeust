@@ -26,6 +26,9 @@ export class CharacterEquipmentPage {
   protected readonly equipped = new Set(
     this.character?.equipment.filter((item) => item.equipped).map((item) => item.equipmentId) ?? [],
   );
+  protected readonly weighted = new Set(
+    this.character?.equipment.filter((item) => item.weighted).map((item) => item.equipmentId) ?? [],
+  );
   protected modalOpen = false;
 
   // Signaux pour la recherche et la pagination
@@ -117,6 +120,16 @@ export class CharacterEquipmentPage {
   protected removeFromInventory(item: Equipment): void {
     this.cart.delete(item.id);
     this.equipped.delete(item.id);
+    this.weighted.delete(item.id);
+    this.cartVersion.update((version) => version + 1);
+  }
+
+  protected isWeighted(id: string): boolean { return this.weighted.has(id); }
+
+  protected toggleWeighted(item: Equipment): void {
+    if (item.type !== 'weapon' || !this.isOwned(item.id)) return;
+    if (this.weighted.has(item.id)) this.weighted.delete(item.id);
+    else this.weighted.add(item.id);
     this.cartVersion.update((version) => version + 1);
   }
 
@@ -183,6 +196,7 @@ export class CharacterEquipmentPage {
     const equipment: CharacterEquipment[] = [...this.cart].map((equipmentId) => ({
       equipmentId,
       equipped: this.equipped.has(equipmentId),
+      weighted: this.weighted.has(equipmentId),
     }));
     this.characterService.setEquipment(this.characterId, equipment);
   }

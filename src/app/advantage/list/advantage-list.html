@@ -2,9 +2,17 @@
   <a class="back-link" routerLink="/settings">← Retour aux paramètres</a>
   <header><p class="eyebrow">JDR Lanfeust de Troy</p><h1>Atouts</h1><p>Gérez le catalogue des atouts disponibles lors de la création des héros.</p></header>
   <button class="button" type="button" (click)="openModal()">Ajouter un atout</button>
+  <label class="category-filter" for="advantage-list-category">Filtrer par catégorie
+    <select id="advantage-list-category" [value]="selectedCategory()" (change)="onCategoryChange($event)">
+      <option value="all">Toutes les catégories</option>
+      @for (category of categories; track category.key) {<option [value]="category.key">{{ category.label }}</option>}
+    </select>
+  </label>
   <section class="advantage-list">
-    @for (advantage of advantages(); track advantage.id) {
+    @for (advantage of filteredAdvantages(); track advantage.id) {
       <article><div><strong>{{ advantage.title }}</strong><p class="category">{{ categoryLabel(advantage.category) }}</p><p>{{ advantage.description }}</p></div><button class="delete" type="button" (click)="remove(advantage.id)">Supprimer</button></article>
+    } @empty {
+      <p class="empty-filter">Aucun atout dans cette catégorie.</p>
     }
   </section>
   <footer><button class="button outline" type="button" (click)="export()">Exporter</button><label class="button outline" for="advantage-import">Importer</label><input id="advantage-import" class="hidden" type="file" accept="application/json,.json" (change)="import($event)" />@if (importError) {<p role="alert">Fichier d’atouts invalide.</p>}</footer>

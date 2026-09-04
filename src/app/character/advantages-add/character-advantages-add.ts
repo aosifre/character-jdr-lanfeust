@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CharacterAdvantage } from '../character.model';
 import { CharacterService } from '../character.service';
@@ -22,6 +22,8 @@ export class CharacterAdvantagesAddPage {
   protected readonly characterId = this.route.snapshot.paramMap.get('id');
   protected readonly character = this.characterId ? this.characterService.findById(this.characterId) : undefined;
   protected readonly advantages = this.advantageService.advantageList;
+  protected readonly categories: AdvantageCategory[] = ['combat', 'origin', 'magic', 'social', 'heroic'];
+  protected readonly selectedCategory = signal<'all' | AdvantageCategory>('all');
   protected readonly selected = new Set(this.character?.advantages.map((advantage) => advantage.advantageId) ?? []);
   public advantageMaximum = 0;
 
@@ -36,6 +38,18 @@ export class CharacterAdvantagesAddPage {
   protected categoryLabel(category: AdvantageCategory): string {
     const labels: Record<AdvantageCategory, string> = { combat: 'Atouts de combat', origin: "Atouts d'origine", magic: 'Atouts magiques', social: 'Atouts sociaux', heroic: 'Atouts héroïques' };
     return labels[category];
+  }
+
+  protected advantagesByCategory(category: AdvantageCategory): Advantage[] {
+    return this.advantages().filter((advantage) => advantage.category === category);
+  }
+
+  protected isCategoryVisible(category: AdvantageCategory): boolean {
+    return this.selectedCategory() === 'all' || this.selectedCategory() === category;
+  }
+
+  protected onCategoryChange(event: Event): void {
+    this.selectedCategory.set((event.target as HTMLSelectElement).value as 'all' | AdvantageCategory);
   }
 
   protected isAvailable(advantage: Advantage): boolean {
