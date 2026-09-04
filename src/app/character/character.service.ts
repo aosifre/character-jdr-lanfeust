@@ -31,7 +31,7 @@ export class CharacterService {
 
   add(firstName: string, lastName: string, description: string, origin: CharacterOrigin): Character {
     const character: Character = {
-      id: crypto.randomUUID(), firstName, lastName, description, origin, level: 1, experience: 0,
+      id: crypto.randomUUID(), firstName, lastName, description, origin, level: 0, experience: 0,
       attributes: this.emptyAttributes(),
       otherScores: this.emptyOtherScores(),
       skills: [],
@@ -171,7 +171,7 @@ export class CharacterService {
       description: typeof value.description === 'string' ? value.description : '',
       origin: this.isOrigin(value.origin) ? value.origin : 'human',
       experience,
-      level: Math.floor(experience / 100) + 1,
+      level: Math.floor(experience / 100),
       attributes: this.isAttributes(value.attributes) ? value.attributes : this.emptyAttributes(),
       otherScores: this.isOtherScores(value.otherScores) ? this.normalizeOtherScores(value.otherScores) : this.emptyOtherScores(),
       skills: Array.isArray(value.skills) ? value.skills : [],

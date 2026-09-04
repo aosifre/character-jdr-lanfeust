@@ -21,7 +21,6 @@ h1 { color: #24323a; font-family: Georgia, serif; font-size: clamp(2.5rem, 6vw, 
 .character-stats { color: #66747a; font-size: .9rem; }
 .row-actions { display: flex; flex-wrap: wrap; gap: 1rem; }
 .action-icon { align-items: center; background: transparent; border: 0; cursor: pointer; display: inline-flex; font-size: 1.25rem; justify-content: center; padding: .25rem; text-decoration: none; }
-.edit-action { color: #315d83; }
 .delete-action { color: #9d413f; }
 .creation-status { align-items: center; display: flex; font-size: .72rem; font-weight: 800; justify-content: flex-start; letter-spacing: .06em; text-transform: uppercase; }
 .creation-complete .creation-status { color: #28734a; }
