@@ -11,6 +11,8 @@ label { color: #24323a; font-size: .85rem; font-weight: 800; margin-top: .8rem; 
 input, textarea, select { background: #fffdf8; border: 1px solid #aebbb8; border-radius: 3px; color: #24323a; font: inherit; outline: none; padding: .8rem 1rem; }
 input { min-height: 3.25rem; }
 textarea { min-height: 10rem; resize: vertical; }
+.portrait-help { color: #66747a; font-size: .85rem; margin: 0; }
+.portrait-preview { aspect-ratio: 1; border: 2px solid #c8b58f; border-radius: 50%; height: 9rem; object-fit: cover; width: 9rem; }
 input:focus, textarea:focus { border-color: #bd5b38; box-shadow: 0 0 0 3px rgba(189, 91, 56, .15); }
 input[readonly] { background: #e9ece7; color: #66747a; cursor: not-allowed; }
 .character-stats { display: grid; gap: 1rem; grid-template-columns: 1fr 1fr; margin-top: .8rem; }

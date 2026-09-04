@@ -24,6 +24,7 @@ export interface Character {
   id: string;
   firstName: string;
   lastName: string;
+  portrait?: string;
   description: string;
   origin: CharacterOrigin;
   level: number;

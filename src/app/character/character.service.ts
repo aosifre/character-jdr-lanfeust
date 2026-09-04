@@ -3,6 +3,9 @@ import { Inject, Injectable, PLATFORM_ID, inject, signal } from '@angular/core';
 import { Character, CharacterAdvantage, CharacterAttributes, CharacterEquipment, CharacterFlaw, CharacterOrigin, CharacterOtherScores, CharacterSkill, CombatBonus } from './character.model';
 import { EquipmentService } from '../equipment/equipment.service';
 
+export const MAX_CHARACTER_STORAGE_BYTES = 4 * 1024 * 1024;
+export const MAX_PORTRAIT_DATA_URL_LENGTH = 420_000;
+
 @Injectable({ providedIn: 'root' })
 export class CharacterService {
   private readonly storageKey = 'jdr-lanfeust-characters';
@@ -29,9 +32,9 @@ export class CharacterService {
     }
   }
 
-  add(firstName: string, lastName: string, description: string, origin: CharacterOrigin): Character {
+  add(firstName: string, lastName: string, description: string, origin: CharacterOrigin, portrait?: string): Character | undefined {
     const character: Character = {
-      id: crypto.randomUUID(), firstName, lastName, description, origin, level: 0, experience: 0,
+      id: crypto.randomUUID(), firstName, lastName, portrait, description, origin, level: 0, experience: 0,
       attributes: this.emptyAttributes(),
       otherScores: this.emptyOtherScores(),
       skills: [],
@@ -40,7 +43,10 @@ export class CharacterService {
       equipment: [],
     };
     this.characters.update((characters) => [...characters, character]);
-    this.saveToStorage();
+    if (!this.saveToStorage()) {
+      this.characters.update((characters) => characters.filter((item) => item.id !== character.id));
+      return undefined;
+    }
     return character;
   }
 
@@ -168,6 +174,7 @@ export class CharacterService {
       id: value.id,
       firstName: value.firstName,
       lastName: value.lastName,
+      portrait: typeof value.portrait === 'string' && value.portrait.length <= MAX_PORTRAIT_DATA_URL_LENGTH ? value.portrait : undefined,
       description: typeof value.description === 'string' ? value.description : '',
       origin: this.isOrigin(value.origin) ? value.origin : 'human',
       experience,
@@ -225,9 +232,16 @@ export class CharacterService {
       .every((key) => typeof attributes[key] === 'number' && Number.isInteger(attributes[key]) && (attributes[key] as number) >= 0);
   }
 
-  private saveToStorage(): void {
+  private saveToStorage(): boolean {
     if (this.isBrowser) {
-      localStorage.setItem(this.storageKey, JSON.stringify(this.characters()));
+      const serialized = JSON.stringify(this.characters());
+      if (serialized.length > MAX_CHARACTER_STORAGE_BYTES) return false;
+      try {
+        localStorage.setItem(this.storageKey, serialized);
+      } catch {
+        return false;
+      }
     }
+    return true;
   }
 }

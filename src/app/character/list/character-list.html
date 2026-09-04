@@ -21,7 +21,10 @@
       <div class="table-heading" aria-hidden="true"><span>Prénom</span><span>Nom</span><span>Niveau / XP</span><span>État</span><span>Actions</span></div>
       @for (character of characters(); track character.id) {
         <article class="character-row" [class.creation-complete]="isCreationComplete(character)" [class.creation-incomplete]="!isCreationComplete(character)" [attr.title]="getCreationStatusMessage(character)">
-          <strong>{{ character.firstName }}</strong>
+          <div class="character-identity">
+            @if (character.portrait) { <img class="character-avatar" [src]="character.portrait" alt="Portrait" /> }
+            <strong>{{ character.firstName }}</strong>
+          </div>
           <span>{{ character.lastName }}</span>
           <span class="character-stats">Niv. {{ character.level }} · {{ character.experience }} XP</span>
           <div class="row-actions">

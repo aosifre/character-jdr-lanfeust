@@ -17,6 +17,8 @@ h1 { color: #24323a; font-family: Georgia, serif; font-size: clamp(2.5rem, 6vw, 
 .character-row.creation-complete { background: #e8f3eb; }
 .character-row.creation-incomplete { background: #faece9; }
 .character-row:hover { box-shadow: inset 4px 0 0 #bd5b38; }
+.character-identity { align-items: center; display: flex; gap: .7rem; min-width: 0; }
+.character-avatar { aspect-ratio: 1; border: 1px solid #c8b58f; border-radius: 50%; height: 2.75rem; object-fit: cover; width: 2.75rem; }
 .character-row strong { color: #24323a; font-size: 1.1rem; }
 .character-stats { color: #66747a; font-size: .9rem; }
 .row-actions { display: flex; flex-wrap: wrap; gap: 1rem; }
