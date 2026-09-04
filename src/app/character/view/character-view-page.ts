@@ -4,7 +4,7 @@ import { CharacterService } from '../character.service';
 import { AdvantageService } from '../../advantage/advantage.service';
 import { EquipmentService } from '../../equipment/equipment.service';
 import { SkillService } from '../../skill/skill.service';
-import { SettingsService } from '../../settings/settings.service';
+import { FlawService } from '../../flaw/flaw.service';
 import { Skill } from '../../skill/skill.model';
 import { Equipment } from '../../equipment/equipment.model';
 
@@ -19,14 +19,14 @@ export class CharacterViewPage {
   private readonly advantageService = inject(AdvantageService);
   private readonly equipmentService = inject(EquipmentService);
   private readonly skillService = inject(SkillService);
-  private readonly settingsService = inject(SettingsService);
+  private readonly flawService = inject(FlawService);
   private readonly route = inject(ActivatedRoute);
 
   protected readonly characterId = this.route.snapshot.paramMap.get('id');
   protected readonly character = this.characterId ? this.characterService.findById(this.characterId) : undefined;
   protected readonly skills = this.skillService.skillList;
   protected readonly advantages = this.advantageService.advantageList;
-  protected readonly flaws = this.settingsService.flawList;
+  protected readonly flaws = this.flawService.flawList;
   protected readonly equipment = this.equipmentService.equipmentList;
   protected damageTaken = 0;
   protected energySpent = 0;

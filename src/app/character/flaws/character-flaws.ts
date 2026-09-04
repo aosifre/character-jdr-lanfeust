@@ -3,17 +3,17 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CharacterFlaw } from '../character.model';
 import { CharacterService } from '../character.service';
-import { SettingsService } from '../../settings/settings.service';
+import { FlawService } from '../../flaw/flaw.service';
 
 @Component({ imports: [ReactiveFormsModule, RouterLink], selector: 'app-character-flaws', templateUrl: './character-flaws.html', styleUrl: './character-flaws.scss' })
 export class CharacterFlawsPage {
   private readonly characterService = inject(CharacterService);
-  private readonly settingsService = inject(SettingsService);
+  private readonly flawService = inject(FlawService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   protected readonly characterId = this.route.snapshot.paramMap.get('id');
   protected readonly character = this.characterId ? this.characterService.findById(this.characterId) : undefined;
-  protected readonly flaws = this.settingsService.flawList;
+  protected readonly flaws = this.flawService.flawList;
   protected readonly selected = new Set(this.character?.flaws.map((flaw) => flaw.flawId) ?? []);
   protected readonly flawForm = new FormGroup({
     title: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
@@ -28,7 +28,7 @@ export class CharacterFlawsPage {
   protected addCustomFlaw(): void {
     if (this.flawForm.invalid) return;
     const value = this.flawForm.getRawValue();
-    this.settingsService.addFlaw(value.title.trim(), value.description.trim());
+    this.flawService.add(value.title.trim(), value.description.trim());
     this.flawForm.reset({ title: '', description: '' });
     this.closeModal();
   }
