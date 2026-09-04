@@ -1,6 +1,6 @@
 import { isPlatformBrowser } from '@angular/common';
 import { Inject, Injectable, PLATFORM_ID, inject, signal } from '@angular/core';
-import { Character, CharacterAdvantage, CharacterAttributes, CharacterEquipment, CharacterFlaw, CharacterOrigin, CharacterOtherScores, CharacterSkill, CombatBonus } from './character.model';
+import { Character, CharacterAdvantage, CharacterAttributes, CharacterEquipment, CharacterFlaw, CharacterOrigin, CharacterOtherScores, CharacterSkill, CharacterSnapshot, CombatBonus } from './character.model';
 import { EquipmentService } from '../equipment/equipment.service';
 
 export const MAX_CHARACTER_STORAGE_BYTES = 4 * 1024 * 1024;
@@ -41,6 +41,7 @@ export class CharacterService {
       advantages: [],
       flaws: [],
       equipment: [],
+      history: [],
     };
     this.characters.update((characters) => [...characters, character]);
     if (!this.saveToStorage()) {
@@ -64,6 +65,26 @@ export class CharacterService {
 
   findById(id: string): Character | undefined {
     return this.characters().find((character) => character.id === id);
+  }
+
+  copyFromSnapshot(characterId: string, snapshotId: string): Character | undefined {
+    const character = this.findById(characterId);
+    const snapshot = character?.history?.find((item) => item.snapshotId === snapshotId);
+    if (!snapshot) return undefined;
+
+    const { snapshotId: ignoredSnapshotId, characterId: ignoredCharacterId, capturedAt: ignoredCapturedAt, ...snapshotData } = structuredClone(snapshot);
+    const copy: Character = {
+      ...snapshotData,
+      id: crypto.randomUUID(),
+      lastName: `${snapshot.lastName} (copie)`,
+      history: [],
+    };
+    this.characters.update((characters) => [...characters, copy]);
+    if (!this.saveToStorage()) {
+      this.characters.update((characters) => characters.filter((item) => item.id !== copy.id));
+      return undefined;
+    }
+    return copy;
   }
 
   setAttributes(id: string, attributes: CharacterAttributes): void {
@@ -128,9 +149,13 @@ export class CharacterService {
     const character = this.findById(id);
     const scores = character ? this.recalculateOtherScores(character.attributes, level, character.otherScores, character.equipment.filter((item) => item.equipped).map((item) => item.equipmentId)) : undefined;
 
-    this.characters.update((characters) => characters.map((character) => 
-      character.id === id && scores ? { ...character, experience, level, otherScores: scores } : character,
-    ));
+    this.characters.update((characters) => characters.map((character) => {
+      if (character.id !== id || !scores) return character;
+      const history = level > character.level
+        ? [...(character.history ?? []), this.createSnapshot(character)]
+        : character.history;
+      return { ...character, experience, level, otherScores: scores, history };
+    }));
     this.saveToStorage();
 
     return { level, experience, hitPoints: scores?.hitPoints ?? 0, energyPoints: scores?.energyPoints ?? 0 };
@@ -189,7 +214,27 @@ export class CharacterService {
         equipped: item.equipped === true,
         weighted: item.weighted === true,
       })) : [],
+      history: Array.isArray(value.history) ? value.history.filter((snapshot): snapshot is CharacterSnapshot => this.isSnapshot(snapshot)) : [],
     };
+  }
+
+  private createSnapshot(character: Character): CharacterSnapshot {
+    const { history, ...currentData } = structuredClone(character);
+    return {
+      ...currentData,
+      snapshotId: crypto.randomUUID(),
+      characterId: character.id,
+      capturedAt: new Date().toISOString(),
+    };
+  }
+
+  private isSnapshot(value: unknown): value is CharacterSnapshot {
+    if (typeof value !== 'object' || value === null) return false;
+    const snapshot = value as Record<string, unknown>;
+    return typeof snapshot['snapshotId'] === 'string'
+      && typeof snapshot['characterId'] === 'string'
+      && typeof snapshot['capturedAt'] === 'string'
+      && this.isCharacter(snapshot);
   }
 
   private emptyAttributes(): CharacterAttributes {

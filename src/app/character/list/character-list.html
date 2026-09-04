@@ -28,6 +28,7 @@
           <span>{{ character.lastName }}</span>
           <span class="character-stats">Niv. {{ character.level }} · {{ character.experience }} XP</span>
           <div class="row-actions">
+            <a class="action-icon history-action" [routerLink]="['/characters', character.id, 'history']" aria-label="Créer une copie depuis un niveau sauvegardé" title="Versions sauvegardées">⟳</a>
             <a class="action-icon equipment-action" [routerLink]="['/characters', character.id, 'equipment']" aria-label="Gérer les équipements" title="Équipements">⚔</a>
             <!-- Action button for viewing -->
             <a class="action-icon view-action" [routerLink]="['/characters', character.id]" aria-label="Voir le personnage" title="Voir">👁</a>

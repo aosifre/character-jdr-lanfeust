@@ -35,6 +35,26 @@ export interface Character {
   advantages: CharacterAdvantage[];
   flaws: CharacterFlaw[];
   equipment: CharacterEquipment[];
+  history?: CharacterSnapshot[];
+}
+
+export interface CharacterSnapshot {
+  snapshotId: string;
+  characterId: string;
+  capturedAt: string;
+  firstName: string;
+  lastName: string;
+  portrait?: string;
+  description: string;
+  origin: CharacterOrigin;
+  level: number;
+  experience: number;
+  attributes: CharacterAttributes;
+  otherScores: CharacterOtherScores;
+  skills: CharacterSkill[];
+  advantages: CharacterAdvantage[];
+  flaws: CharacterFlaw[];
+  equipment: CharacterEquipment[];
 }
 
 export interface CharacterSkill {
