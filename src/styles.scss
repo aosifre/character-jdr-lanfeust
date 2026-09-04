@@ -22,6 +22,14 @@ body {
 	color: var(--ink);
 	font-family: 'Alegreya Sans', sans-serif;
 }
+html[data-font-style='lanfeust'] body { font-family: 'Texte d\'écriture Lanfeust', 'Alegreya Sans', sans-serif; }
+html[data-font-style='classic'] body { font-family: 'Alegreya Sans', sans-serif; }
+html[data-font-style='storybook'] body { font-family: Georgia, 'Times New Roman', serif; }
+html[data-font-style='manuscript'] body { font-family: 'Comic Sans MS', 'Segoe Print', cursive; }
+html[data-font-style='lanfeust'] h1, html[data-font-style='lanfeust'] h2, html[data-font-style='lanfeust'] h3, html[data-font-style='lanfeust'] h4 { font-family: 'Texte d\'écriture Lanfeust', 'Bree Serif', Georgia, serif !important; }
+html[data-font-style='classic'] h1, html[data-font-style='classic'] h2, html[data-font-style='classic'] h3, html[data-font-style='classic'] h4 { font-family: 'Alegreya Sans', sans-serif !important; }
+html[data-font-style='storybook'] h1, html[data-font-style='storybook'] h2, html[data-font-style='storybook'] h3, html[data-font-style='storybook'] h4 { font-family: Georgia, 'Times New Roman', serif !important; }
+html[data-font-style='manuscript'] h1, html[data-font-style='manuscript'] h2, html[data-font-style='manuscript'] h3, html[data-font-style='manuscript'] h4 { font-family: 'Comic Sans MS', 'Segoe Print', cursive !important; }
 button, input, select, textarea { font-family: inherit; }
 
 /* Shared visual language for the character sheets and reference lists. */

@@ -9,6 +9,7 @@ import { CharacterAdvantagesPage } from './character/advantages/character-advant
 import { SettingsPage } from './settings/settings-page';
 import { AdvantageList } from './advantage/list/advantage-list';
 import { CreationSettings } from './settings/creation/creation-settings';
+import { AppearanceSettings } from './settings/appearance/appearance-settings';
 import { FlawList } from './flaw/list/flaw-list';
 import { CharacterFlawsPage } from './character/flaws/character-flaws';
 import { CharacterLevelPage } from './character/levels/character-level';
@@ -38,6 +39,7 @@ export const routes: Routes = [
 	{ path: 'skills', component: SkillList },
 	{ path: 'settings', component: SettingsPage },
 	{ path: 'settings/creation', component: CreationSettings },
+	{ path: 'settings/appearance', component: AppearanceSettings },
 	{ path: 'advantages', component: AdvantageList },
 	{ path: 'flaws', component: FlawList },
 	{ path: '**', redirectTo: 'characters' },

@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { SettingsService } from '../settings.service';
+import { FontStyle, SettingsService } from '../settings.service';
 
 @Component({
   imports: [ReactiveFormsModule, RouterLink],
@@ -13,6 +13,7 @@ export class CreationSettings {
   private readonly settingsService = inject(SettingsService);
   protected readonly form = new FormGroup({
     availableAdvantages: new FormControl(3, { nonNullable: true, validators: [Validators.min(0), Validators.max(99)] }),
+    fontStyle: new FormControl<FontStyle>('lanfeust', { nonNullable: true }),
   });
 
   constructor() { this.form.setValue(this.settingsService.currentSettings()); }
