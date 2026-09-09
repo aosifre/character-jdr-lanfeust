@@ -60,6 +60,14 @@
         <section class="equipment-group"><h3>Bouclier</h3>@if (equippedShields.length > 0) {<div class="equipment-cards">@for (shield of equippedShields; track shield.id) {<article><strong>{{ shield.label }}</strong><span>Quantité : {{ equipmentQuantity(shield.id) }}</span><dl><div><dt>Bonus défense</dt><dd>+{{ shield.defenseBonus }}</dd></div><div><dt>Points de défense</dt><dd>{{ currentCharacter.otherScores.defense }}</dd></div></dl></article>}</div>} @else {<p class="empty-state">Aucun bouclier équipé.</p>}</section>
       </div>
       @if (ownedItems.length > 0) {<div class="inventory-list"><h3>Inventaire complet</h3><div class="collection-list">@for (item of ownedItems; track item.id) {<article><strong>{{ item.label }}</strong><span>{{ typeLabel(item.type) }} · Quantité : {{ equipmentQuantity(item.id) }} · {{ isEquipped(item.id) ? 'Équipé' : 'Non équipé' }}</span></article>}</div></div>} @else {<p class="empty-state">Aucun équipement possédé.</p>}
+      <div class="money-section">
+        <div class="section-heading"><div><p class="eyebrow">Monnaie</p><h3>Argent du personnage</h3></div><span>1 DO = 10 DA = 100 DC</span></div>
+        <div class="money-grid">
+          <label for="gold-pieces">Dragon d'or (DO)<input id="gold-pieces" type="number" min="0" step="1" [value]="currentCharacter.money.gold" (change)="setMoney('gold', $any($event.target).value)" /></label>
+          <label for="silver-pieces">Dragon d'argent (DA)<input id="silver-pieces" type="number" min="0" step="1" [value]="currentCharacter.money.silver" (change)="setMoney('silver', $any($event.target).value)" /></label>
+          <label for="copper-pieces">Dragon de cuivre (DC)<input id="copper-pieces" type="number" min="0" step="1" [value]="currentCharacter.money.copper" (change)="setMoney('copper', $any($event.target).value)" /></label>
+        </div>
+      </div>
     </section>
   </main>
 } @else {

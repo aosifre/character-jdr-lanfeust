@@ -7,6 +7,7 @@ import { SkillService } from '../../skill/skill.service';
 import { FlawService } from '../../flaw/flaw.service';
 import { Skill } from '../../skill/skill.model';
 import { Equipment } from '../../equipment/equipment.model';
+import { CharacterMoney } from '../character.model';
 
 @Component({
   imports: [RouterLink],
@@ -109,6 +110,11 @@ export class CharacterViewPage {
   protected setGlobalSkillPenalty(value: string): void { this.globalSkillPenalty = this.nonNegativeValue(value); }
   protected setCombatPenalty(value: string): void { this.combatPenalty = this.nonNegativeValue(value); }
   protected setSkillPenalty(skillId: string, value: string): void { this.skillPenalties[skillId] = this.nonNegativeValue(value); }
+  protected setMoney(coin: keyof CharacterMoney, value: string): void {
+    if (!this.character) return;
+    this.character.money[coin] = this.nonNegativeValue(value);
+    this.characterService.setMoney(this.character.id, { ...this.character.money });
+  }
   protected goToSection(event: Event, sectionId: string): void {
     event.preventDefault();
     document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth', block: 'start' });

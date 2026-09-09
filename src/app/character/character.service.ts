@@ -1,6 +1,6 @@
 import { isPlatformBrowser } from '@angular/common';
 import { Inject, Injectable, PLATFORM_ID, inject, signal } from '@angular/core';
-import { Character, CharacterAdvantage, CharacterAttributes, CharacterEquipment, CharacterFlaw, CharacterOrigin, CharacterOtherScores, CharacterSkill, CharacterSnapshot, CombatBonus } from './character.model';
+import { Character, CharacterAdvantage, CharacterAttributes, CharacterEquipment, CharacterFlaw, CharacterMoney, CharacterOrigin, CharacterOtherScores, CharacterSkill, CharacterSnapshot, CombatBonus } from './character.model';
 import { EquipmentService } from '../equipment/equipment.service';
 
 export const MAX_CHARACTER_STORAGE_BYTES = 4 * 1024 * 1024;
@@ -37,6 +37,7 @@ export class CharacterService {
       id: crypto.randomUUID(), firstName, lastName, portrait, description, origin, level: 0, experience: 0,
       attributes: this.emptyAttributes(),
       otherScores: this.emptyOtherScores(),
+      money: this.emptyMoney(),
       skills: [],
       advantages: [],
       flaws: [],
@@ -110,6 +111,13 @@ export class CharacterService {
   setOtherScores(id: string, otherScores: CharacterOtherScores): void {
     this.characters.update((characters) => characters.map((character) =>
       character.id === id ? { ...character, otherScores } : character,
+    ));
+    this.saveToStorage();
+  }
+
+  setMoney(id: string, money: CharacterMoney): void {
+    this.characters.update((characters) => characters.map((character) =>
+      character.id === id ? { ...character, money } : character,
     ));
     this.saveToStorage();
   }
@@ -206,6 +214,7 @@ export class CharacterService {
       level: Math.floor(experience / 100),
       attributes: this.isAttributes(value.attributes) ? value.attributes : this.emptyAttributes(),
       otherScores: this.isOtherScores(value.otherScores) ? this.normalizeOtherScores(value.otherScores) : this.emptyOtherScores(),
+      money: this.isMoney(value.money) ? value.money : this.emptyMoney(),
       skills: Array.isArray(value.skills) ? value.skills : [],
       advantages: Array.isArray(value.advantages) ? value.advantages : [],
       flaws: Array.isArray(value.flaws) ? value.flaws : [],
@@ -215,7 +224,9 @@ export class CharacterService {
         equipped: item.equipped === true,
         weighted: item.weighted === true,
       })) : [],
-      history: Array.isArray(value.history) ? value.history.filter((snapshot): snapshot is CharacterSnapshot => this.isSnapshot(snapshot)) : [],
+      history: Array.isArray(value.history)
+        ? value.history.filter((snapshot): snapshot is CharacterSnapshot => this.isSnapshot(snapshot)).map((snapshot) => this.normalizeSnapshot(snapshot))
+        : [],
     };
   }
 
@@ -227,6 +238,10 @@ export class CharacterService {
       characterId: character.id,
       capturedAt: new Date().toISOString(),
     };
+  }
+
+  private normalizeSnapshot(snapshot: CharacterSnapshot): CharacterSnapshot {
+    return { ...snapshot, money: this.isMoney(snapshot.money) ? snapshot.money : this.emptyMoney() };
   }
 
   private isSnapshot(value: unknown): value is CharacterSnapshot {
@@ -244,6 +259,17 @@ export class CharacterService {
 
   private emptyOtherScores(): CharacterOtherScores {
     return { attack: 0, defense: 0, save: 0, hitPoints: 0, energyPoints: 0, combatBonus: null, combatBonusPoints: { attack: 0, defense: 0, save: 0 } };
+  }
+
+  private emptyMoney(): CharacterMoney {
+    return { gold: 0, silver: 0, copper: 0 };
+  }
+
+  private isMoney(value: unknown): value is CharacterMoney {
+    if (typeof value !== 'object' || value === null) return false;
+    const money = value as Record<string, unknown>;
+    return ['gold', 'silver', 'copper']
+      .every((key) => typeof money[key] === 'number' && Number.isInteger(money[key]) && (money[key] as number) >= 0);
   }
 
   private isOtherScores(value: unknown): value is CharacterOtherScores {
