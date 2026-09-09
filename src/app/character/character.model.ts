@@ -20,6 +20,12 @@ export interface CharacterOtherScores {
   combatBonusPoints: { attack: number; defense: number; save: number };
 }
 
+export interface CharacterMoney {
+  gold: number;
+  silver: number;
+  copper: number;
+}
+
 export interface Character {
   id: string;
   firstName: string;
@@ -31,6 +37,7 @@ export interface Character {
   experience: number;
   attributes: CharacterAttributes;
   otherScores: CharacterOtherScores;
+  money: CharacterMoney;
   skills: CharacterSkill[];
   advantages: CharacterAdvantage[];
   flaws: CharacterFlaw[];
@@ -51,6 +58,7 @@ export interface CharacterSnapshot {
   experience: number;
   attributes: CharacterAttributes;
   otherScores: CharacterOtherScores;
+  money: CharacterMoney;
   skills: CharacterSkill[];
   advantages: CharacterAdvantage[];
   flaws: CharacterFlaw[];

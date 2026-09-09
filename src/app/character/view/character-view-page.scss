@@ -43,6 +43,11 @@ input { width: 100%; box-sizing: border-box; padding: .55rem .65rem; border: 1px
 .equipment-cards dl div { display: grid; gap: .15rem; }
 .equipment-cards dt { color: #65736d; font-size: .75rem; }.equipment-cards dd { margin: 0; color: #176b63; font-size: 1.15rem; font-weight: 800; }
 .inventory-list { margin-top: 1.5rem; }
+.money-section { margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid #d8dfd8; }
+.money-section h3 { margin: .2rem 0 0; color: #176b63; }
+.money-section .section-heading > span { color: #65736d; font-size: .85rem; font-weight: 700; }
+.money-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .75rem; }
+.money-grid label { display: grid; gap: .35rem; color: #65736d; font-size: .8rem; font-weight: 700; }
 .empty-state { color: #65736d; }.empty-state h1 { color: #23302d; }
-@media (max-width: 800px) { .view-heading { align-items: start; flex-direction: column; gap: 1rem; }.header-stats { width: 100%; box-sizing: border-box; }.attribute-grid { grid-template-columns: repeat(3, 1fr); }.score-grid { grid-template-columns: repeat(2, 1fr); }.score-grid > div:last-child { grid-column: span 2; }.collection-list, .equipment-cards { grid-template-columns: 1fr; } }
+@media (max-width: 800px) { .view-heading { align-items: start; flex-direction: column; gap: 1rem; }.header-stats { width: 100%; box-sizing: border-box; }.attribute-grid { grid-template-columns: repeat(3, 1fr); }.score-grid { grid-template-columns: repeat(2, 1fr); }.score-grid > div:last-child { grid-column: span 2; }.collection-list, .equipment-cards, .money-grid { grid-template-columns: 1fr; } }
 @media (max-width: 520px) { .view-shell { padding-inline: .8rem; }.panel { padding: 1rem; }.attribute-grid { grid-template-columns: repeat(2, 1fr); }.score-grid { grid-template-columns: 1fr; }.score-grid > div:last-child { grid-column: auto; }.section-heading, .penalty-controls { align-items: stretch; flex-direction: column; }.skill-row { grid-template-columns: 1fr auto; }.skill-row label { grid-column: span 2; } }
