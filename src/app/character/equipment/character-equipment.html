@@ -4,7 +4,7 @@
     <p class="eyebrow">{{ character?.firstName }} {{ character?.lastName }}</p>
     <h1>Équipements</h1>
     <p>Équipez votre personnage et consultez les bonus actifs.</p>
-    <button class="button button-primary" type="button" (click)="openModal()">+ Ajouter un équipement</button>
+    <button class="button button-primary" type="button" (click)="openModal()"><span class="button-icon" aria-hidden="true">＋</span> Ajouter un équipement</button>
   </header>
 
   <section class="shop" aria-label="Boutique d'équipements">
@@ -32,6 +32,7 @@
           <th>Quantité</th>
           <th>Type</th>
           <th>Catégorie</th>
+          <th>Poids</th>
           <th>Effets / Stats</th>
           <th>Action</th>
         </tr>
@@ -53,6 +54,7 @@
               <span class="type-badge">{{ typeLabel(item.type) }}</span>
             </td>
             <td>{{ categoryLabel(item.category) }}</td>
+            <td><input class="quantity-input" type="number" min="0" step="0.1" [value]="weight(item)" (change)="updateWeight(item, $event)" [attr.aria-label]="'Poids de ' + item.label" /> kg</td>
             <td>
               <small>{{ description(item) }}</small>
               @if (skillBonusDescription(item)) {
@@ -63,24 +65,25 @@
               }
             </td>
             <td>
+              <button type="button" class="button button-small button-outline" (click)="editEquipment(item)" title="Modifier l'équipement"><span class="button-icon" aria-hidden="true">✎</span> Modifier</button>
               @if (!isOwned(item.id)) {
-                <button type="button" class="button button-small" (click)="addToInventory(item)">Ajouter</button>
+                <button type="button" class="button button-small" (click)="addToInventory(item)" title="Ajouter à l'inventaire"><span class="button-icon" aria-hidden="true">＋</span> Ajouter</button>
               } @else {
                 <div class="equipment-actions">
-                  <button type="button" class="button button-small" [class.button-outline]="isEquipped(item.id)" [disabled]="!isEquipped(item.id) && !canEquip(item)" (click)="toggleEquipped(item)">
-                    {{ isEquipped(item.id) ? 'Déséquiper' : 'Équiper' }}
+                  <button type="button" class="button button-small" [class.button-outline]="isEquipped(item.id)" [disabled]="!isEquipped(item.id) && !canEquip(item)" (click)="toggleEquipped(item)" [title]="isEquipped(item.id) ? 'Déséquiper' : 'Équiper'">
+                    <span class="button-icon" aria-hidden="true">{{ isEquipped(item.id) ? '↶' : '⚔' }}</span> {{ isEquipped(item.id) ? 'Déséquiper' : 'Équiper' }}
                   </button>
                   @if (item.type === 'weapon') {
                     <label class="weighted-control"><input type="checkbox" [checked]="isWeighted(item.id)" (change)="toggleWeighted(item)" /> Lestée (+2 dégâts)</label>
                   }
-                  <button type="button" class="button button-small button-danger" (click)="removeFromInventory(item)">Retirer</button>
+                  <button type="button" class="button button-small button-danger" (click)="removeFromInventory(item)" title="Retirer de l'inventaire"><span class="button-icon" aria-hidden="true">×</span> Retirer</button>
                 </div>
               }
             </td>
           </tr>
         } @empty {
           <tr>
-            <td colspan="6" class="empty-cell">Aucun équipement trouvé.</td>
+            <td colspan="7" class="empty-cell">Aucun équipement trouvé.</td>
           </tr>
         }
       </tbody>
@@ -131,7 +134,7 @@
                 (click)="removeFromInventory(item)"
                 title="Retirer du panier"
               >
-                Retirer
+                <span class="button-icon" aria-hidden="true">×</span> Retirer
               </button>
           </article>
         }
@@ -151,7 +154,7 @@
   @if (modalOpen) {
     <div class="modal-backdrop" role="presentation" (click)="closeModal()">
       <section class="modal" role="dialog" aria-modal="true" aria-labelledby="equipment-modal-title" (click)="$event.stopPropagation()">
-        <h2 id="equipment-modal-title">Ajouter un équipement</h2>
+        <h2 id="equipment-modal-title">{{ editingEquipmentId ? 'Modifier un équipement' : 'Ajouter un équipement' }}</h2>
         <form [formGroup]="form" (ngSubmit)="addEquipment()">
           <label>Nom <input formControlName="label" placeholder="Ex. Dague dentelée" /></label>
           <label>Catégorie d'objet 
@@ -175,10 +178,11 @@
             <label>Bonus DEF <input type="number" formControlName="defenseBonus" /></label>
             <label>Réduction dégâts <input type="number" formControlName="damageReduction" /></label>
           </div>
+          <div class="form-row"><label>Poids (kg) <input type="number" min="0" step="0.1" formControlName="weight" /></label></div>
           <label>Bonus compétences <input formControlName="skillBonus" placeholder="acrobaties:1, survie:2" /></label>
           <div class="modal-actions">
             <button class="button button-outline" type="button" (click)="closeModal()">Annuler</button>
-            <button class="button button-primary" type="submit" [disabled]="form.invalid">Ajouter au panier</button>
+            <button class="button button-primary" type="submit" [disabled]="form.invalid">{{ editingEquipmentId ? 'Enregistrer les modifications' : 'Ajouter au panier' }}</button>
           </div>
         </form>
       </section>

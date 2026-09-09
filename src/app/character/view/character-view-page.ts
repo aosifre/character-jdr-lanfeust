@@ -1,4 +1,5 @@
 import { Component, inject } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CharacterService } from '../character.service';
 import { AdvantageService } from '../../advantage/advantage.service';
@@ -10,7 +11,7 @@ import { Equipment } from '../../equipment/equipment.model';
 import { CharacterMoney } from '../character.model';
 
 @Component({
-  imports: [RouterLink],
+  imports: [RouterLink, DecimalPipe],
   selector: 'app-character-view-page',
   templateUrl: './character-view-page.html',
   styleUrl: './character-view-page.scss',
@@ -94,6 +95,13 @@ export class CharacterViewPage {
       .map((item) => this.equipment().find((equipment) => equipment.id === item.equipmentId))
       .filter((item): item is Equipment => item !== undefined) ?? [];
   }
+
+  protected get carriedWeight(): number {
+    return this.ownedItems.reduce((total, item) => total + this.equipmentService.weight(item) * this.equipmentQuantity(item.id), 0);
+  }
+
+  protected get carryingCapacity(): number { return 10 + 10 * (this.character?.attributes.force ?? 0); }
+  protected get encumbrancePercentage(): number { return Math.min(100, this.carryingCapacity ? this.carriedWeight / this.carryingCapacity * 100 : 0); }
 
   protected damageDice(item: Equipment): string { return item.category ? `${item.category}D6` : 'Non applicable'; }
 

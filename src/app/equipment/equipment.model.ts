@@ -9,5 +9,6 @@ export interface Equipment {
   attackBonus: number;
   defenseBonus: number;
   damageReduction: number;
+  weight?: number;
   skillBonuses: Record<string, number>;
 }
