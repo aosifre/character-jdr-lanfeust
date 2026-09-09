@@ -53,15 +53,22 @@
     <section id="flaws" class="panel collection-panel"><div class="section-heading"><div><p class="eyebrow">Travers</p><h2>Travers du personnage</h2></div></div><div class="collection-list">@for (selected of currentCharacter.flaws; track selected.flawId) {@if (flaws().find((item) => item.id === selected.flawId); as flaw) {<article><strong>{{ flaw.title }}</strong><span>{{ flaw.description || 'Aucune description.' }}</span></article>}} @empty {<p class="empty-state">Aucun travers sélectionné.</p>}</div></section>
 
     <section id="equipment" class="panel collection-panel">
-      <div class="section-heading"><div><p class="eyebrow">Inventaire</p><h2>Équipement équipé</h2></div><a class="text-link" [routerLink]="['/characters', currentCharacter.id, 'equipment']">Gérer l'équipement</a></div>
+      <div class="section-heading"><div><p class="eyebrow">Inventaire</p><h2>Équipement</h2></div><a class="text-link" [routerLink]="['/characters', currentCharacter.id, 'equipment']">Gérer l'équipement</a></div>
       <div class="equipment-groups">
         <section class="equipment-group"><h3>Armes</h3>@if (equippedWeapons.length > 0) {<div class="equipment-cards">@for (weapon of equippedWeapons; track weapon.id) {<article><strong>{{ weapon.label }}</strong><span>Quantité : {{ equipmentQuantity(weapon.id) }} · Catégorie {{ weapon.category ?? '-' }}@if (isWeaponWeighted(weapon.id)) { · Lestée}</span><dl><div><dt>Bonus attaque</dt><dd>+{{ weapon.attackBonus }}</dd></div><div><dt>Points d'attaque</dt><dd>{{ currentCharacter.otherScores.attack }}</dd></div><div><dt>Dégâts</dt><dd>{{ damageDice(weapon) }}+{{ damageBonus(weapon) }}</dd></div></dl></article>}</div>} @else {<p class="empty-state">Aucune arme équipée.</p>}</section>
         <section class="equipment-group"><h3>Armure</h3>@if (equippedArmor.length > 0) {<div class="equipment-cards">@for (armor of equippedArmor; track armor.id) {<article><strong>{{ armor.label }}</strong><span>Quantité : {{ equipmentQuantity(armor.id) }}</span><dl><div><dt>Protection</dt><dd>-{{ armor.damageReduction }} Dégâts</dd></div></dl></article>}</div>} @else {<p class="empty-state">Aucune armure équipée.</p>}</section>
         <section class="equipment-group"><h3>Bouclier</h3>@if (equippedShields.length > 0) {<div class="equipment-cards">@for (shield of equippedShields; track shield.id) {<article><strong>{{ shield.label }}</strong><span>Quantité : {{ equipmentQuantity(shield.id) }}</span><dl><div><dt>Bonus défense</dt><dd>+{{ shield.defenseBonus }}</dd></div><div><dt>Points de défense</dt><dd>{{ currentCharacter.otherScores.defense }}</dd></div></dl></article>}</div>} @else {<p class="empty-state">Aucun bouclier équipé.</p>}</section>
       </div>
+      <div class="encumbrance-section">
+        <div class="section-heading"><div><p class="eyebrow">Encombrement</p><h3>Charge transportée</h3></div><span>Force {{ currentCharacter.attributes.force }}</span></div>
+        <div class="encumbrance-summary"><strong>{{ carriedWeight | number:'1.0-1' }} kg</strong><span>/ {{ carryingCapacity }} kg possibles</span></div>
+        <div class="encumbrance-bar" role="progressbar" [attr.aria-valuenow]="carriedWeight" [attr.aria-valuemax]="carryingCapacity" aria-label="Poids transporté"><span [style.width.%]="encumbrancePercentage" [class.overloaded]="carriedWeight > carryingCapacity"></span></div>
+        @if (carriedWeight > carryingCapacity) { <p class="encumbrance-warning">La charge dépasse la capacité de port du personnage.</p> }
+        <small>Capacité : 10 kg + 10 kg par point de Force.</small>
+      </div>
       @if (ownedItems.length > 0) {<div class="inventory-list"><h3>Inventaire complet</h3><div class="collection-list">@for (item of ownedItems; track item.id) {<article><strong>{{ item.label }}</strong><span>{{ typeLabel(item.type) }} · Quantité : {{ equipmentQuantity(item.id) }} · {{ isEquipped(item.id) ? 'Équipé' : 'Non équipé' }}</span></article>}</div></div>} @else {<p class="empty-state">Aucun équipement possédé.</p>}
       <div class="money-section">
-        <div class="section-heading"><div><p class="eyebrow">Monnaie</p><h3>Argent du personnage</h3></div><span>1 DO = 10 DA = 100 DC</span></div>
+        <div class="section-heading"><div><p class="eyebrow">Monnaie</p></div><span>1 DO = 10 DA = 100 DC</span></div>
         <div class="money-grid">
           <label for="gold-pieces">Dragon d'or (DO)<input id="gold-pieces" type="number" min="0" step="1" [value]="currentCharacter.money.gold" (change)="setMoney('gold', $any($event.target).value)" /></label>
           <label for="silver-pieces">Dragon d'argent (DA)<input id="silver-pieces" type="number" min="0" step="1" [value]="currentCharacter.money.silver" (change)="setMoney('silver', $any($event.target).value)" /></label>

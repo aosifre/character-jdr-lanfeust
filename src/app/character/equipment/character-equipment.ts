@@ -31,6 +31,7 @@ export class CharacterEquipmentPage {
     this.character?.equipment.filter((item) => item.weighted).map((item) => item.equipmentId) ?? [],
   );
   protected modalOpen = false;
+  protected editingEquipmentId: string | null = null;
 
   // Signaux pour la recherche et la pagination
   protected searchQuery = signal('');
@@ -46,6 +47,7 @@ export class CharacterEquipmentPage {
     attackBonus: new FormControl(0, { nonNullable: true }),
     defenseBonus: new FormControl(0, { nonNullable: true }),
     damageReduction: new FormControl(0, { nonNullable: true }),
+    weight: new FormControl(0, { nonNullable: true, validators: [Validators.min(0)] }),
     skillBonus: new FormControl('', { nonNullable: true }),
   });
 
@@ -139,6 +141,12 @@ export class CharacterEquipmentPage {
     this.cartVersion.update((version) => version + 1);
   }
 
+  protected updateWeight(item: Equipment, event: Event): void {
+    const weight = Math.max(0, Number((event.target as HTMLInputElement).value) || 0);
+    this.equipmentService.updateWeight(item.id, weight);
+    this.cartVersion.update((version) => version + 1);
+  }
+
   protected toggleWeighted(item: Equipment): void {
     if (item.type !== 'weapon' || !this.isOwned(item.id)) return;
     if (this.weighted.has(item.id)) this.weighted.delete(item.id);
@@ -172,6 +180,23 @@ export class CharacterEquipmentPage {
   }
 
   protected openModal(): void {
+    this.editingEquipmentId = null;
+    this.form.reset(this.defaultFormValue());
+    this.modalOpen = true;
+  }
+
+  protected editEquipment(item: Equipment): void {
+    this.editingEquipmentId = item.id;
+    this.form.reset({
+      label: item.label,
+      type: item.type,
+      category: item.category === null ? 'none' : String(item.category) as '1' | '2' | '3',
+      attackBonus: item.attackBonus,
+      defenseBonus: item.defenseBonus,
+      damageReduction: item.damageReduction,
+      weight: this.weight(item),
+      skillBonus: Object.entries(item.skillBonuses).map(([skillId, bonus]) => `${skillId}:${bonus}`).join(', '),
+    });
     this.modalOpen = true;
   }
   protected closeModal(): void {
@@ -181,27 +206,22 @@ export class CharacterEquipmentPage {
   protected addEquipment(): void {
     if (this.form.invalid) return;
     const value = this.form.getRawValue();
-    const item = this.equipmentService.add(
-      value.label.trim(),
-      value.type,
-      value.category === 'none' ? null : (Number(value.category) as 1 | 2 | 3),
-      value.attackBonus,
-      value.defenseBonus,
-      value.damageReduction,
-      this.parseSkillBonus(value.skillBonus),
-    );
-    this.cart.add(item.id);
+    const category = value.category === 'none' ? null : (Number(value.category) as 1 | 2 | 3);
+    const skillBonuses = this.parseSkillBonus(value.skillBonus);
+    if (this.editingEquipmentId) {
+      this.equipmentService.update(this.editingEquipmentId, value.label.trim(), value.type, category, value.attackBonus, value.defenseBonus, value.damageReduction, value.weight, skillBonuses);
+    } else {
+      const item = this.equipmentService.add(value.label.trim(), value.type, category, value.attackBonus, value.defenseBonus, value.damageReduction, value.weight, skillBonuses);
+      this.cart.add(item.id);
+    }
     this.cartVersion.update((version) => version + 1);
-    this.form.reset({
-      label: '',
-      type: 'weapon',
-      category: '1',
-      attackBonus: 0,
-      defenseBonus: 0,
-      damageReduction: 0,
-      skillBonus: '',
-    });
+    this.form.reset(this.defaultFormValue());
+    this.editingEquipmentId = null;
     this.closeModal();
+  }
+
+  private defaultFormValue() {
+    return { label: '', type: 'weapon' as EquipmentType, category: '1' as '1' | '2' | '3' | 'none', attackBonus: 0, defenseBonus: 0, damageReduction: 0, weight: 0, skillBonus: '' };
   }
 
   protected save(): void {
@@ -242,6 +262,8 @@ export class CharacterEquipmentPage {
     if (item.type === 'armor') return `-${item.damageReduction} dégâts`;
     return 'Équipement utilisable';
   }
+
+  protected weight(item: Equipment): number { return this.equipmentService.weight(item); }
 
   protected skillBonusDescription(item: Equipment): string {
     return Object.entries(item.skillBonuses)

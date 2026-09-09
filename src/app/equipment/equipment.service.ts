@@ -115,7 +115,7 @@ const defaultEquipment: Equipment[] = [
 export class EquipmentService {
   private readonly storageKey = 'jdr-lanfeust-equipment-v1';
   private readonly isBrowser: boolean;
-  private readonly equipment = signal<Equipment[]>(defaultEquipment);
+  private readonly equipment = signal<Equipment[]>(defaultEquipment.map((item) => ({ ...item, weight: item.weight ?? 0 })));
   readonly equipmentList = this.equipment.asReadonly();
 
   constructor(@Inject(PLATFORM_ID) platformId: object) {
@@ -125,17 +125,26 @@ export class EquipmentService {
       if (saved) {
         try {
           const parsed = JSON.parse(saved);
-          if (Array.isArray(parsed) && parsed.every((item) => this.isEquipment(item))) this.equipment.set(parsed);
+          if (Array.isArray(parsed) && parsed.every((item) => this.isEquipment(item))) {
+            this.equipment.set(parsed.map((item) => ({ ...item, weight: item.weight ?? 0 })));
+          }
         } catch { /* Ignore an invalid equipment catalogue. */ }
       }
     }
   }
 
-  add(label: string, type: EquipmentType, category: EquipmentCategory | null, attackBonus: number, defenseBonus: number, damageReduction: number, skillBonuses: Record<string, number>): Equipment {
-    const item = { id: crypto.randomUUID(), label, type, category, attackBonus, defenseBonus, damageReduction, skillBonuses };
+  add(label: string, type: EquipmentType, category: EquipmentCategory | null, attackBonus: number, defenseBonus: number, damageReduction: number, weight: number, skillBonuses: Record<string, number>): Equipment {
+    const item = { id: crypto.randomUUID(), label, type, category, attackBonus, defenseBonus, damageReduction, weight, skillBonuses };
     this.equipment.update((items) => [...items, item]);
     this.save();
     return item;
+  }
+
+  update(id: string, label: string, type: EquipmentType, category: EquipmentCategory | null, attackBonus: number, defenseBonus: number, damageReduction: number, weight: number, skillBonuses: Record<string, number>): void {
+    this.equipment.update((items) => items.map((item) => item.id === id
+      ? { ...item, label, type, category, attackBonus, defenseBonus, damageReduction, weight, skillBonuses }
+      : item));
+    this.save();
   }
 
   combatBonuses(equipmentIds: string[]): { attack: number; defense: number; damageReduction: number } {
@@ -150,6 +159,15 @@ export class EquipmentService {
     return this.equipment().filter((item) => equipmentIds.includes(item.id)).reduce((total, item) => total + (item.skillBonuses[skillId] ?? 0), 0);
   }
 
+  weight(item: Equipment): number {
+    return typeof item.weight === 'number' && Number.isFinite(item.weight) && item.weight >= 0 ? item.weight : 0;
+  }
+
+  updateWeight(id: string, weight: number): void {
+    this.equipment.update((items) => items.map((item) => item.id === id ? { ...item, weight } : item));
+    this.save();
+  }
+
   remove(id: string): void {
     this.equipment.update((items) => items.filter((item) => item.id !== id));
     this.save();
@@ -162,7 +180,9 @@ export class EquipmentService {
       && ['weapon', 'shield', 'armor', 'other'].includes(item['type'] as string)
       && (item['category'] === null || item['category'] === 1 || item['category'] === 2 || item['category'] === 3)
       && typeof item['attackBonus'] === 'number' && typeof item['defenseBonus'] === 'number'
-      && typeof item['damageReduction'] === 'number' && typeof item['skillBonuses'] === 'object';
+      && typeof item['damageReduction'] === 'number'
+      && (item['weight'] === undefined || (typeof item['weight'] === 'number' && item['weight'] >= 0))
+      && typeof item['skillBonuses'] === 'object';
   }
 
   private save(): void {
