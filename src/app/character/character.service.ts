@@ -25,6 +25,7 @@ export class CharacterService {
             throw new Error('Invalid character data');
           }
           this.characters.set(parsedCharacters.map((character) => this.normalizeCharacter(character)));
+          this.saveToStorage();
         } catch {
           localStorage.removeItem(this.storageKey);
         }
@@ -98,13 +99,14 @@ export class CharacterService {
   recalculateOtherScores(attributes: CharacterAttributes, level: number, currentScores: CharacterOtherScores, equipmentIds: string[] = []): CharacterOtherScores {
     const points = currentScores.combatBonusPoints;
     const equipmentBonuses = this.equipmentService.combatBonuses(equipmentIds);
+    const levelUps = Math.max(0, level);
     return {
       ...currentScores,
       attack: attributes.force + attributes.intelligence + points.attack + equipmentBonuses.attack,
       defense: attributes.dexterite + attributes.charisme + points.defense + equipmentBonuses.defense,
       save: attributes.constitution + attributes.sagesse + points.save,
-      hitPoints: level > 1 ? 10 + attributes.constitution + 5 * level : 10 + attributes.constitution,
-      energyPoints: level > 1 ? (1 + attributes.sagesse) * level : 5 + attributes.sagesse,
+      hitPoints: 10 + attributes.constitution + (levelUps * (5 + attributes.constitution)),
+      energyPoints: 5 + attributes.sagesse + (levelUps * (1 + attributes.sagesse)),
     };
   }
 
@@ -112,6 +114,22 @@ export class CharacterService {
     this.characters.update((characters) => characters.map((character) =>
       character.id === id ? { ...character, otherScores } : character,
     ));
+    this.saveToStorage();
+  }
+
+  addCombatBonusPoints(id: string, bonuses: Exclude<CombatBonus, null>[]): void {
+    if (bonuses.length !== 2 || bonuses[0] === bonuses[1]) return;
+
+    this.characters.update((characters) => characters.map((character) => {
+      if (character.id !== id) return character;
+      const combatBonusPoints = { ...character.otherScores.combatBonusPoints };
+      bonuses.forEach((bonus) => combatBonusPoints[bonus]++);
+      const otherScores = this.recalculateOtherScores(character.attributes, character.level, {
+        ...character.otherScores,
+        combatBonusPoints,
+      }, character.equipment.filter((item) => item.equipped).map((item) => item.equipmentId));
+      return { ...character, otherScores };
+    }));
     this.saveToStorage();
   }
 
@@ -203,6 +221,16 @@ export class CharacterService {
 
   private normalizeCharacter(value: Character): Character {
     const experience = this.isExperience(value.experience) ? value.experience : 0;
+    const equipment = Array.isArray(value.equipment) ? value.equipment.map((item) => ({
+      equipmentId: item.equipmentId,
+      quantity: Number.isInteger(item.quantity) && item.quantity > 0 ? item.quantity : 1,
+      equipped: item.equipped === true,
+      weighted: item.weighted === true,
+    })) : [];
+    const attributes = this.isAttributes(value.attributes) ? value.attributes : this.emptyAttributes();
+    const otherScores = this.isOtherScores(value.otherScores) ? this.normalizeOtherScores(value.otherScores) : this.emptyOtherScores();
+    const level = Math.floor(experience / 100);
+
     return {
       id: value.id,
       firstName: value.firstName,
@@ -211,19 +239,14 @@ export class CharacterService {
       description: typeof value.description === 'string' ? value.description : '',
       origin: this.isOrigin(value.origin) ? value.origin : 'human',
       experience,
-      level: Math.floor(experience / 100),
-      attributes: this.isAttributes(value.attributes) ? value.attributes : this.emptyAttributes(),
-      otherScores: this.isOtherScores(value.otherScores) ? this.normalizeOtherScores(value.otherScores) : this.emptyOtherScores(),
+      level,
+      attributes,
+      otherScores: this.recalculateOtherScores(attributes, level, otherScores, equipment.filter((item) => item.equipped).map((item) => item.equipmentId)),
       money: this.isMoney(value.money) ? value.money : this.emptyMoney(),
       skills: Array.isArray(value.skills) ? value.skills : [],
       advantages: Array.isArray(value.advantages) ? value.advantages : [],
       flaws: Array.isArray(value.flaws) ? value.flaws : [],
-      equipment: Array.isArray(value.equipment) ? value.equipment.map((item) => ({
-        equipmentId: item.equipmentId,
-        quantity: Number.isInteger(item.quantity) && item.quantity > 0 ? item.quantity : 1,
-        equipped: item.equipped === true,
-        weighted: item.weighted === true,
-      })) : [],
+      equipment,
       history: Array.isArray(value.history)
         ? value.history.filter((snapshot): snapshot is CharacterSnapshot => this.isSnapshot(snapshot)).map((snapshot) => this.normalizeSnapshot(snapshot))
         : [],
