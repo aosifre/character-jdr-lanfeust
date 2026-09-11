@@ -61,8 +61,11 @@ export class CharacterService {
   }
 
   remove(id: string): void {
+    const previousCharacters = this.characters();
     this.characters.update((characters) => characters.filter((character) => character.id !== id));
-    this.saveToStorage();
+    if (!this.saveToStorage()) {
+      this.characters.set(previousCharacters);
+    }
   }
 
   findById(id: string): Character | undefined {
@@ -103,8 +106,8 @@ export class CharacterService {
     return {
       ...currentScores,
       attack: attributes.force + attributes.intelligence + points.attack + equipmentBonuses.attack,
-      defense: attributes.dexterite + attributes.charisme + points.defense + equipmentBonuses.defense,
-      save: attributes.constitution + attributes.sagesse + points.save,
+      defense: attributes.dexterite + attributes.sagesse + points.defense + equipmentBonuses.defense,
+      save: attributes.constitution + attributes.charisme + points.save,
       hitPoints: 10 + attributes.constitution + (levelUps * (5 + attributes.constitution)),
       energyPoints: 5 + attributes.sagesse + (levelUps * (1 + attributes.sagesse)),
     };
@@ -192,9 +195,12 @@ export class CharacterService {
       return false;
     }
 
+    const previousCharacters = this.characters();
     this.characters.set(data.map((character) => this.normalizeCharacter(character)));
-    this.saveToStorage();
-    return true;
+    if (this.saveToStorage()) return true;
+
+    this.characters.set(previousCharacters);
+    return false;
   }
 
   private isCharacter(value: unknown): value is Character {
@@ -329,6 +335,10 @@ export class CharacterService {
 
   private saveToStorage(): boolean {
     if (this.isBrowser) {
+      if (this.characters().length === 0) {
+        localStorage.removeItem(this.storageKey);
+        return true;
+      }
       const serialized = JSON.stringify(this.characters());
       if (serialized.length > MAX_CHARACTER_STORAGE_BYTES) return false;
       try {
