@@ -1,27 +1,48 @@
-<main class="form-shell">
-    <a class="back-link" routerLink="/characters">← Retour aux personnages</a>
-    <header class="edit-heading">
+<main class="allocation-shell">
+    <a class="back-link" routerLink="/characters">← Annuler</a>
+    <header class="allocation-heading">
         <p class="eyebrow">JDR Lanfeust de Troy</p>
         <h1>{{ character?.firstName }} {{ character?.lastName }}</h1>
         <p>Niveau {{ character?.level }}</p>
     </header>
-    <div class="level-up-notification">
+    <section class="preview level-up-notification">
         <p>Félicitations ! Votre personnage a atteint le niveau <strong>{{ character?.level }}</strong>, vous possédez maintenant <strong>{{ character?.experience }}</strong> points d'expérience.</p>
         <p>Vous possédez maintenant <strong>{{ character?.otherScores.hitPoints }}</strong> points de vie.</p>
         <p>Vous possédez maintenant <strong>{{ character?.otherScores.energyPoints }}</strong> points d'énergie.</p>
         <hr />
         <p>Vous pouvez maintenant choisir de nouvelles compétences, atouts ou travers pour votre personnage.</p>
-    </div>
-    <form [formGroup]="form" (ngSubmit)="save()" novalidate>
-        <label for="nextLevelChoice">Que souhaitez-vous faire ?</label>
-
-        <select id="nextLevelChoice" formControlName="nextLevelChoice">
-            <option *ngFor="let option of optionsLevelUp" [value]="option.value">{{ option.label }}</option>
-        </select>
-        <div class="form-actions">
-            <a class="cancel-link" routerLink="/characters">Annuler</a>
-            <button class="button button-primary" type="submit">Enregistrer</button>
-        </div>
-
-    </form>
+    </section>
+    @if (!combatBonusSelectionComplete) {
+        <section class="combat-bonus-section">
+            <h2>Choisissez vos degrés de combat</h2>
+            <p>Sélectionnez deux scores différents parmi ATT, DEF et SAV.</p>
+            <div class="characteristic-grid" aria-label="Degrés de combat">
+                <button class="characteristic-card" [class.assigned]="isCombatBonusSelected('attack')" type="button" (click)="selectCombatBonus('attack')">
+                    <span>Attaque (ATT)</span><strong>{{ character?.otherScores?.attack }}@if (isCombatBonusSelected('attack')) { → {{ (character?.otherScores?.attack ?? 0) + 1 }}}</strong>
+                </button>
+                <button class="characteristic-card" [class.assigned]="isCombatBonusSelected('defense')" type="button" (click)="selectCombatBonus('defense')">
+                    <span>Défense (DEF)</span><strong>{{ character?.otherScores?.defense }}@if (isCombatBonusSelected('defense')) { → {{ (character?.otherScores?.defense ?? 0) + 1 }}}</strong>
+                </button>
+                <button class="characteristic-card" [class.assigned]="isCombatBonusSelected('save')" type="button" (click)="selectCombatBonus('save')">
+                    <span>Sauvegarde (SAV)</span><strong>{{ character?.otherScores?.save }}@if (isCombatBonusSelected('save')) { → {{ (character?.otherScores?.save ?? 0) + 1 }}}</strong>
+                </button>
+            </div>
+            <div class="allocation-footer">
+                <p>{{ selectedCombatBonuses.length }}/2 degré sélectionné</p>
+                <button class="button button-primary" type="button" [disabled]="selectedCombatBonuses.length !== 2" (click)="confirmCombatBonuses()">Valider</button>
+            </div>
+        </section>
+    } @else {
+        <form [formGroup]="form" (ngSubmit)="save()" novalidate>
+            <label for="nextLevelChoice">Que souhaitez-vous faire ?</label>
+            <select id="nextLevelChoice" formControlName="nextLevelChoice">
+                <option value="" disabled>Choisissez une option</option>
+                <option *ngFor="let option of optionsLevelUp" [value]="option.value">{{ option.label }}</option>
+            </select>
+            <div class="form-actions">
+                <a class="cancel-link" routerLink="/characters">Annuler</a>
+                <button class="button button-primary" type="submit">Enregistrer</button>
+            </div>
+        </form>
+    }
 </main>
