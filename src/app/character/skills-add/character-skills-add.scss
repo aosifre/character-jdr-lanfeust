@@ -9,13 +9,19 @@ h1 { color: #24323a; font-family: Georgia, serif; font-size: clamp(2.3rem, 6vw, 
 .custom-skill-form label { grid-column: 1 / -1; color: #24323a; font-size: .85rem; font-weight: 800; }
 .custom-skill-form input, .custom-skill-form select { background: #fffdf8; border: 1px solid #aebbb8; border-radius: 3px; font: inherit; min-height: 3rem; padding: .7rem; }
 .skill-grid { display: grid; gap: 1rem; grid-template-columns: repeat(3, 1fr); }
-.skill-card { align-items: center; background: #fffdf8; border: 1px solid #aebbb8; border-radius: 4px; color: #24323a; cursor: pointer; display: flex; flex-direction: column; gap: .65rem; min-height: 9rem; padding: 1.2rem; }
+.skill-card { align-items: center; background: #fffdf8; border: 1px solid #aebbb8; border-radius: 4px; color: #24323a; display: flex; flex-direction: column; gap: .65rem; min-height: 9rem; padding: 1.2rem; }
 .skill-card:hover, .skill-card.selected { border-color: #bd5b38; }
 .skill-card.selected { box-shadow: inset 0 0 0 2px #bd5b38; }
 .skill-card.known-skill { background: #e4f1e5; }
-.skill-card span { font-weight: 800; }
+.skill-name { font-weight: 800; }
 .skill-card strong { color: #bd5b38; font-family: Georgia, serif; font-size: 2.2rem; font-weight: 500; }
 .skill-card small { color: #66747a; }
+.degree-controls { align-items: center; display: flex; gap: .75rem; margin-top: .25rem; }
+.degree-controls span { color: #66747a; font-size: .85rem; min-width: 5.5rem; text-align: center; }
+.degree-button { align-items: center; background: #fffefa; border: 1px solid #aebbb8; border-radius: 4px; color: #24323a; cursor: pointer; display: inline-flex; font: 700 1.15rem/1 sans-serif; height: 2.25rem; justify-content: center; width: 2.25rem; }
+.degree-button:hover:not(:disabled) { background: #176b63; border-color: #176b63; color: #fff; }
+.degree-button:disabled { cursor: not-allowed; opacity: .4; }
+.new-skill-button { min-height: 2.5rem; padding: .5rem .75rem; }
 footer { align-items: center; border-top: 1px solid #cfd6d4; display: flex; justify-content: space-between; margin-top: 2.5rem; padding-top: 1.5rem; }
 footer p { margin: 0; }
 .button { background: #24323a; border: 0; border-radius: 4px; color: #fff; cursor: pointer; font: inherit; font-weight: 800; min-height: 3rem; padding: .75rem 1.5rem; }
