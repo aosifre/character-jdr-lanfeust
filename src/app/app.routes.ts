@@ -25,6 +25,7 @@ export const routes: Routes = [
 	{ path: '', pathMatch: 'full', redirectTo: 'characters' },
 	{ path: 'characters', component: CharacterList },
 	{ path: 'characters/new', component: CharacterForm },
+	{ path: 'characters/:id/edit', component: CharacterForm },
 	{ path: 'characters/:id/history', component: CharacterHistoryPage },
 	{ path: 'characters/:id', component: CharacterViewPage },
 	{ path: 'characters/:id/characteristics', component: CharacterCharacteristics },

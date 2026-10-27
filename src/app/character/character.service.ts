@@ -53,9 +53,11 @@ export class CharacterService {
     return character;
   }
 
-  update(id: string, firstName: string, lastName: string, description: string, origin: CharacterOrigin): void {
+  update(id: string, firstName: string, lastName: string, description: string, origin: CharacterOrigin, portrait?: string | null): void {
     this.characters.update((characters) => characters.map((character) =>
-      character.id === id ? { ...character, firstName, lastName, description, origin } : character,
+      character.id === id
+        ? { ...character, firstName, lastName, description, origin, portrait: portrait === undefined ? character.portrait : portrait ?? undefined }
+        : character,
     ));
     this.saveToStorage();
   }

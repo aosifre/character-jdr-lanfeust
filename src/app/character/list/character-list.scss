@@ -19,8 +19,9 @@ h1 { color: #24323a; font-family: Georgia, serif; font-size: clamp(2.5rem, 6vw, 
 .character-avatar { aspect-ratio: 1; border: 1px solid #c8b58f; border-radius: 50%; height: 2.75rem; object-fit: cover; width: 2.75rem; }
 .character-row strong { color: #24323a; font-size: 1.1rem; }
 .character-stats { color: #66747a; font-size: .9rem; }
-.row-actions { display: flex; flex-wrap: wrap; gap: 1rem; }
+.row-actions { display: flex; flex-wrap: wrap; gap: .65rem; }
 .action-icon { align-items: center; background: transparent; border: 0; cursor: pointer; display: inline-flex; font-size: 1.25rem; justify-content: center; padding: .25rem; text-decoration: none; }
+.edit-action { color: #176b63; }
 .delete-action { color: #9d413f; }
 .empty-state { border: 1px solid #cfd6d4; padding: 4rem 2rem; text-align: center; }
 .empty-mark { color: #f0a35d; font-size: 2.5rem; margin-bottom: 1rem; }
