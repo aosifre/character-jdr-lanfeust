@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { SettingsService } from './settings/settings.service';
 
 @Component({
   imports: [RouterOutlet],
@@ -8,4 +9,5 @@ import { RouterOutlet } from '@angular/router';
   templateUrl: './app.html',
 })
 export class App {
+  private readonly settingsService = inject(SettingsService);
 }
