@@ -35,7 +35,17 @@ export class CharacterEquipmentPage {
 
   // Signaux pour la recherche et la pagination
   protected searchQuery = signal('');
-  protected equipmentFilter = signal<'all' | 'owned' | 'equipped' | 'not-equipped'>('all');
+  protected equipmentFilter = signal<'all' | 'owned' | 'equipped' | 'not-equipped'>(
+    this.characterId ? 'owned' : 'all',
+  );
+  protected cartCategory = signal<'all' | EquipmentType>('all');
+  protected readonly cartCategories: { id: 'all' | EquipmentType; label: string; icon: string }[] = [
+    { id: 'all', label: 'Tout', icon: '▦' },
+    { id: 'weapon', label: 'Armes', icon: '⚔' },
+    { id: 'armor', label: 'Armures', icon: '♢' },
+    { id: 'shield', label: 'Boucliers', icon: '⛨' },
+    { id: 'other', label: 'Autres', icon: '✦' },
+  ];
   private readonly cartVersion = signal(0);
   protected currentPage = signal(1);
   protected readonly pageSize = 10;
@@ -108,6 +118,13 @@ export class CharacterEquipmentPage {
     }
   }
 
+  protected cartCount(category: 'all' | EquipmentType): number {
+    this.cartVersion();
+    return this.equipment().filter((item) =>
+      this.cart.has(item.id) && (category === 'all' || item.type === category),
+    ).length;
+  }
+
   protected isEquipped(id: string): boolean {
     return this.equipped.has(id);
   }
@@ -120,6 +137,7 @@ export class CharacterEquipmentPage {
     this.cart.add(item.id);
     this.quantities.set(item.id, 1);
     this.cartVersion.update((version) => version + 1);
+    this.saveInventory();
   }
 
   protected removeFromInventory(item: Equipment): void {
@@ -128,6 +146,7 @@ export class CharacterEquipmentPage {
     this.equipped.delete(item.id);
     this.weighted.delete(item.id);
     this.cartVersion.update((version) => version + 1);
+    this.saveInventory();
   }
 
   protected isWeighted(id: string): boolean { return this.weighted.has(id); }
@@ -139,6 +158,7 @@ export class CharacterEquipmentPage {
     const value = Math.max(1, Math.floor(Number((event.target as HTMLInputElement).value) || 1));
     this.quantities.set(item.id, value);
     this.cartVersion.update((version) => version + 1);
+    this.saveInventory();
   }
 
   protected updateWeight(item: Equipment, event: Event): void {
@@ -152,6 +172,7 @@ export class CharacterEquipmentPage {
     if (this.weighted.has(item.id)) this.weighted.delete(item.id);
     else this.weighted.add(item.id);
     this.cartVersion.update((version) => version + 1);
+    this.saveInventory();
   }
 
   protected toggleEquipped(item: Equipment): void {
@@ -161,6 +182,7 @@ export class CharacterEquipmentPage {
       this.equipped.add(item.id);
     }
     this.cartVersion.update((version) => version + 1);
+    this.saveInventory();
   }
 
   protected canEquip(item: Equipment): boolean {
@@ -215,6 +237,7 @@ export class CharacterEquipmentPage {
       this.cart.add(item.id);
     }
     this.cartVersion.update((version) => version + 1);
+    this.saveInventory();
     this.form.reset(this.defaultFormValue());
     this.editingEquipmentId = null;
     this.closeModal();
@@ -224,7 +247,7 @@ export class CharacterEquipmentPage {
     return { label: '', type: 'weapon' as EquipmentType, category: '1' as '1' | '2' | '3' | 'none', attackBonus: 0, defenseBonus: 0, damageReduction: 0, weight: 0, skillBonus: '' };
   }
 
-  protected save(): void {
+  private saveInventory(): void {
     if (!this.characterId) return;
     const equipment: CharacterEquipment[] = [...this.cart].map((equipmentId) => ({
       equipmentId,
@@ -285,6 +308,12 @@ export class CharacterEquipmentPage {
   }
 
   protected get cartItems(): Equipment[] {
+    this.cartVersion();
     return this.equipment().filter((item) => this.cart.has(item.id));
+  }
+
+  protected get filteredCartItems(): Equipment[] {
+    const category = this.cartCategory();
+    return this.cartItems.filter((item) => category === 'all' || item.type === category);
   }
 }

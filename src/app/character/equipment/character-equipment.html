@@ -7,7 +7,77 @@
     <button class="button button-primary" type="button" (click)="openModal()"><span class="button-icon" aria-hidden="true">＋</span> Ajouter un équipement</button>
   </header>
 
-  <section class="shop" aria-label="Boutique d'équipements">
+  <div class="shop-layout">
+  <section id="inventory" class="active-equipment" aria-label="Équipements du personnage">
+    <div class="section-heading"><div><p class="eyebrow">Inventaire du personnage</p><h2>Équipements possédés <span class="cart-count">{{ cart.size }}</span></h2></div></div>
+
+    <div class="cart-tabs" role="tablist" aria-label="Filtrer les équipements par catégorie">
+      @for (category of cartCategories; track category.id) {
+        <button
+          class="cart-tab"
+          [class.active]="cartCategory() === category.id"
+          type="button"
+          role="tab"
+          [attr.aria-selected]="cartCategory() === category.id"
+          [attr.aria-controls]="'cart-panel-' + category.id"
+          [id]="'cart-tab-' + category.id"
+          (click)="cartCategory.set(category.id)"
+        >
+          <span class="cart-tab-icon" aria-hidden="true">{{ category.icon }}</span>
+          <span>{{ category.label }}</span>
+          <span class="cart-tab-count">{{ cartCount(category.id) }}</span>
+        </button>
+      }
+    </div>
+
+    <div class="cart-panel" role="tabpanel" [id]="'cart-panel-' + cartCategory()" [attr.aria-labelledby]="'cart-tab-' + cartCategory()" tabindex="0">
+    @if (filteredCartItems.length > 0) {
+      <div class="equipment-cards cart-items">
+        @for (item of filteredCartItems; track item.id) {
+          <article class="owned-equipment-card">
+            <button
+              type="button"
+              class="remove-equipment"
+              (click)="removeFromInventory(item)"
+              [attr.aria-label]="'Retirer ' + item.label + ' de l’inventaire'"
+              title="Retirer de l’inventaire"
+            >×</button>
+            <div class="cart-item-info">
+              <strong>{{ item.label }}</strong>
+              <span class="cart-item-meta">{{ typeLabel(item.type) }} · {{ categoryLabel(item.category) }}</span>
+              <small>{{ description(item) }}</small>
+              @if (skillBonusDescription(item)) {
+                <small class="cart-item-skills">{{ skillBonusDescription(item) }}</small>
+              }
+            </div>
+            <label class="cart-quantity">Quantité
+              <input class="quantity-input" type="number" min="1" step="1" [value]="quantity(item.id)" (change)="updateQuantity(item, $event)" [attr.aria-label]="'Quantité de ' + item.label" />
+            </label>
+            @if (item.type === 'weapon') {
+              <label class="weighted-control"><input type="checkbox" [checked]="isWeighted(item.id)" (change)="toggleWeighted(item)" /> Lestée (+2 dégâts)</label>
+            }
+            <div class="cart-item-actions">
+              <button type="button" class="button button-small button-outline" [disabled]="!isEquipped(item.id) && !canEquip(item)" (click)="toggleEquipped(item)" [title]="isEquipped(item.id) ? 'Déséquiper' : 'Équiper'">
+                <span class="button-icon" aria-hidden="true">{{ isEquipped(item.id) ? '↶' : '⚔' }}</span>{{ isEquipped(item.id) ? 'Déséquiper' : 'Équiper' }}
+              </button>
+            </div>
+          </article>
+        }
+      </div>
+
+      <div class="active-summary">
+        <h3>Cumul des bonus</h3>
+        <p>Attaque +{{ combatBonuses.attack }} · Défense +{{ combatBonuses.defense }} · Réduction des dégâts {{ combatBonuses.damageReduction }}</p>
+      </div>
+    } @else {
+      <p class="empty-cart-message">{{ cartCategory() === 'all' ? 'Aucun équipement sélectionné pour le moment.' : 'Aucun équipement dans cette catégorie.' }}</p>
+    }
+    </div>
+
+  </section>
+
+  <section class="shop" aria-label="Catalogue des équipements">
+    <div class="section-heading catalog-heading"><div><p class="eyebrow">Boutique</p><h2>Catalogue</h2></div></div>
     <div class="search-bar">
       <input
         type="search"
@@ -25,6 +95,7 @@
       </label>
     </div>
 
+    <div class="equipment-table-wrap">
     <table class="equipment-table">
       <thead>
         <tr>
@@ -76,7 +147,6 @@
                   @if (item.type === 'weapon') {
                     <label class="weighted-control"><input type="checkbox" [checked]="isWeighted(item.id)" (change)="toggleWeighted(item)" /> Lestée (+2 dégâts)</label>
                   }
-                  <button type="button" class="button button-small button-danger" (click)="removeFromInventory(item)" title="Retirer de l'inventaire"><span class="button-icon" aria-hidden="true">×</span> Retirer</button>
                 </div>
               }
             </td>
@@ -88,6 +158,7 @@
         }
       </tbody>
     </table>
+    </div>
 
     <!-- Pagination -->
     @if (totalPages() > 1) {
@@ -113,43 +184,7 @@
     }
   </section>
 
-  <section class="active-equipment" aria-label="Résumé de l'équipement">
-    <div class="section-heading"><div><p class="eyebrow">Inventaire</p><h2>Équipements possédés ({{ cart.size }})</h2></div></div>
-
-    @if (cartItems.length > 0) {
-      <div class="equipment-cards">
-        @for (item of cartItems; track item.id) {
-          <article class="owned-equipment-card">
-            <div class="cart-item-info">
-              <strong>{{ item.label }}</strong>
-              <span class="cart-item-meta">{{ typeLabel(item.type) }} · {{ categoryLabel(item.category) }} · Quantité : {{ quantity(item.id) }} · {{ isEquipped(item.id) ? 'Équipé' : 'Non équipé' }}@if (item.type === 'weapon' && isWeighted(item.id)) { · Lestée (+2 dégâts)}</span>
-              <small>{{ description(item) }}</small>
-              @if (skillBonusDescription(item)) {
-                <small class="cart-item-skills">{{ skillBonusDescription(item) }}</small>
-              }
-            </div>
-              <button
-                type="button"
-                class="button button-outline button-small button-danger"
-                (click)="removeFromInventory(item)"
-                title="Retirer du panier"
-              >
-                <span class="button-icon" aria-hidden="true">×</span> Retirer
-              </button>
-          </article>
-        }
-      </div>
-
-      <div class="active-summary">
-        <h3>Cumul des bonus</h3>
-        <p>Attaque +{{ combatBonuses.attack }} · Défense +{{ combatBonuses.defense }} · Réduction des dégâts {{ combatBonuses.damageReduction }}</p>
-      </div>
-    } @else {
-      <p class="empty-cart-message">Aucun équipement sélectionné pour le moment.</p>
-    }
-
-    <button class="button button-primary" type="button" (click)="save()">Valider l'inventaire</button>
-  </section>
+  </div>
 
   @if (modalOpen) {
     <div class="modal-backdrop" role="presentation" (click)="closeModal()">
@@ -182,7 +217,7 @@
           <label>Bonus compétences <input formControlName="skillBonus" placeholder="acrobaties:1, survie:2" /></label>
           <div class="modal-actions">
             <button class="button button-outline" type="button" (click)="closeModal()">Annuler</button>
-            <button class="button button-primary" type="submit" [disabled]="form.invalid">{{ editingEquipmentId ? 'Enregistrer les modifications' : 'Ajouter au panier' }}</button>
+            <button class="button button-primary" type="submit" [disabled]="form.invalid">{{ editingEquipmentId ? 'Enregistrer les modifications' : 'Ajouter à l’inventaire' }}</button>
           </div>
         </form>
       </section>
