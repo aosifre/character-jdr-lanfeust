@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CharacterService } from '../character.service';
 import { CharacterOrigin } from '../character.model';
 import { MAX_PORTRAIT_DATA_URL_LENGTH } from '../character.service';
@@ -14,26 +14,40 @@ import { MAX_PORTRAIT_DATA_URL_LENGTH } from '../character.service';
 export class CharacterForm {
   private readonly characterService = inject(CharacterService);
   private readonly router = inject(Router);
-  protected readonly portrait = signal<string | null>(null);
+  private readonly route = inject(ActivatedRoute);
+  protected readonly characterId = this.route.snapshot.paramMap.get('id');
+  protected readonly character = this.characterId ? this.characterService.findById(this.characterId) : undefined;
+  protected readonly isEditing = !!this.characterId;
+  protected readonly portrait = signal<string | null>(this.character?.portrait ?? null);
   protected imageError = '';
   protected imageProcessing = false;
   protected readonly form = new FormGroup({
-    firstName: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
-    lastName: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
-    description: new FormControl('', { nonNullable: true }),
-    origin: new FormControl<CharacterOrigin>('human', { nonNullable: true }),
+    firstName: new FormControl(this.character?.firstName ?? '', { nonNullable: true, validators: [Validators.required] }),
+    lastName: new FormControl(this.character?.lastName ?? '', { nonNullable: true, validators: [Validators.required] }),
+    description: new FormControl(this.character?.description ?? '', { nonNullable: true }),
+    origin: new FormControl<CharacterOrigin>(this.character?.origin ?? 'human', { nonNullable: true }),
   });
 
   protected save(): void {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     if (this.imageProcessing) return;
     const { firstName, lastName, description, origin } = this.form.getRawValue();
+    if (this.characterId) {
+      if (!this.character) return;
+      this.characterService.update(this.characterId, firstName.trim(), lastName.trim(), description.trim(), origin, this.portrait());
+      this.router.navigate(['/characters']);
+      return;
+    }
     const character = this.characterService.add(firstName.trim(), lastName.trim(), description.trim(), origin, this.portrait() ?? undefined);
     if (!character) {
       this.imageError = 'La mémoire disponible est insuffisante. Supprimez une image ou un personnage avant de réessayer.';
       return;
     }
     this.router.navigate(['/characters', character.id, 'characteristics']);
+  }
+
+  protected removePortrait(): void {
+    this.portrait.set(null);
   }
 
   protected selectPortrait(event: Event): void {
