@@ -3,7 +3,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CharacterEquipment } from '../character.model';
 import { CharacterService } from '../character.service';
-import { Equipment, EquipmentType } from '../../equipment/equipment.model';
+import { equipmentIcon, Equipment, EquipmentType } from '../../equipment/equipment.model';
 import { EquipmentService } from '../../equipment/equipment.service';
 
 @Component({
@@ -52,6 +52,7 @@ export class CharacterEquipmentPage {
 
   protected readonly form = new FormGroup({
     label: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+    icon: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(16)] }),
     type: new FormControl<EquipmentType>('weapon', { nonNullable: true }),
     category: new FormControl<'1' | '2' | '3' | 'none'>('1', { nonNullable: true }),
     attackBonus: new FormControl(0, { nonNullable: true }),
@@ -201,6 +202,16 @@ export class CharacterEquipmentPage {
     return '';
   }
 
+  protected iconFor(item: Equipment): string { return equipmentIcon(item); }
+
+  protected get formEquipmentIcon(): string {
+    return equipmentIcon({
+      label: this.form.controls.label.value,
+      type: this.form.controls.type.value,
+      icon: this.form.controls.icon.value,
+    });
+  }
+
   protected openModal(): void {
     this.editingEquipmentId = null;
     this.form.reset(this.defaultFormValue());
@@ -211,6 +222,7 @@ export class CharacterEquipmentPage {
     this.editingEquipmentId = item.id;
     this.form.reset({
       label: item.label,
+      icon: item.icon ?? '',
       type: item.type,
       category: item.category === null ? 'none' : String(item.category) as '1' | '2' | '3',
       attackBonus: item.attackBonus,
@@ -231,9 +243,9 @@ export class CharacterEquipmentPage {
     const category = value.category === 'none' ? null : (Number(value.category) as 1 | 2 | 3);
     const skillBonuses = this.parseSkillBonus(value.skillBonus);
     if (this.editingEquipmentId) {
-      this.equipmentService.update(this.editingEquipmentId, value.label.trim(), value.type, category, value.attackBonus, value.defenseBonus, value.damageReduction, value.weight, skillBonuses);
+      this.equipmentService.update(this.editingEquipmentId, value.label.trim(), value.type, category, value.attackBonus, value.defenseBonus, value.damageReduction, value.weight, skillBonuses, value.icon);
     } else {
-      const item = this.equipmentService.add(value.label.trim(), value.type, category, value.attackBonus, value.defenseBonus, value.damageReduction, value.weight, skillBonuses);
+      const item = this.equipmentService.add(value.label.trim(), value.type, category, value.attackBonus, value.defenseBonus, value.damageReduction, value.weight, skillBonuses, value.icon);
       this.cart.add(item.id);
     }
     this.cartVersion.update((version) => version + 1);
@@ -244,7 +256,7 @@ export class CharacterEquipmentPage {
   }
 
   private defaultFormValue() {
-    return { label: '', type: 'weapon' as EquipmentType, category: '1' as '1' | '2' | '3' | 'none', attackBonus: 0, defenseBonus: 0, damageReduction: 0, weight: 0, skillBonus: '' };
+    return { label: '', icon: '', type: 'weapon' as EquipmentType, category: '1' as '1' | '2' | '3' | 'none', attackBonus: 0, defenseBonus: 0, damageReduction: 0, weight: 0, skillBonus: '' };
   }
 
   private saveInventory(): void {

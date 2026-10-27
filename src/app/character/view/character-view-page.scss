@@ -39,6 +39,8 @@ input { width: 100%; box-sizing: border-box; padding: .55rem .65rem; border: 1px
 .equipment-group h3, .inventory-list h3 { margin: 0 0 .75rem; color: #176b63; }
 .equipment-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: .75rem; }
 .equipment-cards article { display: grid; gap: .55rem; padding: 1rem; background: #edf3ed; border-left: 3px solid #176b63; }
+.equipment-name { align-items: center; display: inline-flex; gap: .55rem; }
+.equipment-icon { align-items: center; display: inline-flex; flex: 0 0 1.6rem; font-size: 1.2rem; justify-content: center; line-height: 1; }
 .equipment-cards article > span { color: #65736d; font-size: .9rem; }
 .equipment-cards dl { display: flex; flex-wrap: wrap; gap: 1rem; margin: 0; }
 .equipment-cards dl div { display: grid; gap: .15rem; }

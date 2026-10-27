@@ -43,6 +43,11 @@ h1 { color: #24323a; font-family: Georgia, serif; font-size: clamp(2.3rem, 6vw, 
 }
 
 .shop { min-width: 0; }
+.equipment-name { align-items: center; display: inline-flex; gap: .55rem; }
+.equipment-icon { align-items: center; display: inline-flex; flex: 0 0 1.6rem; font-size: 1.2rem; justify-content: center; line-height: 1; }
+.equipment-name-preview { align-items: center; display: flex; gap: .5rem; }
+.equipment-name-preview input { flex: 1; min-width: 0; }
+.modal label small { color: #66747a; font-size: .8rem; font-weight: 400; }
 .catalog-heading { border-bottom: 1px solid #cfd6d4; margin: 0 0 1.25rem; padding-bottom: .75rem; }
 .catalog-heading h2 { color: #24323a; margin: .25rem 0 0; }
 .equipment-table-wrap { max-width: 100%; overflow-x: auto; }

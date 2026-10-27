@@ -43,7 +43,7 @@
               title="Retirer de l’inventaire"
             >×</button>
             <div class="cart-item-info">
-              <strong>{{ item.label }}</strong>
+              <strong class="equipment-name"><span class="equipment-icon" aria-hidden="true">{{ iconFor(item) }}</span>{{ item.label }}</strong>
               <span class="cart-item-meta">{{ typeLabel(item.type) }} · {{ categoryLabel(item.category) }}</span>
               <small>{{ description(item) }}</small>
               @if (skillBonusDescription(item)) {
@@ -112,7 +112,7 @@
         @for (item of paginatedEquipment(); track item.id) {
           <tr [class.equipped]="isEquipped(item.id)">
             <td>
-              <strong>{{ item.label }}</strong>
+              <strong class="equipment-name"><span class="equipment-icon" aria-hidden="true">{{ iconFor(item) }}</span>{{ item.label }}</strong>
             </td>
             <td>
               @if (isOwned(item.id)) {
@@ -191,7 +191,11 @@
       <section class="modal" role="dialog" aria-modal="true" aria-labelledby="equipment-modal-title" (click)="$event.stopPropagation()">
         <h2 id="equipment-modal-title">{{ editingEquipmentId ? 'Modifier un équipement' : 'Ajouter un équipement' }}</h2>
         <form [formGroup]="form" (ngSubmit)="addEquipment()">
-          <label>Nom <input formControlName="label" placeholder="Ex. Dague dentelée" /></label>
+          <label>Nom <span class="equipment-name-preview"><span class="equipment-icon" aria-hidden="true">{{ formEquipmentIcon }}</span><input formControlName="label" placeholder="Ex. Dague dentelée" /></span></label>
+          <label>Icône (facultative)
+            <input formControlName="icon" maxlength="16" placeholder="Ex. 🗡️" />
+            <small>Laissez vide pour utiliser une icône proposée selon le nom.</small>
+          </label>
           <label>Catégorie d'objet 
             <select formControlName="type">
               <option value="weapon">Arme</option>
