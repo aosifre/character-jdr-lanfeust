@@ -1,5 +1,5 @@
 <main class="equipment-shell">
-  <a class="back-link" routerLink="/characters">← Retour</a>
+  <a class="back-link" [routerLink]="characterId ? ['/characters', characterId] : '/characters'">← Retour</a>
   <header class="equipment-heading">
     <p class="eyebrow">{{ character?.firstName }} {{ character?.lastName }}</p>
     <h1>Équipements</h1>
