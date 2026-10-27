@@ -29,7 +29,8 @@ input { width: 100%; box-sizing: border-box; padding: .55rem .65rem; border: 1px
 .penalty-controls p { margin: 0 0 .55rem; color: #65736d; font-size: .8rem; }
 .inline-control { min-width: 140px; }
 .skill-list { display: grid; gap: .5rem; }
-.skill-row { display: grid; grid-template-columns: 1fr auto 100px; align-items: center; gap: 1rem; padding: .8rem 1rem; border-left: 3px solid #8ab6a1; background: #edf3ed; }
+.skill-row { display: grid; grid-template-columns: 1fr auto 100px; align-items: center; gap: 1rem; padding: .8rem 1rem; border-left: 3px solid #8ab6a1; border-bottom: 1px solid #d8dfd8; background: #edf3ed; transition: background-color 140ms ease; }
+.skill-row:hover { background: #e2ece4; }
 .skill-row div { display: grid; gap: .2rem; }.skill-row small { color: #65736d; }.skill-total { min-width: 2rem; color: #176b63; font-size: 1.4rem; text-align: center; }
 .collection-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: .75rem; }
 .collection-list article { display: grid; gap: .3rem; padding: 1rem; border-top: 3px solid #d0643b; background: #f1e9dc; }.collection-list span { color: #65736d; font-size: .9rem; }

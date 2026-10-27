@@ -14,6 +14,21 @@
 	--danger: #a5403e;
 }
 
+html[data-theme='dark'] {
+	color-scheme: dark;
+	--ink: #edf0e9;
+	--ink-soft: #bac6c0;
+	--copper: #efa078;
+	--gold: #e6b968;
+	--gold-light: #f3d996;
+	--paper: #171d20;
+	--paper-light: #222b2e;
+	--paper-dark: #303b3e;
+	--line: #465456;
+	--success: #8bc49a;
+	--danger: #ef8e88;
+}
+
 * { box-sizing: border-box; }
 html, body { margin: 0; min-height: 100%; }
 body {
@@ -21,6 +36,10 @@ body {
 	background-image: linear-gradient(rgba(255, 250, 240, .2), rgba(255, 250, 240, .2)), repeating-linear-gradient(0deg, rgba(116, 76, 35, .035) 0, rgba(116, 76, 35, .035) 1px, transparent 1px, transparent 5px);
 	color: var(--ink);
 	font-family: 'Alegreya Sans', sans-serif;
+}
+html[data-theme='dark'] body {
+	background-color: var(--paper);
+	background-image: repeating-linear-gradient(0deg, rgba(220, 232, 223, .018) 0, rgba(220, 232, 223, .018) 1px, transparent 1px, transparent 5px);
 }
 html[data-font-style='lanfeust'] body { font-family: 'Texte d\'écriture Lanfeust', 'Alegreya Sans', sans-serif; }
 html[data-font-style='classic'] body { font-family: 'Alegreya Sans', sans-serif; }
@@ -47,7 +66,8 @@ a { color: var(--copper); }
 }
 .button:hover, button.button:hover, .settings-nav a:hover { box-shadow: 1px 1px 0 rgba(23, 44, 59, .18); transform: translate(2px, 2px); }
 .button-primary, .button { background: var(--ink) !important; color: var(--paper-light) !important; }
-.button-secondary, .button-primary span { background: var(--gold) !important; color: var(--ink) !important; }
+.button-secondary { background: var(--gold) !important; color: var(--ink) !important; }
+.button-primary span { background: transparent !important; color: var(--gold) !important; }
 .button-outline, .outline { background: transparent !important; border-color: var(--ink) !important; color: var(--ink) !important; }
 
 input, textarea, select {
@@ -70,3 +90,77 @@ input:focus, textarea:focus, select:focus { border-color: var(--copper) !importa
 .character-row.creation-incomplete { background: rgba(247, 224, 211, .82) !important; }
 .creation-complete .creation-status { color: var(--success) !important; }
 .creation-incomplete .creation-status, .delete-action, .import-error { color: var(--danger) !important; }
+
+html[data-theme='dark'] h1,
+html[data-theme='dark'] h2,
+html[data-theme='dark'] h3,
+html[data-theme='dark'] h4,
+html[data-theme='dark'] label,
+html[data-theme='dark'] .character-row strong,
+html[data-theme='dark'] .cart-quantity,
+html[data-theme='dark'] .owned-equipment-card strong { color: var(--ink) !important; }
+html[data-theme='dark'] p,
+html[data-theme='dark'] small,
+html[data-theme='dark'] .character-stats,
+html[data-theme='dark'] .cart-item-info > span,
+html[data-theme='dark'] .cart-item-info > small,
+html[data-theme='dark'] .back-link,
+html[data-theme='dark'] .intro { color: var(--ink-soft) !important; }
+html[data-theme='dark'] a { color: var(--copper); }
+html[data-theme='dark'] input,
+html[data-theme='dark'] textarea,
+html[data-theme='dark'] select,
+html[data-theme='dark'] .modal,
+html[data-theme='dark'] .custom-skill-form { background-color: var(--paper-light) !important; color: var(--ink) !important; border-color: var(--line) !important; }
+html[data-theme='dark'] option { background: var(--paper-light); color: var(--ink); }
+html[data-theme='dark'] .character-row,
+html[data-theme='dark'] .empty-state,
+html[data-theme='dark'] .panel,
+html[data-theme='dark'] .equipment-card,
+html[data-theme='dark'] .score-card,
+html[data-theme='dark'] .characteristic-card,
+html[data-theme='dark'] .active-equipment,
+html[data-theme='dark'] .owned-equipment-card,
+html[data-theme='dark'] .skill-card,
+html[data-theme='dark'] .collection-list article,
+html[data-theme='dark'] .equipment-group,
+html[data-theme='dark'] .history-list article,
+html[data-theme='dark'] .score-grid > div,
+html[data-theme='dark'] .attribute-grid > div,
+html[data-theme='dark'] .view-shell .skill-row {
+	background-color: #222b2e !important;
+	border-color: var(--line) !important;
+	color: var(--ink) !important;
+}
+html[data-theme='dark'] .view-shell .skill-row small,
+html[data-theme='dark'] .view-shell .skill-row label { color: var(--ink-soft) !important; }
+html[data-theme='dark'] .view-shell .skill-row .skill-total { color: #8bc4a7 !important; }
+html[data-theme='dark'] .view-shell .skill-row:hover { background-color: #2b3739 !important; }
+html[data-theme='dark'] .view-shell .equipment-cards article,
+html[data-theme='dark'] .view-shell .encumbrance-section { background-color: #222b2e !important; border-color: var(--line) !important; color: var(--ink) !important; }
+html[data-theme='dark'] .view-shell .equipment-cards article > span,
+html[data-theme='dark'] .view-shell .equipment-cards dt,
+html[data-theme='dark'] .view-shell .encumbrance-section small,
+html[data-theme='dark'] .view-shell .encumbrance-summary { color: var(--ink-soft) !important; }
+html[data-theme='dark'] .view-shell .equipment-cards dd,
+html[data-theme='dark'] .view-shell .encumbrance-summary strong,
+html[data-theme='dark'] .view-shell .encumbrance-section h3 { color: #8bc4a7 !important; }
+html[data-theme='dark'] .view-shell .encumbrance-bar { background-color: #465456 !important; }
+html[data-theme='dark'] .view-shell .encumbrance-bar span { background-color: #6da78b; }
+html[data-theme='dark'] .character-row.creation-complete { background-color: #263a31 !important; }
+html[data-theme='dark'] .character-row.creation-incomplete { background-color: #3a2c2b !important; }
+html[data-theme='dark'] .equipment-table th,
+html[data-theme='dark'] .equipment-table td,
+html[data-theme='dark'] .character-table,
+html[data-theme='dark'] .character-row,
+html[data-theme='dark'] section,
+html[data-theme='dark'] header,
+html[data-theme='dark'] .heading { border-color: var(--line) !important; }
+html[data-theme='dark'] .equipment-table tr.equipped { background-color: #263a31 !important; }
+html[data-theme='dark'] .button-primary,
+html[data-theme='dark'] .button { background-color: #31484b !important; color: #f4f1e8 !important; }
+html[data-theme='dark'] .button-outline,
+html[data-theme='dark'] .outline { background-color: transparent !important; border-color: var(--ink-soft) !important; color: var(--ink) !important; }
+html[data-theme='dark'] .settings-nav a { color: var(--ink) !important; }
+html[data-theme='dark'] .pagination span,
+html[data-theme='dark'] .table-heading { color: var(--ink-soft) !important; }

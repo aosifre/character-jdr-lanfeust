@@ -16,10 +16,16 @@ export class CreationSettings {
     fontStyle: new FormControl<FontStyle>('lanfeust', { nonNullable: true }),
   });
 
-  constructor() { this.form.setValue(this.settingsService.currentSettings()); }
+  constructor() {
+    const settings = this.settingsService.currentSettings();
+    this.form.setValue({
+      availableAdvantages: settings.availableAdvantages,
+      fontStyle: settings.fontStyle,
+    });
+  }
 
   protected save(): void {
     if (this.form.invalid) return;
-    this.settingsService.update(this.form.getRawValue());
+    this.settingsService.update({ ...this.settingsService.currentSettings(), ...this.form.getRawValue() });
   }
 }

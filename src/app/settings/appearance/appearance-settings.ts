@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { FontStyle, SettingsService } from '../settings.service';
+import { ColorTheme, FontStyle, SettingsService } from '../settings.service';
 
 @Component({
   imports: [RouterLink],
@@ -10,10 +10,15 @@ import { FontStyle, SettingsService } from '../settings.service';
 })
 export class AppearanceSettings {
   private readonly settingsService = inject(SettingsService);
-  protected readonly fontStyle = this.settingsService.currentSettings().fontStyle;
+  protected readonly settings = this.settingsService.currentSettings;
 
   protected updateFontStyle(event: Event): void {
     const fontStyle = (event.target as HTMLSelectElement).value as FontStyle;
-    this.settingsService.update({ ...this.settingsService.currentSettings(), fontStyle });
+    this.settingsService.update({ ...this.settings(), fontStyle });
+  }
+
+  protected updateTheme(event: Event): void {
+    const theme = (event.target as HTMLSelectElement).value as ColorTheme;
+    this.settingsService.update({ ...this.settings(), theme });
   }
 }
