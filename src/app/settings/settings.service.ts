@@ -4,11 +4,13 @@ import { Inject, Injectable, PLATFORM_ID, signal } from '@angular/core';
 export interface GlobalSettings {
   availableAdvantages: number;
   fontStyle: FontStyle;
+  theme: ColorTheme;
 }
 
 export type FontStyle = 'lanfeust' | 'classic' | 'storybook' | 'manuscript';
+export type ColorTheme = 'light' | 'dark';
 
-const defaultSettings: GlobalSettings = { availableAdvantages: 3, fontStyle: 'lanfeust' };
+const defaultSettings: GlobalSettings = { availableAdvantages: 3, fontStyle: 'lanfeust', theme: 'light' };
 
 @Injectable({ providedIn: 'root' })
 export class SettingsService {
@@ -28,13 +30,13 @@ export class SettingsService {
           if (restored) this.settings.set(restored);
         } catch { /* Ignore an invalid settings file. */ }
       }
-      this.applyFontStyle();
+      this.applyAppearance();
     }
   }
 
   update(settings: GlobalSettings): void {
     this.settings.set(settings);
-    this.applyFontStyle();
+    this.applyAppearance();
     this.save();
   }
 
@@ -55,9 +57,11 @@ export class SettingsService {
       || !Number.isInteger(settings['availableAdvantages'])
       || settings['availableAdvantages'] < 0) return null;
     const fontStyle = settings['fontStyle'];
+    const theme = settings['theme'];
     return {
       availableAdvantages: settings['availableAdvantages'] as number,
       fontStyle: this.isFontStyle(fontStyle) ? fontStyle : defaultSettings.fontStyle,
+      theme: this.isColorTheme(theme) ? theme : defaultSettings.theme,
     };
   }
 
@@ -65,8 +69,14 @@ export class SettingsService {
     return value === 'lanfeust' || value === 'classic' || value === 'storybook' || value === 'manuscript';
   }
 
-  private applyFontStyle(): void {
-    if (this.isBrowser) document.documentElement.dataset['fontStyle'] = this.settings().fontStyle;
+  private isColorTheme(value: unknown): value is ColorTheme {
+    return value === 'light' || value === 'dark';
+  }
+
+  private applyAppearance(): void {
+    if (!this.isBrowser) return;
+    document.documentElement.dataset['fontStyle'] = this.settings().fontStyle;
+    document.documentElement.dataset['theme'] = this.settings().theme;
   }
 
   private save(): void {
