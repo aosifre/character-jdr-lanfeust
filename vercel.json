@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/characters/(.*)",
+      "destination": "/index.csr.html"
+    }
+  ]
+}
