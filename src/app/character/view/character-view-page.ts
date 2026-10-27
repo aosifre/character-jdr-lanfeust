@@ -7,7 +7,7 @@ import { EquipmentService } from '../../equipment/equipment.service';
 import { SkillService } from '../../skill/skill.service';
 import { FlawService } from '../../flaw/flaw.service';
 import { Skill } from '../../skill/skill.model';
-import { Equipment } from '../../equipment/equipment.model';
+import { equipmentIcon, Equipment } from '../../equipment/equipment.model';
 import { CharacterMoney } from '../character.model';
 
 @Component({
@@ -69,6 +69,8 @@ export class CharacterViewPage {
   protected equipmentName(equipmentId: string): string {
     return this.equipment().find((item) => item.id === equipmentId)?.label ?? 'Équipement inconnu';
   }
+
+  protected equipmentIcon(equipment: Equipment): string { return equipmentIcon(equipment); }
 
   protected equipmentQuantity(equipmentId: string): number {
     return this.character?.equipment.find((item) => item.equipmentId === equipmentId)?.quantity ?? 1;

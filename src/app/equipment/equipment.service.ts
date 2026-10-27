@@ -133,16 +133,16 @@ export class EquipmentService {
     }
   }
 
-  add(label: string, type: EquipmentType, category: EquipmentCategory | null, attackBonus: number, defenseBonus: number, damageReduction: number, weight: number, skillBonuses: Record<string, number>): Equipment {
-    const item = { id: crypto.randomUUID(), label, type, category, attackBonus, defenseBonus, damageReduction, weight, skillBonuses };
+  add(label: string, type: EquipmentType, category: EquipmentCategory | null, attackBonus: number, defenseBonus: number, damageReduction: number, weight: number, skillBonuses: Record<string, number>, icon?: string): Equipment {
+    const item = { id: crypto.randomUUID(), label, ...(icon?.trim() ? { icon: icon.trim() } : {}), type, category, attackBonus, defenseBonus, damageReduction, weight, skillBonuses };
     this.equipment.update((items) => [...items, item]);
     this.save();
     return item;
   }
 
-  update(id: string, label: string, type: EquipmentType, category: EquipmentCategory | null, attackBonus: number, defenseBonus: number, damageReduction: number, weight: number, skillBonuses: Record<string, number>): void {
+  update(id: string, label: string, type: EquipmentType, category: EquipmentCategory | null, attackBonus: number, defenseBonus: number, damageReduction: number, weight: number, skillBonuses: Record<string, number>, icon?: string): void {
     this.equipment.update((items) => items.map((item) => item.id === id
-      ? { ...item, label, type, category, attackBonus, defenseBonus, damageReduction, weight, skillBonuses }
+      ? { ...item, label, ...(icon?.trim() ? { icon: icon.trim() } : { icon: undefined }), type, category, attackBonus, defenseBonus, damageReduction, weight, skillBonuses }
       : item));
     this.save();
   }
@@ -181,6 +181,7 @@ export class EquipmentService {
       && (item['category'] === null || item['category'] === 1 || item['category'] === 2 || item['category'] === 3)
       && typeof item['attackBonus'] === 'number' && typeof item['defenseBonus'] === 'number'
       && typeof item['damageReduction'] === 'number'
+      && (item['icon'] === undefined || (typeof item['icon'] === 'string' && item['icon'].length <= 16))
       && (item['weight'] === undefined || (typeof item['weight'] === 'number' && item['weight'] >= 0))
       && typeof item['skillBonuses'] === 'object';
   }
