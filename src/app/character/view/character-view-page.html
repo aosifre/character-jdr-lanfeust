@@ -15,7 +15,7 @@
     </header>
 
     <nav class="section-nav" aria-label="Sections de la fiche">
-      <a href="#attributes" (click)="goToSection($event, 'attributes')">Caractéristiques</a><a href="#scores" (click)="goToSection($event, 'scores')">Scores</a><a href="#skills" (click)="goToSection($event, 'skills')">Compétences</a><a href="#advantages" (click)="goToSection($event, 'advantages')">Atouts</a><a href="#flaws" (click)="goToSection($event, 'flaws')">Travers</a><a href="#equipment" (click)="goToSection($event, 'equipment')">Équipement</a>
+      <a href="#attributes" [class.active]="activeSection() === 'attributes'" [attr.aria-current]="activeSection() === 'attributes' ? 'location' : null" (click)="goToSection($event, 'attributes')">Caractéristiques</a><a href="#scores" [class.active]="activeSection() === 'scores'" [attr.aria-current]="activeSection() === 'scores' ? 'location' : null" (click)="goToSection($event, 'scores')">Scores</a><a href="#skills" [class.active]="activeSection() === 'skills'" [attr.aria-current]="activeSection() === 'skills' ? 'location' : null" (click)="goToSection($event, 'skills')">Compétences</a><a href="#advantages" [class.active]="activeSection() === 'advantages'" [attr.aria-current]="activeSection() === 'advantages' ? 'location' : null" (click)="goToSection($event, 'advantages')">Atouts</a><a href="#flaws" [class.active]="activeSection() === 'flaws'" [attr.aria-current]="activeSection() === 'flaws' ? 'location' : null" (click)="goToSection($event, 'flaws')">Travers</a><a href="#equipment" [class.active]="activeSection() === 'equipment'" [attr.aria-current]="activeSection() === 'equipment' ? 'location' : null" (click)="goToSection($event, 'equipment')">Équipement</a><a href="#encumbrance" [class.active]="activeSection() === 'encumbrance'" [attr.aria-current]="activeSection() === 'encumbrance' ? 'location' : null" (click)="goToSection($event, 'encumbrance')">Encombrement</a>
     </nav>
 
     <section id="attributes" class="panel">
@@ -26,7 +26,7 @@
     </section>
 
     <section id="scores" class="panel">
-      <div class="section-heading"><div><p class="eyebrow">État de partie</p></div><span>Niveau {{ currentCharacter.level }} · {{ currentCharacter.experience }} XP</span></div>
+      <div class="section-heading"><div><p class="eyebrow">Scores</p></div></div>
       <div class="score-grid">
         <div><span>Points de vie</span><strong>{{ remainingHitPoints }} <small>/ {{ currentCharacter.otherScores.hitPoints }}</small></strong><label for="damage">Blessures à ajouter</label><input id="damage" type="number" min="0" [value]="damageTaken" (input)="setDamage($any($event.target).value)" /></div>
         <div><span>Points d'énergie</span><strong>{{ remainingEnergy }} <small>/ {{ currentCharacter.otherScores.energyPoints }}</small></strong><label for="energy-spent">PE dépensés</label><input id="energy-spent" type="number" min="0" [value]="energySpent" (input)="setEnergySpent($any($event.target).value)" /></div>
@@ -59,13 +59,6 @@
         <section class="equipment-group"><h3>Armure</h3>@if (equippedArmor.length > 0) {<div class="equipment-cards">@for (armor of equippedArmor; track armor.id) {<article><strong class="equipment-name"><span class="equipment-icon" aria-hidden="true">{{ equipmentIcon(armor) }}</span>{{ armor.label }}</strong><span>Quantité : {{ equipmentQuantity(armor.id) }}</span><dl><div><dt>Protection</dt><dd>-{{ armor.damageReduction }} Dégâts</dd></div></dl></article>}</div>} @else {<p class="empty-state">Aucune armure équipée.</p>}</section>
         <section class="equipment-group"><h3>Bouclier</h3>@if (equippedShields.length > 0) {<div class="equipment-cards">@for (shield of equippedShields; track shield.id) {<article><strong class="equipment-name"><span class="equipment-icon" aria-hidden="true">{{ equipmentIcon(shield) }}</span>{{ shield.label }}</strong><span>Quantité : {{ equipmentQuantity(shield.id) }}</span><dl><div><dt>Bonus défense</dt><dd>+{{ shield.defenseBonus }}</dd></div><div><dt>Points de défense</dt><dd>{{ currentCharacter.otherScores.defense }}</dd></div></dl></article>}</div>} @else {<p class="empty-state">Aucun bouclier équipé.</p>}</section>
       </div>
-      <div class="encumbrance-section">
-        <div class="section-heading"><div><p class="eyebrow">Encombrement</p><h3>Charge transportée</h3></div><span>Force {{ currentCharacter.attributes.force }}</span></div>
-        <div class="encumbrance-summary"><strong>{{ carriedWeight | number:'1.0-1' }} kg</strong><span>/ {{ carryingCapacity }} kg possibles</span></div>
-        <div class="encumbrance-bar" role="progressbar" [attr.aria-valuenow]="carriedWeight" [attr.aria-valuemax]="carryingCapacity" aria-label="Poids transporté"><span [style.width.%]="encumbrancePercentage" [class.overloaded]="carriedWeight > carryingCapacity"></span></div>
-        @if (carriedWeight > carryingCapacity) { <p class="encumbrance-warning">La charge dépasse la capacité de port du personnage.</p> }
-        <small>Capacité : 10 kg + 10 kg par point de Force.</small>
-      </div>
       @if (ownedItems.length > 0) {<div class="inventory-list"><h3>Inventaire complet</h3><div class="collection-list">@for (item of ownedItems; track item.id) {<article><strong class="equipment-name"><span class="equipment-icon" aria-hidden="true">{{ equipmentIcon(item) }}</span>{{ item.label }}</strong><span>{{ typeLabel(item.type) }} · Quantité : {{ equipmentQuantity(item.id) }} · {{ isEquipped(item.id) ? 'Équipé' : 'Non équipé' }}</span></article>}</div></div>} @else {<p class="empty-state">Aucun équipement possédé.</p>}
       <div class="money-section">
         <div class="section-heading"><div><p class="eyebrow">Monnaie</p></div><span>1 DO = 10 DA = 100 DC</span></div>
@@ -75,6 +68,14 @@
           <label for="copper-pieces">Dragon de cuivre (DC)<input id="copper-pieces" type="number" min="0" step="1" [value]="currentCharacter.money.copper" (change)="setMoney('copper', $any($event.target).value)" /></label>
         </div>
       </div>
+    </section>
+
+    <section id="encumbrance" class="panel encumbrance-section">
+      <div class="section-heading"><div><p class="eyebrow">Encombrement</p><h2>Charge transportée</h2></div><span>Force {{ currentCharacter.attributes.force }}</span></div>
+      <div class="encumbrance-summary"><strong>{{ carriedWeight | number:'1.0-1' }} kg</strong><span>/ {{ carryingCapacity }} kg possibles</span></div>
+      <div class="encumbrance-bar" role="progressbar" [attr.aria-valuenow]="carriedWeight" [attr.aria-valuemax]="carryingCapacity" aria-label="Poids transporté"><span [style.width.%]="encumbrancePercentage" [class.overloaded]="carriedWeight > carryingCapacity"></span></div>
+      @if (carriedWeight > carryingCapacity) { <p class="encumbrance-warning">La charge dépasse la capacité de port du personnage.</p> }
+      <small>Capacité : 10 kg + 10 kg par point de Force.</small>
     </section>
   </main>
 } @else {

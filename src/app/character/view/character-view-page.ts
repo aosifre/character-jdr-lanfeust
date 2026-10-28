@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { AfterViewInit, Component, HostListener, inject, signal } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CharacterService } from '../character.service';
@@ -16,7 +16,7 @@ import { CharacterMoney } from '../character.model';
   templateUrl: './character-view-page.html',
   styleUrl: './character-view-page.scss',
 })
-export class CharacterViewPage {
+export class CharacterViewPage implements AfterViewInit {
   private readonly characterService = inject(CharacterService);
   private readonly advantageService = inject(AdvantageService);
   private readonly equipmentService = inject(EquipmentService);
@@ -30,11 +30,21 @@ export class CharacterViewPage {
   protected readonly advantages = this.advantageService.advantageList;
   protected readonly flaws = this.flawService.flawList;
   protected readonly equipment = this.equipmentService.equipmentList;
+  protected readonly activeSection = signal('attributes');
   protected damageTaken = 0;
   protected energySpent = 0;
   protected globalSkillPenalty = 0;
   protected combatPenalty = 0;
   protected readonly skillPenalties: Record<string, number> = {};
+
+  ngAfterViewInit(): void {
+    this.updateActiveSection();
+  }
+
+  @HostListener('window:scroll')
+  protected onWindowScroll(): void {
+    this.updateActiveSection();
+  }
 
   protected get remainingHitPoints(): number {
     return Math.max(0, (this.character?.otherScores.hitPoints ?? 0) - this.numberOrZero(this.damageTaken));
@@ -127,7 +137,22 @@ export class CharacterViewPage {
   }
   protected goToSection(event: Event, sectionId: string): void {
     event.preventDefault();
+    this.activeSection.set(sectionId);
     document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  private updateActiveSection(): void {
+    if (typeof window === 'undefined') return;
+
+    const navigation = document.querySelector<HTMLElement>('.section-nav');
+    if (!navigation) return;
+
+    const activationLine = navigation.getBoundingClientRect().bottom + 16;
+    const sectionIds = ['attributes', 'scores', 'skills', 'advantages', 'flaws', 'equipment', 'encumbrance'];
+    this.activeSection.set(sectionIds.reduce((activeId, sectionId) => {
+      const section = document.getElementById(sectionId);
+      return section && section.getBoundingClientRect().top <= activationLine ? sectionId : activeId;
+    }, sectionIds[0]));
   }
 
   private nonNegativeValue(value: string): number { return Math.max(0, Number.parseInt(value, 10) || 0); }
