@@ -24,7 +24,7 @@ export class CharacterAdvantagesAddPage {
   protected readonly advantages = this.advantageService.advantageList;
   protected readonly categories: AdvantageCategory[] = ['combat', 'origin', 'magic', 'social', 'heroic'];
   protected readonly selectedCategory = signal<'all' | AdvantageCategory>('all');
-  protected readonly selected = new Set(this.character?.advantages.map((advantage) => advantage.advantageId) ?? []);
+  protected readonly selected = new Map<string, number>();
   public advantageMaximum = 0;
 
  // ajout d'un avantage supplémentaire pour le personnage en + du nombre d'avantages actuel du personnage
@@ -32,9 +32,15 @@ export class CharacterAdvantagesAddPage {
       if (!this.characterId || !this.character) return;
 
       this.advantageMaximum = this.character.advantages.length + 1;
-  }
+     for (const { advantageId } of this.character.advantages) {
+       this.selected.set(advantageId, (this.selected.get(advantageId) ?? 0) + 1);
+     }
+ }
 
-  protected isSelected(id: string): boolean { return this.selected.has(id); }
+ protected isSelected(id: string): boolean { return this.selectedCount(id) > 0; }
+ protected selectedCount(id: string): number { return this.selected.get(id) ?? 0; }
+ protected get selectedTotal(): number { return [...this.selected.values()].reduce((total, count) => total + count, 0); }
+ protected isRepeatable(advantage: Advantage): boolean { return advantage.repeatable === true; }
   protected categoryLabel(category: AdvantageCategory): string {
     const labels: Record<AdvantageCategory, string> = { combat: 'Atouts de combat', origin: "Atouts d'origine", magic: 'Atouts magiques', social: 'Atouts sociaux', heroic: 'Atouts héroïques' };
     return labels[category];
@@ -55,7 +61,7 @@ export class CharacterAdvantagesAddPage {
   protected isAvailable(advantage: Advantage): boolean {
     const attributes = this.character?.attributes;
     const meetsCondition = !advantage.conditionAttribute || (attributes?.[advantage.conditionAttribute] ?? 0) >= (advantage.conditionMinimum ?? 0);
-    const meetsPrerequisite = !advantage.prerequisiteId || this.selected.has(advantage.prerequisiteId);
+    const meetsPrerequisite = !advantage.prerequisiteId || this.isSelected(advantage.prerequisiteId);
     const meetsLevel = advantage.minimumLevel == null || (this.character?.level ?? 0) >= advantage.minimumLevel;
     return meetsCondition && meetsPrerequisite && meetsLevel;
   }
@@ -69,16 +75,24 @@ export class CharacterAdvantagesAddPage {
     return conditions.length ? `Condition : ${conditions.join(' · ')}` : 'Aucune condition';
   }
   protected toggle(id: string): void {
-    if (this.selected.has(id)) this.selected.delete(id);
+    const count = this.selectedCount(id);
+    const advantage = this.advantages().find((item) => item.id === id);
+    if (count > 0 && advantage && !this.isRepeatable(advantage)) this.selected.delete(id);
     else {
-      const advantage = this.advantages().find((item) => item.id === id);
-      if (advantage && this.isAvailable(advantage) && this.selected.size < this.advantageMaximum) this.selected.add(id);
+      if (advantage && this.isAvailable(advantage) && this.selectedTotal < this.advantageMaximum) this.selected.set(id, count + 1);
     }
   }
+
+  protected removeOne(id: string): void {
+    const count = this.selectedCount(id);
+    if (count <= 1) this.selected.delete(id);
+    else this.selected.set(id, count - 1);
+  }
+
   protected save(): void {
     const maximum = this.advantageMaximum;
-    if (!this.characterId || this.selected.size !== maximum) return;
-    const selected: CharacterAdvantage[] = [...this.selected].map((advantageId) => ({ advantageId }));
+    if (!this.characterId || this.selectedTotal !== maximum) return;
+    const selected: CharacterAdvantage[] = [...this.selected].flatMap(([advantageId, count]) => Array.from({ length: count }, () => ({ advantageId })));
     this.characterService.setAdvantages(this.characterId, selected);
     // on redirige vers la liste des personnages après l'ajout de l'avantage
     this.router.navigate(['/characters']);

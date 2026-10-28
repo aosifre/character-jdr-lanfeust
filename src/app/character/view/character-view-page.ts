@@ -108,6 +108,17 @@ export class CharacterViewPage implements AfterViewInit {
       .filter((item): item is Equipment => item !== undefined) ?? [];
   }
 
+  protected get selectedAdvantageSummaries(): { id: string; title: string; description: string; count: number }[] {
+    const counts = new Map<string, number>();
+    for (const selected of this.character?.advantages ?? []) {
+      counts.set(selected.advantageId, (counts.get(selected.advantageId) ?? 0) + 1);
+    }
+    return [...counts].flatMap(([id, count]) => {
+      const advantage = this.advantages().find((item) => item.id === id);
+      return advantage ? [{ id, title: advantage.title, description: advantage.description || 'Aucune description.', count }] : [];
+    });
+  }
+
   protected get carriedWeight(): number {
     return this.ownedItems.reduce((total, item) => total + this.equipmentService.weight(item) * this.equipmentQuantity(item.id), 0);
   }

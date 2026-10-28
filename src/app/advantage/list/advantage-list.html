@@ -30,6 +30,7 @@
         <label for="condition-minimum">Seuil</label><input id="condition-minimum" formControlName="conditionMinimum" type="number" min="0" placeholder="Seuil" />
         <label for="prerequisite">Atout prérequis</label><select id="prerequisite" formControlName="prerequisiteId"><option [ngValue]="null">Aucun prérequis</option>@for (advantage of advantages(); track advantage.id) {<option [value]="advantage.id">{{ advantage.title }}</option>}</select>
         <label for="minimum-level">Niveau minimum</label><input id="minimum-level" formControlName="minimumLevel" type="number" min="0" placeholder="Niveau minimum" />
+        <label for="repeatable">Peut être choisi plusieurs fois</label><input id="repeatable" formControlName="repeatable" type="checkbox" />
         <div class="modal-actions"><button class="button outline" type="button" (click)="closeModal()">Annuler</button><button class="button" type="submit">Ajouter</button></div>
       </form>
     </section>

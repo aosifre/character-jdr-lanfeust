@@ -11,4 +11,5 @@ export interface Advantage {
   conditionMinimum: number | null;
   prerequisiteId: string | null;
   minimumLevel?: number | null;
+  repeatable?: boolean;
 }
