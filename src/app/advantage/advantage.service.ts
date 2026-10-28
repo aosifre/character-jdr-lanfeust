@@ -14,12 +14,12 @@ const defaultAdvantages: Advantage[] = [
   { id: 'attaque-repetition', title: 'Attaque à répétition', category: 'combat', description: 'Quand vous maniez une arme d\'amateur ou que vous êtes à mains nues, vous pouvez faire une attaque supplémentaire à votre tour. Si vous avez plusieurs attaques, vous utiliez votre meilleur bonus. Cependant, tous vos jets d\'Attaque sont assortis d\'un malus de -2.', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
   { id: 'attaque-sournoise', title: 'Attaque sournoise', category: 'combat', description: 'Si vous pouvez surprendre un adversaire et l\'attaquer sans qu\'il détecte votre présence, vous pouvez ajouter 1d6 aux dégâts de toutes les atttaques de votre tour. Cet atout fonctionne au corps à corps comme à distance. Vous pouvez prendre cette atout plusieurs fois, à concurrence d\'une fois tous les 5 niveaux. A chaque nouvel Atout, ajoutez 1d6 à vos dégâts pendant une attaque sournoise.', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
   { id: 'charge-furieuse', title: 'Charge furieuse', category: 'combat', description: 'Si vous avez passé votre tour précédent à courir en direction de vos adversaires, les dégâts de votre première attaque sont doublés : jetez deux fois le nombre de d6 correspondant à votre arme et ajoutez votre bonus de Force.', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
-  { id: 'combat-monte', title: 'Combat monté', category: 'combat', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
-  { id: 'combat-a-deux-armes', title: 'Combat à deux armes', category: 'combat', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
-  { id: 'combat-en-aveugle', title: 'Combat en aveugle', category: 'combat', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
-  { id: 'cri-de-guerre', title: 'Cri de guerre', category: 'combat', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
-  { id: 'cri-de-ralliement', title: 'Cri de ralliement', category: 'combat', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
-  { id: 'enchainement', title: 'Enchaînement', category: 'combat', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
+  { id: 'combat-monte', title: 'Combat monté', category: 'combat', description: 'Cet Atout a deux effets. A chaque fois que vous ou votre monture, vous subissez des dégâts, vous pouvez faire un jet d\'Equitation opposé au jet d\'Attaque initial. Si vous réussiez, vous décidez si ces dégâts s\'appliquent à vous ou à votre monture. Vous devez annoncer ce choix avant que les dégâts ne soient résolus. Si vous avez passé votre tour précédent à galoper en direction de vos rivaux, vous doublez les dégâts de votre première attaque. Prenez deux fois le nombre de d6 correspondant à votre arme et faites donc une belle brochette d\'adversaires ! Votre bonus de Force ne s\'applique qu\'une fois.', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
+  { id: 'combat-a-deux-armes', title: 'Combat à deux armes', category: 'combat', description: 'Vous gagnez une attaque supplémentaire avec cette deuxième arme, mais toutes vos attaques se font avec un malus de -2. Si vous avez plusieurs attaques, utilisez votre meilleur bonus.', conditionAttribute: 'dexterite', conditionMinimum: 2, prerequisiteId: null },
+  { id: 'combat-en-aveugle', title: 'Combat en aveugle', category: 'combat', description: 'Vous êtes parfaitement capable de vous battre dans l\'obscurité. Vous ne subissez aucun désavantage quand vous êtes dans cette situation. Le conteur ne peut pas vous faire de Krâsses dues à l\'obscurité.', conditionAttribute: 'sagesse', conditionMinimum: 2, prerequisiteId: null },
+  { id: 'cri-de-guerre', title: 'Cri de guerre', category: 'combat', description: 'Quand un nouveau combat s\'engage, vous pouvez pousser votre cri de guerre. Tous les adversaires qui vous entendent recevront un malus de -2 au premier jet de Défense qu\'ils joueront contre vous.', conditionAttribute: 'charisme', conditionMinimum: 2, prerequisiteId: null },
+  { id: 'cri-de-ralliement', title: 'Cri de ralliement', category: 'combat', description: 'Une fois par combat, vous pouvez pousser un cri de ralliement. Tous les alliés qui vous entendent reçoivent  un bonus de +2 aux jets de Sauvegarde et d\'Attaque qu\'ils joueront d\'ici à votre prochain tour.', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
+  { id: 'enchainement', title: 'Enchaînement', category: 'combat', description: 'Vous êtes spécialisé dans les combats de groupe. A chaque fois que vous mettez un adversaire hors de combat au corps à corps, vous pouvez faire une nouvelle attaque sur un autre adversaire engagé au corps à corps contre vous.', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null, minimumLevel: 5 },
   { id: 'gladiateur-des-tavernes', title: 'Gladiateur des tavernes', category: 'combat', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
   { id: 'jeu-de-jambes', title: 'Jeu de jambes', category: 'combat', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
   { id: 'lancer-de-gens', title: 'Lancer de gens', category: 'combat', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId:null },
@@ -102,8 +102,8 @@ export class AdvantageService {
     }
   }
 
-  add(title: string, category: AdvantageCategory, description: string, conditionAttribute: AttributeKey | null, conditionMinimum: number | null, prerequisiteId: string | null): void {
-    this.advantages.update((advantages) => [...advantages, { id: crypto.randomUUID(), title, category, description, conditionAttribute, conditionMinimum, prerequisiteId }]);
+  add(title: string, category: AdvantageCategory, description: string, conditionAttribute: AttributeKey | null, conditionMinimum: number | null, prerequisiteId: string | null, minimumLevel: number | null): void {
+    this.advantages.update((advantages) => [...advantages, { id: crypto.randomUUID(), title, category, description, conditionAttribute, conditionMinimum, prerequisiteId, minimumLevel }]);
     this.save();
   }
 
@@ -128,11 +128,12 @@ export class AdvantageService {
       && (advantage['description'] === undefined || typeof advantage['description'] === 'string')
       && (advantage['conditionAttribute'] === null || advantage['conditionAttribute'] === undefined || this.isAttribute(advantage['conditionAttribute']))
       && (advantage['conditionMinimum'] === null || advantage['conditionMinimum'] === undefined || this.isNumber(advantage['conditionMinimum']))
-      && (advantage['prerequisiteId'] === null || advantage['prerequisiteId'] === undefined || typeof advantage['prerequisiteId'] === 'string');
+      && (advantage['prerequisiteId'] === null || advantage['prerequisiteId'] === undefined || typeof advantage['prerequisiteId'] === 'string')
+      && (advantage['minimumLevel'] === null || advantage['minimumLevel'] === undefined || this.isNumber(advantage['minimumLevel']));
   }
 
   private normalize(value: Advantage & { label?: string }): Advantage {
-    return { id: value.id, title: value.title ?? value.label ?? '', category: value.category ?? 'heroic', description: value.description ?? '', conditionAttribute: value.conditionAttribute ?? null, conditionMinimum: value.conditionMinimum ?? null, prerequisiteId: value.prerequisiteId ?? null };
+    return { id: value.id, title: value.title ?? value.label ?? '', category: value.category ?? 'heroic', description: value.description ?? '', conditionAttribute: value.conditionAttribute ?? null, conditionMinimum: value.conditionMinimum ?? null, prerequisiteId: value.prerequisiteId ?? null, minimumLevel: value.minimumLevel === undefined && value.id === 'enchainement' ? 5 : value.minimumLevel ?? null };
   }
 
   private isAttribute(value: unknown): boolean { return ['force', 'dexterite', 'constitution', 'sagesse', 'intelligence', 'charisme'].includes(value as string); }

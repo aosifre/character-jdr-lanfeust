@@ -34,6 +34,7 @@ export class AdvantageList {
     conditionAttribute: new FormControl<AttributeKey | null>(null, { nonNullable: true }),
     conditionMinimum: new FormControl<number | null>(null, { nonNullable: true }),
     prerequisiteId: new FormControl<string | null>(null, { nonNullable: true }),
+    minimumLevel: new FormControl<number | null>(null, { nonNullable: true }),
   });
   protected importError = false;
   protected modalOpen = false;
@@ -41,8 +42,8 @@ export class AdvantageList {
   protected add(): void {
     if (this.form.invalid) return;
     const value = this.form.getRawValue();
-    this.service.add(value.title.trim(), value.category, value.description.trim(), value.conditionAttribute, value.conditionMinimum, value.prerequisiteId);
-    this.form.reset({ title: '', category: 'heroic', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null });
+    this.service.add(value.title.trim(), value.category, value.description.trim(), value.conditionAttribute, value.conditionMinimum, value.prerequisiteId, value.minimumLevel);
+    this.form.reset({ title: '', category: 'heroic', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null, minimumLevel: null });
     this.modalOpen = false;
   }
 

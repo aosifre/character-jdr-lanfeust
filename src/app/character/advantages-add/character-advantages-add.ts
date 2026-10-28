@@ -56,17 +56,24 @@ export class CharacterAdvantagesAddPage {
     const attributes = this.character?.attributes;
     const meetsCondition = !advantage.conditionAttribute || (attributes?.[advantage.conditionAttribute] ?? 0) >= (advantage.conditionMinimum ?? 0);
     const meetsPrerequisite = !advantage.prerequisiteId || this.selected.has(advantage.prerequisiteId);
-    return meetsCondition && meetsPrerequisite;
+    const meetsLevel = advantage.minimumLevel == null || (this.character?.level ?? 0) >= advantage.minimumLevel;
+    return meetsCondition && meetsPrerequisite && meetsLevel;
   }
 
   protected conditionText(advantage: Advantage): string {
-    if (advantage.conditionAttribute) return `Condition : ${advantage.conditionAttribute} ${advantage.conditionMinimum}`;
-    if (advantage.prerequisiteId) return 'Nécessite un autre atout';
-    return 'Aucune condition';
+    const conditions = [
+      advantage.conditionAttribute ? `${advantage.conditionAttribute} ${advantage.conditionMinimum}` : null,
+      advantage.prerequisiteId ? 'un autre atout' : null,
+      advantage.minimumLevel != null ? `niveau ${advantage.minimumLevel} minimum` : null,
+    ].filter((condition) => condition !== null);
+    return conditions.length ? `Condition : ${conditions.join(' · ')}` : 'Aucune condition';
   }
   protected toggle(id: string): void {
     if (this.selected.has(id)) this.selected.delete(id);
-    else if (this.selected.size < this.advantageMaximum) this.selected.add(id);
+    else {
+      const advantage = this.advantages().find((item) => item.id === id);
+      if (advantage && this.isAvailable(advantage) && this.selected.size < this.advantageMaximum) this.selected.add(id);
+    }
   }
   protected save(): void {
     const maximum = this.advantageMaximum;

@@ -10,4 +10,5 @@ export interface Advantage {
   conditionAttribute: AttributeKey | null;
   conditionMinimum: number | null;
   prerequisiteId: string | null;
+  minimumLevel?: number | null;
 }
