@@ -7,9 +7,10 @@ import { SettingsService } from '../../settings/settings.service';
 import { SkillService } from '../../skill/skill.service';
 import { Advantage, DARSHAN_DEITIES, DeityChoiceDraft } from '../../advantage/advantage.model';
 import { AdvantageCategory } from '../../advantage/advantage.model';
+import { AdvantageDescriptionPipe } from '../../advantage/advantage-description.pipe';
 
 @Component({
-  imports: [RouterLink],
+  imports: [RouterLink, AdvantageDescriptionPipe],
   selector: 'app-character-advantage-add',
   templateUrl: './character-advantages-add.html',
   styleUrl: './character-advantages-add.scss'

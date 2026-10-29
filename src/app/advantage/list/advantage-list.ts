@@ -6,9 +6,10 @@ import { AdvantageCategory } from '../advantage.model';
 import { AttributeKey } from '../../skill/skill.model';
 import { CharacterOrigin } from '../../character/character.model';
 import { SkillService } from '../../skill/skill.service';
+import { AdvantageDescriptionPipe } from '../advantage-description.pipe';
 
 @Component({
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, AdvantageDescriptionPipe],
   selector: 'app-advantage-list',
   templateUrl: './advantage-list.html',
   styleUrl: './advantage-list.scss',

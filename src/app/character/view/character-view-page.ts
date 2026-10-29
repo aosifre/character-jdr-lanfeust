@@ -9,9 +9,10 @@ import { FlawService } from '../../flaw/flaw.service';
 import { Skill } from '../../skill/skill.model';
 import { equipmentIcon, Equipment } from '../../equipment/equipment.model';
 import { CharacterMoney, CharacterRecipe } from '../character.model';
+import { AdvantageDescriptionPipe } from '../../advantage/advantage-description.pipe';
 
 @Component({
-  imports: [RouterLink, DecimalPipe],
+  imports: [RouterLink, DecimalPipe, AdvantageDescriptionPipe],
   selector: 'app-character-view-page',
   templateUrl: './character-view-page.html',
   styleUrl: './character-view-page.scss',

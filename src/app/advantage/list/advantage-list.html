@@ -10,7 +10,7 @@
   </label>
   <section class="advantage-list">
     @for (advantage of filteredAdvantages(); track advantage.id) {
-      <article><div><strong>{{ advantage.title }}</strong><p class="category">{{ categoryLabel(advantage.category) }}</p><p>{{ advantage.description }}</p></div><button class="delete" type="button" (click)="remove(advantage.id)">Supprimer</button></article>
+      <article><div><strong>{{ advantage.title }}</strong><p class="category">{{ categoryLabel(advantage.category) }}</p><p class="advantage-description" [innerHTML]="advantage.description | advantageDescription"></p></div><button class="delete" type="button" (click)="remove(advantage.id)">Supprimer</button></article>
     } @empty {
       <p class="empty-filter">Aucun atout dans cette catégorie.</p>
     }
@@ -25,7 +25,7 @@
       <form [formGroup]="form" (ngSubmit)="add()">
         <label for="advantage-title">Titre</label><input id="advantage-title" formControlName="title" placeholder="Titre de l'atout" />
         <label for="category">Catégorie</label><select id="category" formControlName="category">@for (category of categories; track category.key) {<option [value]="category.key">{{ category.label }}</option>}</select>
-        <label for="advantage-description">Description</label><textarea id="advantage-description" formControlName="description" rows="5" placeholder="Description"></textarea>
+        <label for="advantage-description">Description</label><textarea id="advantage-description" formControlName="description" rows="5" placeholder="Description"></textarea><small class="description-help">Les retours à la ligne et les balises &lt;br/&gt; sont affichés.</small>
         <label for="condition-attribute">Caractéristique requise</label><select id="condition-attribute" formControlName="conditionAttribute"><option [ngValue]="null">Aucune condition</option>@for (attribute of attributes; track attribute.key) {<option [value]="attribute.key">{{ attribute.label }}</option>}</select>
         <label for="condition-minimum">Seuil</label><input id="condition-minimum" formControlName="conditionMinimum" type="number" min="0" placeholder="Seuil" />
         <label for="condition-origin">Origine requise</label><select id="condition-origin" formControlName="conditionOrigin"><option [ngValue]="null">Toutes les origines</option>@for (origin of origins; track origin.key) {<option [value]="origin.key">{{ origin.label }}</option>}</select>

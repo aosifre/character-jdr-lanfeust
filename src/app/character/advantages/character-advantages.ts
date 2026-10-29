@@ -7,8 +7,9 @@ import { SettingsService } from '../../settings/settings.service';
 import { SkillService } from '../../skill/skill.service';
 import { Advantage, DARSHAN_DEITIES, DeityChoiceDraft } from '../../advantage/advantage.model';
 import { AdvantageCategory } from '../../advantage/advantage.model';
+import { AdvantageDescriptionPipe } from '../../advantage/advantage-description.pipe';
 
-@Component({ imports: [RouterLink], selector: 'app-character-advantages', templateUrl: './character-advantages.html', styleUrl: './character-advantages.scss' })
+@Component({ imports: [RouterLink, AdvantageDescriptionPipe], selector: 'app-character-advantages', templateUrl: './character-advantages.html', styleUrl: './character-advantages.scss' })
 export class CharacterAdvantagesPage {
   private readonly characterService = inject(CharacterService);
   private readonly advantageService = inject(AdvantageService);
