@@ -12,4 +12,5 @@ export interface Advantage {
   prerequisiteId: string | null;
   minimumLevel?: number | null;
   repeatable?: boolean;
+  weaponChoice?: boolean;
 }

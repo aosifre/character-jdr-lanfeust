@@ -19,6 +19,18 @@ describe('CharacterAdvantagesAddPage', () => {
     minimumLevel: null,
     repeatable: true,
   };
+  const weaponChoiceAdvantage = {
+    id: 'surspecialisation',
+    title: 'Surspécialisation',
+    category: 'combat' as const,
+    description: '',
+    conditionAttribute: null,
+    conditionMinimum: null,
+    prerequisiteId: null,
+    minimumLevel: null,
+    repeatable: true,
+    weaponChoice: true,
+  };
   const specializationAdvantage = {
     id: 'specialisation',
     title: 'Spécialisation',
@@ -29,6 +41,7 @@ describe('CharacterAdvantagesAddPage', () => {
     prerequisiteId: null,
     minimumLevel: null,
     repeatable: true,
+    weaponChoice: true,
   };
   let character: Character;
   let setAdvantages: ReturnType<typeof vi.fn>;
@@ -62,7 +75,7 @@ describe('CharacterAdvantagesAddPage', () => {
         { provide: ActivatedRoute, useValue: { snapshot: { paramMap: { get: () => character.id } } } },
         { provide: Router, useValue: { navigate: vi.fn() } },
         { provide: CharacterService, useValue: { findById: () => character, setAdvantages } },
-        { provide: AdvantageService, useValue: { advantageList: signal([repeatableAdvantage, specializationAdvantage]) } },
+        { provide: AdvantageService, useValue: { advantageList: signal([repeatableAdvantage, specializationAdvantage, weaponChoiceAdvantage]) } },
         { provide: SettingsService, useValue: { currentSettings: signal({ availableAdvantages: 0 }) } },
       ],
     });
@@ -96,7 +109,7 @@ describe('CharacterAdvantagesAddPage', () => {
   it('stores a distinct weapon for each specialization during level-up', () => {
     const internalPage = page as unknown as {
       toggle(id: string): void;
-      setSpecializationWeapon(index: number, event: Event): void;
+      setWeaponChoice(id: string, index: number, event: Event): void;
       save(): void;
       canSave: boolean;
       advantageMaximum: number;
@@ -105,20 +118,44 @@ describe('CharacterAdvantagesAddPage', () => {
     internalPage.advantageMaximum = 3;
     internalPage.toggle(specializationAdvantage.id);
     internalPage.toggle(specializationAdvantage.id);
-    internalPage.setSpecializationWeapon(0, { target: { value: 'Épée' } } as unknown as Event);
-    internalPage.setSpecializationWeapon(1, { target: { value: 'épée' } } as unknown as Event);
+    internalPage.setWeaponChoice(specializationAdvantage.id, 0, { target: { value: 'Épée' } } as unknown as Event);
+    internalPage.setWeaponChoice(specializationAdvantage.id, 1, { target: { value: 'épée' } } as unknown as Event);
 
     expect(internalPage.canSave).toBe(false);
 
-    internalPage.setSpecializationWeapon(1, { target: { value: 'Hache' } } as unknown as Event);
+    internalPage.setWeaponChoice(specializationAdvantage.id, 1, { target: { value: 'Hache' } } as unknown as Event);
     expect(internalPage.canSave).toBe(true);
 
     internalPage.save();
 
     expect(setAdvantages).toHaveBeenCalledWith(character.id, [
       { advantageId: repeatableAdvantage.id },
-      { advantageId: specializationAdvantage.id, specializationWeapon: 'Épée' },
-      { advantageId: specializationAdvantage.id, specializationWeapon: 'Hache' },
+      { advantageId: specializationAdvantage.id, chosenWeapon: 'Épée' },
+      { advantageId: specializationAdvantage.id, chosenWeapon: 'Hache' },
+    ]);
+  });
+
+  it('uses the weapon choice attribute for other advantages', () => {
+    const internalPage = page as unknown as {
+      toggle(id: string): void;
+      setWeaponChoice(id: string, index: number, event: Event): void;
+      save(): void;
+      canSave: boolean;
+      advantageMaximum: number;
+    };
+    internalPage.advantageMaximum = 2;
+    internalPage.toggle(weaponChoiceAdvantage.id);
+
+    expect(internalPage.canSave).toBe(false);
+
+    internalPage.setWeaponChoice(weaponChoiceAdvantage.id, 0, { target: { value: 'Épée' } } as unknown as Event);
+    expect(internalPage.canSave).toBe(true);
+
+    internalPage.save();
+
+    expect(setAdvantages).toHaveBeenCalledWith(character.id, [
+      { advantageId: repeatableAdvantage.id },
+      { advantageId: weaponChoiceAdvantage.id, chosenWeapon: 'Épée' },
     ]);
   });
 });

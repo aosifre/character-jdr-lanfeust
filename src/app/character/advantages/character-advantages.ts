@@ -20,15 +20,18 @@ export class CharacterAdvantagesPage {
   protected readonly categories: AdvantageCategory[] = ['combat', 'origin', 'magic', 'social', 'heroic'];
   protected readonly selectedCategory = signal<'all' | AdvantageCategory>('all');
   protected readonly selected = new Map<string, number>();
-  protected readonly specializationWeapons: string[] = [];
+  protected readonly weaponChoices = new Map<string, string[]>();
   protected readonly availableAdvantages = this.settingsService.currentSettings;
 
   constructor() {
     for (const selectedAdvantage of this.character?.advantages ?? []) {
       const { advantageId } = selectedAdvantage;
       this.selected.set(advantageId, (this.selected.get(advantageId) ?? 0) + 1);
-      if (advantageId === 'specialisation') {
-        this.specializationWeapons.push(selectedAdvantage.specializationWeapon ?? '');
+      const advantage = this.advantages().find((item) => item.id === advantageId);
+      if (advantage?.weaponChoice) {
+        const choices = this.weaponChoices.get(advantageId) ?? [];
+        choices.push(selectedAdvantage.chosenWeapon ?? selectedAdvantage.specializationWeapon ?? '');
+        this.weaponChoices.set(advantageId, choices);
       }
     }
   }
@@ -36,18 +39,23 @@ export class CharacterAdvantagesPage {
   protected isSelected(id: string): boolean { return this.selectedCount(id) > 0; }
   protected selectedCount(id: string): number { return this.selected.get(id) ?? 0; }
   protected get selectedTotal(): number { return [...this.selected.values()].reduce((total, count) => total + count, 0); }
-  protected get canSave(): boolean {
-    return this.selectedTotal === this.availableAdvantages().availableAdvantages && this.hasValidSpecializationWeapons();
-  }
+  protected get canSave(): boolean { return this.selectedTotal === this.availableAdvantages().availableAdvantages && this.hasValidWeaponChoices(); }
   protected isRepeatable(advantage: Advantage): boolean { return advantage.repeatable === true; }
-  protected setSpecializationWeapon(index: number, event: Event): void {
-    this.specializationWeapons[index] = (event.target as HTMLInputElement).value;
+  protected weaponChoicesFor(advantageId: string): string[] { return this.weaponChoices.get(advantageId) ?? []; }
+  protected setWeaponChoice(advantageId: string, index: number, event: Event): void {
+    const choices = this.weaponChoices.get(advantageId) ?? [];
+    choices[index] = (event.target as HTMLInputElement).value;
+    this.weaponChoices.set(advantageId, choices);
   }
-  private hasValidSpecializationWeapons(): boolean {
-    const weapons = this.specializationWeapons.slice(0, this.selectedCount('specialisation')).map((weapon) => weapon.trim().toLowerCase());
-    return weapons.length === this.selectedCount('specialisation')
-      && weapons.every(Boolean)
-      && new Set(weapons).size === weapons.length;
+  private hasValidWeaponChoices(): boolean {
+    return [...this.selected].every(([advantageId, count]) => {
+      const advantage = this.advantages().find((item) => item.id === advantageId);
+      if (!advantage?.weaponChoice) return true;
+      const weapons = (this.weaponChoices.get(advantageId) ?? []).slice(0, count).map((weapon) => weapon.trim());
+      return weapons.length === count
+        && weapons.every(Boolean)
+        && (advantageId !== 'specialisation' || new Set(weapons.map((weapon) => weapon.toLowerCase())).size === weapons.length);
+    });
   }
   protected categoryLabel(category: AdvantageCategory): string {
     const labels: Record<AdvantageCategory, string> = { combat: 'Atouts de combat', origin: "Atouts d'origine", magic: 'Atouts magiques', social: 'Atouts sociaux', heroic: 'Atouts héroïques' };
@@ -83,7 +91,11 @@ export class CharacterAdvantagesPage {
     else {
       if (advantage && this.isAvailable(advantage) && this.selectedTotal < maximum) {
         this.selected.set(id, count + 1);
-        if (id === 'specialisation') this.specializationWeapons.push('');
+        if (advantage.weaponChoice) {
+          const choices = this.weaponChoices.get(id) ?? [];
+          choices.push('');
+          this.weaponChoices.set(id, choices);
+        }
       }
     }
   }
@@ -92,15 +104,16 @@ export class CharacterAdvantagesPage {
     const count = this.selectedCount(id);
     if (count <= 1) this.selected.delete(id);
     else this.selected.set(id, count - 1);
-    if (id === 'specialisation') this.specializationWeapons.pop();
+    const advantage = this.advantages().find((item) => item.id === id);
+    if (advantage?.weaponChoice) this.weaponChoices.get(id)?.pop();
   }
 
   protected save(): void {
     const maximum = this.availableAdvantages().availableAdvantages;
     if (!this.characterId || !this.canSave || this.selectedTotal !== maximum) return;
     const selected: CharacterAdvantage[] = [...this.selected].flatMap(([advantageId, count]) =>
-      advantageId === 'specialisation'
-        ? this.specializationWeapons.slice(0, count).map((weapon) => ({ advantageId, specializationWeapon: weapon.trim() }))
+      this.advantages().find((advantage) => advantage.id === advantageId)?.weaponChoice
+        ? this.weaponChoicesFor(advantageId).slice(0, count).map((weapon) => ({ advantageId, chosenWeapon: weapon.trim() }))
         : Array.from({ length: count }, () => ({ advantageId })),
     );
     this.characterService.setAdvantages(this.characterId, selected);

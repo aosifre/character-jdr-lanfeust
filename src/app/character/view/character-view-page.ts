@@ -113,7 +113,8 @@ export class CharacterViewPage implements AfterViewInit {
     for (const selected of this.character?.advantages ?? []) {
       const summary = selections.get(selected.advantageId) ?? { count: 0, weapons: [] };
       summary.count++;
-      if (selected.specializationWeapon) summary.weapons.push(selected.specializationWeapon);
+      const weapon = selected.chosenWeapon ?? selected.specializationWeapon;
+      if (weapon) summary.weapons.push(weapon);
       selections.set(selected.advantageId, summary);
     }
     return [...selections].flatMap(([id, summary]) => {

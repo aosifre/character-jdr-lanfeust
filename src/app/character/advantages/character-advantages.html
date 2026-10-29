@@ -11,12 +11,12 @@
     @for (advantage of filteredAdvantages(); track advantage.id) {
       <div class="advantage-choice">
         <button class="advantage-card" [class.selected]="isSelected(advantage.id)" [disabled]="(!isAvailable(advantage) && !isSelected(advantage.id)) || (isRepeatable(advantage) && selectedTotal >= availableAdvantages().availableAdvantages)" type="button" (click)="toggle(advantage.id)"><span>{{ advantage.title }}</span><strong>{{ isSelected(advantage.id) ? (isRepeatable(advantage) ? '× ' + selectedCount(advantage.id) : '✓') : '+' }}</strong><small>{{ categoryLabel(advantage.category) }}</small><small>{{ advantage.description || 'Aucune description' }}</small><small>{{ conditionText(advantage) }}</small></button>
-        @if (advantage.id === 'specialisation' && isSelected(advantage.id)) {
+        @if (advantage.weaponChoice && isSelected(advantage.id)) {
           <div class="specialization-weapons">
-            <strong>Armes de spécialisation</strong>
-            @for (weapon of specializationWeapons; track $index; let index = $index) {
-              <label [for]="'specialisation-weapon-' + index">Arme {{ index + 1 }}</label>
-              <input [id]="'specialisation-weapon-' + index" type="text" [value]="weapon" (input)="setSpecializationWeapon(index, $event)" />
+            <strong>Arme(s) à choisir</strong>
+            @for (weapon of weaponChoicesFor(advantage.id); track $index; let index = $index) {
+              <label [for]="advantage.id + '-weapon-' + index">Arme {{ index + 1 }}</label>
+              <input [id]="advantage.id + '-weapon-' + index" type="text" [value]="weapon" (input)="setWeaponChoice(advantage.id, index, $event)" />
             }
             <small>Chaque occurrence doit concerner une arme différente.</small>
           </div>

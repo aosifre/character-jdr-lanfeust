@@ -29,8 +29,8 @@ const defaultAdvantages: Advantage[] = [
   { id: 'provocateur', title: 'Provocateur', category: 'combat', description: 'Si vous réussissez un jet de Bmuff opposé à sa Psychologie, celui-ci cherche à vous faire taire par tous les moyens, au mépris de toute prudence. Sous l\'effet de la colère, ses jets d\'Attaque et de Défense se font avec un malus de -4 pendant tout son prochain tour. Cet Atout fonctionne également sur les animaux et les créatures qui ne comprendraient pas votre langage.', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
   { id: 'science-de-l-embuscade', title: 'Science de l\'embuscade', category: 'combat', description: 'Si vous disposez d\'au moins une minute pour préparer une embuscade, vous pouvez surprendre un groupe ennemi au maximum 10 fois plus nombreux que le vôtre. Non seulement votre camp attaque le premier mais vous recevez un bonus de +2 à tous vos jets d\'Attaque et de +1d6 à tous vos dégâts du tour pour refléter l\'effet de surprise. Vos compagnons, si toutefois ils acceptent de suivre vos instructions, peuvent recevoir le même bonus. Pour cela, il faut qu\'ils parviennent à se cacher correctement en réussissant un jet de Discrétion contre une difficulté de 15.', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
   { id: 'sous-la-ceinture', title: 'Sous la ceinture', category: 'combat', description: 'Quand vous faites une tentative de Krâsse sur une attaque, vous ajoutez 1dK sans prélever dans le tas une Krâsse pour celui-ci. Voir les règles de Krâsses en page 94.', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
-  { id: 'specialisation', title: 'Spécialisation', category: 'combat', description: 'Choisissez une arme. Vous recevez +2 aux jets d\'Attaque et de Dégâts avec une telle arme. Vous pouvez prendre plusieurs fois cet Atout, mais celui-ci doit s\'appliquer à une arme différente à chaque fois.', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null, repeatable: true },
-  { id: 'surspecialisation', title: 'Surspécialisation', category: 'combat', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
+  { id: 'specialisation', title: 'Spécialisation', category: 'combat', description: 'Choisissez une arme. Vous recevez +2 aux jets d\'Attaque et de Dégâts avec une telle arme. Vous pouvez prendre plusieurs fois cet Atout, mais celui-ci doit s\'appliquer à une arme différente à chaque fois.', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null, repeatable: true, weaponChoice: true },
+  { id: 'surspecialisation', title: 'Surspécialisation', category: 'combat', description: 'Choisissez une arme pour laquelle vous avez déjà l\'Atout Spécialisation. Votre bonus aux jets d\'Attaque et de Dégâts avec cette arme est maintenant de +4.', conditionAttribute: null, conditionMinimum: null, prerequisiteId: 'specialisation', repeatable: true, minimumLevel: 5, weaponChoice: true },
   { id: 'tir-de-loin', title: 'Tir de loin', category: 'combat', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
   { id: 'tir-rapide', title: 'Tir rapide', category: 'combat', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
   { id: 'uppercut', title: 'Uppercut', category: 'combat', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
@@ -102,8 +102,8 @@ export class AdvantageService {
     }
   }
 
-  add(title: string, category: AdvantageCategory, description: string, conditionAttribute: AttributeKey | null, conditionMinimum: number | null, prerequisiteId: string | null, minimumLevel: number | null, repeatable: boolean): void {
-    this.advantages.update((advantages) => [...advantages, { id: crypto.randomUUID(), title, category, description, conditionAttribute, conditionMinimum, prerequisiteId, minimumLevel, repeatable }]);
+  add(title: string, category: AdvantageCategory, description: string, conditionAttribute: AttributeKey | null, conditionMinimum: number | null, prerequisiteId: string | null, minimumLevel: number | null, repeatable: boolean, weaponChoice = false): void {
+    this.advantages.update((advantages) => [...advantages, { id: crypto.randomUUID(), title, category, description, conditionAttribute, conditionMinimum, prerequisiteId, minimumLevel, repeatable, weaponChoice }]);
     this.save();
   }
 
@@ -130,12 +130,13 @@ export class AdvantageService {
       && (advantage['conditionMinimum'] === null || advantage['conditionMinimum'] === undefined || this.isNumber(advantage['conditionMinimum']))
       && (advantage['prerequisiteId'] === null || advantage['prerequisiteId'] === undefined || typeof advantage['prerequisiteId'] === 'string')
       && (advantage['minimumLevel'] === null || advantage['minimumLevel'] === undefined || this.isNumber(advantage['minimumLevel']))
-      && (advantage['repeatable'] === undefined || typeof advantage['repeatable'] === 'boolean');
+      && (advantage['repeatable'] === undefined || typeof advantage['repeatable'] === 'boolean')
+      && (advantage['weaponChoice'] === undefined || typeof advantage['weaponChoice'] === 'boolean');
   }
 
   private normalize(value: Advantage & { label?: string }): Advantage {
     const defaultAdvantage = defaultAdvantages.find((advantage) => advantage.id === value.id);
-    return { id: value.id, title: value.title ?? value.label ?? '', category: value.category ?? 'heroic', description: value.description ?? '', conditionAttribute: value.conditionAttribute ?? null, conditionMinimum: value.conditionMinimum ?? null, prerequisiteId: value.prerequisiteId ?? null, minimumLevel: value.minimumLevel === undefined ? defaultAdvantage?.minimumLevel ?? null : value.minimumLevel, repeatable: value.repeatable ?? defaultAdvantage?.repeatable ?? false };
+    return { id: value.id, title: value.title ?? value.label ?? '', category: value.category ?? 'heroic', description: value.description ?? '', conditionAttribute: value.conditionAttribute ?? null, conditionMinimum: value.conditionMinimum ?? null, prerequisiteId: value.prerequisiteId ?? null, minimumLevel: value.minimumLevel === undefined ? defaultAdvantage?.minimumLevel ?? null : value.minimumLevel, repeatable: value.repeatable ?? defaultAdvantage?.repeatable ?? false, weaponChoice: value.weaponChoice ?? defaultAdvantage?.weaponChoice ?? false };
   }
 
   private isAttribute(value: unknown): boolean { return ['force', 'dexterite', 'constitution', 'sagesse', 'intelligence', 'charisme'].includes(value as string); }
