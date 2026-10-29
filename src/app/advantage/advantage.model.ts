@@ -47,9 +47,15 @@ export interface Advantage {
   conditionAttribute: AttributeKey | null;
   conditionMinimum: number | null;
   conditionOrigin?: CharacterOrigin | null;
+  conditionSkillId?: string | null;
+  conditionSkillMinimum?: number | null;
   prerequisiteId: string | null;
   minimumLevel?: number | null;
   repeatable?: boolean;
   weaponChoice?: boolean;
   deityChoice?: boolean;
+  excludedAdvantageIds?: string[];
+  recipeChoice?: boolean;
+  recipeCount?: number;
+  evolutionOnly?: boolean;
 }

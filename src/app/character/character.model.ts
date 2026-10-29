@@ -8,7 +8,7 @@ export interface CharacterAttributes {
 }
 
 export type CombatBonus = 'attack' | 'defense' | 'save' | null;
-export type CharacterOrigin = 'human' | 'darshan' | 'troll' | 'eckmul' | 'souardie';
+export type CharacterOrigin = 'darshan' | 'eckmul' | 'souardie' | 'region-primitive-reculee' | 'other';
 
 export interface CharacterOtherScores {
   attack: number;
@@ -74,11 +74,24 @@ export interface CharacterAdvantage {
   advantageId: string;
   chosenWeapon?: string;
   specializationWeapon?: string;
+  recipes?: CharacterRecipe[];
   chosenDeity?: {
     name: string;
     circumstances: string;
     helpingHand: string;
   };
+}
+
+export type RecipePowerType = 'communs' | 'mineurs' | 'majeurs';
+
+export interface CharacterRecipe {
+  ingredients: string;
+  power: string;
+  powerType: RecipePowerType | '';
+  range: string;
+  duration: string;
+  energyCost: number | null;
+  rareIngredient: string;
 }
 
 export interface CharacterFlaw {

@@ -21,6 +21,7 @@ const defaultSkills: Skill[] = [
   { id: 'psychologie', label: 'Psychologie', attributeOne: 'sagesse', attributeTwo: 'intelligence' },
   { id: 'renseignement', label: 'Renseignement', attributeOne: 'charisme', attributeTwo: 'sagesse' },
   { id: 'survie', label: 'Survie', attributeOne: 'sagesse', attributeTwo: 'constitution' },
+  { id: 'metier-alchimiste', label: 'Alchimie', attributeOne: 'intelligence', attributeTwo: 'sagesse' },
 ];
 
 @Injectable({ providedIn: 'root' })

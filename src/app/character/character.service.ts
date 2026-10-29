@@ -224,7 +224,7 @@ export class CharacterService {
   }
 
   private isOrigin(value: unknown): value is CharacterOrigin {
-    return value === 'human' || value === 'darshan' || value === 'troll' || value === 'eckmul' || value === 'souardie';
+    return  value === 'darshan' || value === 'eckmul' || value === 'souardie' || value === 'region-primitive-reculee';
   }
 
   private normalizeCharacter(value: Character): Character {
@@ -245,7 +245,7 @@ export class CharacterService {
       lastName: value.lastName,
       portrait: typeof value.portrait === 'string' && value.portrait.length <= MAX_PORTRAIT_DATA_URL_LENGTH ? value.portrait : undefined,
       description: typeof value.description === 'string' ? value.description : '',
-      origin: this.isOrigin(value.origin) ? value.origin : 'human',
+      origin: this.isOrigin(value.origin) ? value.origin : 'other',
       experience,
       level,
       attributes,

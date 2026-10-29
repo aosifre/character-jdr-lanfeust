@@ -48,7 +48,8 @@ const defaultAdvantages: Advantage[] = [
   { id: 'endurant', title: 'Talentueux', category: 'heroic', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
   { id: 'bon-sens-souard', title: 'Bon sens souard', category: 'origin', description: 'Le conteur ne peut jamais faire de tentative de Krâsse quand un de ses seconds rôles essaie de vous embobiner ou de vous mentir. Votre bon sens s\'étend également aux effets magiques qui essaieraient de vous faire prendre des vessises pour des lanternes. Vous bénéficiez d\'un bonus de +4 aux jets de Sauvegarde contre de tels pouvoirs.', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null, conditionOrigin: 'souardie' },
   { id: 'chouchou-d-un-dieu', title: 'Chouchou d\'un dieu', category: 'origin', description: 'Choisissez avec le conteur dans la liste située en page 148 quel est le dieu qui vous convient le mieux à votre concept de héros. Les règles concenrant les interventions divines se trouvent également en page 148.', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null, conditionOrigin: 'darshan', deityChoice: true },
-  { id: 'chaman', title: 'Chaman', category: 'origin', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
+  { id: 'chaman', title: 'Chaman', category: 'origin', description: 'La magie des chamans se confine le plus souvent à créer des potions, des onguents et d\'autres concoctions peu ragoûtantes mais néanmoins efficaces. Au départ, vous connaissez deux recettes magiques. Allez voir en page 155 pour plus de détails.', conditionAttribute: null, conditionMinimum: null, conditionOrigin: 'region-primitive-reculee', conditionSkillId: 'metier-alchimiste', conditionSkillMinimum: 5, prerequisiteId: null, excludedAdvantageIds: ['pouvoir-magique', 'sage-d-eckmul'], recipeChoice: true, recipeCount: 2 },
+  { id: 'nouvelle-recette-chaman', title: 'Nouvelle recette', category: 'origin', description: 'Apprenez une recette supplémentaire grâce à votre talent de Chaman.', conditionAttribute: null, conditionMinimum: null, conditionOrigin: null, conditionSkillId: null, conditionSkillMinimum: null, prerequisiteId: 'chaman', minimumLevel: 1, repeatable: true, recipeChoice: true, recipeCount: 1, evolutionOnly: true },
   { id: 'fortune', title: 'Fortuné', category: 'origin', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
   { id: 'chevalier', title: 'Chevalier', category: 'origin', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
   { id: 'gnome-de-troy', title: 'Gnome de Troy', category: 'origin', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
@@ -103,8 +104,8 @@ export class AdvantageService {
     }
   }
 
-  add(title: string, category: AdvantageCategory, description: string, conditionAttribute: AttributeKey | null, conditionMinimum: number | null, prerequisiteId: string | null, minimumLevel: number | null, repeatable: boolean, weaponChoice = false, conditionOrigin: CharacterOrigin | null = null, deityChoice = false): void {
-    this.advantages.update((advantages) => [...advantages, { id: crypto.randomUUID(), title, category, description, conditionAttribute, conditionMinimum, prerequisiteId, minimumLevel, repeatable, weaponChoice, conditionOrigin, deityChoice }]);
+  add(title: string, category: AdvantageCategory, description: string, conditionAttribute: AttributeKey | null, conditionMinimum: number | null, prerequisiteId: string | null, minimumLevel: number | null, repeatable: boolean, weaponChoice = false, conditionOrigin: CharacterOrigin | null = null, deityChoice = false, conditionSkillId: string | null = null, conditionSkillMinimum: number | null = null, excludedAdvantageIds: string[] = [], recipeChoice = false, recipeCount = 1, evolutionOnly = false): void {
+    this.advantages.update((advantages) => [...advantages, { id: crypto.randomUUID(), title, category, description, conditionAttribute, conditionMinimum, prerequisiteId, minimumLevel, repeatable, weaponChoice, conditionOrigin, deityChoice, conditionSkillId, conditionSkillMinimum, excludedAdvantageIds, recipeChoice, recipeCount, evolutionOnly }]);
     this.save();
   }
 
@@ -134,15 +135,21 @@ export class AdvantageService {
       && (advantage['repeatable'] === undefined || typeof advantage['repeatable'] === 'boolean')
       && (advantage['weaponChoice'] === undefined || typeof advantage['weaponChoice'] === 'boolean')
       && (advantage['deityChoice'] === undefined || typeof advantage['deityChoice'] === 'boolean')
-      && (advantage['conditionOrigin'] === null || advantage['conditionOrigin'] === undefined || this.isOrigin(advantage['conditionOrigin']));
+      && (advantage['recipeChoice'] === undefined || typeof advantage['recipeChoice'] === 'boolean')
+      && (advantage['recipeCount'] === undefined || (typeof advantage['recipeCount'] === 'number' && this.isNumber(advantage['recipeCount']) && advantage['recipeCount'] > 0))
+      && (advantage['evolutionOnly'] === undefined || typeof advantage['evolutionOnly'] === 'boolean')
+      && (advantage['conditionOrigin'] === null || advantage['conditionOrigin'] === undefined || this.isOrigin(advantage['conditionOrigin']))
+      && (advantage['conditionSkillId'] === null || advantage['conditionSkillId'] === undefined || typeof advantage['conditionSkillId'] === 'string')
+      && (advantage['conditionSkillMinimum'] === null || advantage['conditionSkillMinimum'] === undefined || this.isNumber(advantage['conditionSkillMinimum']))
+      && (advantage['excludedAdvantageIds'] === undefined || (Array.isArray(advantage['excludedAdvantageIds']) && advantage['excludedAdvantageIds'].every((id) => typeof id === 'string')));
   }
 
   private normalize(value: Advantage & { label?: string }): Advantage {
     const defaultAdvantage = defaultAdvantages.find((advantage) => advantage.id === value.id);
-    return { id: value.id, title: value.title ?? value.label ?? '', category: value.category ?? 'heroic', description: value.description ?? '', conditionAttribute: value.conditionAttribute ?? null, conditionMinimum: value.conditionMinimum ?? null, conditionOrigin: value.conditionOrigin ?? defaultAdvantage?.conditionOrigin ?? null, prerequisiteId: value.prerequisiteId ?? null, minimumLevel: value.minimumLevel === undefined ? defaultAdvantage?.minimumLevel ?? null : value.minimumLevel, repeatable: value.repeatable ?? defaultAdvantage?.repeatable ?? false, weaponChoice: value.weaponChoice ?? defaultAdvantage?.weaponChoice ?? false, deityChoice: value.deityChoice ?? defaultAdvantage?.deityChoice ?? false };
+    return { id: value.id, title: value.title ?? value.label ?? '', category: value.category ?? 'heroic', description: value.description ?? '', conditionAttribute: value.conditionAttribute ?? null, conditionMinimum: value.conditionMinimum ?? null, conditionOrigin: value.conditionOrigin ?? defaultAdvantage?.conditionOrigin ?? null, conditionSkillId: value.conditionSkillId ?? defaultAdvantage?.conditionSkillId ?? null, conditionSkillMinimum: value.conditionSkillMinimum ?? defaultAdvantage?.conditionSkillMinimum ?? null, excludedAdvantageIds: value.excludedAdvantageIds ?? defaultAdvantage?.excludedAdvantageIds ?? [], prerequisiteId: value.prerequisiteId ?? null, minimumLevel: value.minimumLevel === undefined ? defaultAdvantage?.minimumLevel ?? null : value.minimumLevel, repeatable: value.repeatable ?? defaultAdvantage?.repeatable ?? false, weaponChoice: value.weaponChoice ?? defaultAdvantage?.weaponChoice ?? false, deityChoice: value.deityChoice ?? defaultAdvantage?.deityChoice ?? false, recipeChoice: value.recipeChoice ?? defaultAdvantage?.recipeChoice ?? false, recipeCount: value.recipeCount ?? defaultAdvantage?.recipeCount ?? 1, evolutionOnly: value.evolutionOnly ?? defaultAdvantage?.evolutionOnly ?? false };
   }
 
-  private isOrigin(value: unknown): value is CharacterOrigin { return ['human', 'darshan', 'troll', 'eckmul', 'souardie'].includes(value as string); }
+  private isOrigin(value: unknown): value is CharacterOrigin { return ['human', 'darshan', 'troll', 'eckmul', 'souardie', 'region-primitive-reculee'].includes(value as string); }
   private isAttribute(value: unknown): boolean { return ['force', 'dexterite', 'constitution', 'sagesse', 'intelligence', 'charisme'].includes(value as string); }
   private isCategory(value: unknown): value is AdvantageCategory { return ['combat', 'origin', 'magic', 'social', 'heroic'].includes(value as string); }
   private isNumber(value: unknown): boolean { return typeof value === 'number' && Number.isInteger(value) && value >= 0; }

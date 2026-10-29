@@ -30,7 +30,7 @@ describe('CharacterSkillsAddPage', () => {
       firstName: 'Test',
       lastName: 'Hero',
       description: '',
-      origin: 'human',
+      origin: 'darshan',
       level: 3,
       experience: 300,
       attributes: {

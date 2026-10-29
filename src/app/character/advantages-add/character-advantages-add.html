@@ -50,6 +50,14 @@
                   <textarea [id]="advantage.id + '-helping-hand'" rows="2" [value]="deityChoiceFor(advantage.id).helpingHand" (input)="setDeityChoice(advantage.id, 'helpingHand', $event)"></textarea>
                 </div>
               }
+              @if (advantage.recipeChoice && isSelected(advantage.id)) {
+                <div class="recipe-selection">
+                  <button class="button outline" type="button" (click)="openRecipeModal(advantage.id)">
+                    {{ confirmedRecipeChoices.has(advantage.id) ? 'Modifier les recettes' : 'Saisir les recettes' }}
+                  </button>
+                  <small>{{ confirmedRecipeChoices.has(advantage.id) ? 'Recettes validées' : 'Recettes à valider' }}</small>
+                </div>
+              }
               @if (isRepeatable(advantage) && isSelected(advantage.id)) {<button class="remove-selection" type="button" (click)="removeOne(advantage.id)">Retirer une occurrence</button>}
             </div>
           } @empty {
@@ -64,3 +72,42 @@
     Ajouter l'atout
   </button></footer>
 </main>
+@if (recipeModalAdvantageId; as advantageId) {
+  <div class="modal-backdrop" (click)="closeRecipeModal()">
+    <section class="recipe-modal" role="dialog" aria-modal="true" aria-labelledby="recipe-modal-title" (click)="$event.stopPropagation()">
+      <header class="recipe-modal-header">
+        <div><p class="eyebrow">Atout : {{ advantageTitle(advantageId) }}</p><h2 id="recipe-modal-title">Recettes à apprendre</h2></div>
+        <button class="close-button" type="button" aria-label="Fermer" (click)="closeRecipeModal()">×</button>
+      </header>
+      <div class="recipe-modal-content">
+        @for (recipe of recipeChoicesFor(advantageId); track $index; let recipeIndex = $index) {
+          <fieldset class="recipe-fields">
+            <legend>Recette {{ recipeIndex + 1 }}</legend>
+            <label [for]="advantageId + '-ingredients-' + recipeIndex">Ingrédients</label>
+            <input [id]="advantageId + '-ingredients-' + recipeIndex" type="text" [value]="recipe.ingredients" (input)="setRecipeChoice(advantageId, recipeIndex, 'ingredients', $event)" />
+            <label [for]="advantageId + '-power-' + recipeIndex">Pouvoir</label>
+            <input [id]="advantageId + '-power-' + recipeIndex" type="text" [value]="recipe.power" (input)="setRecipeChoice(advantageId, recipeIndex, 'power', $event)" />
+            <label [for]="advantageId + '-power-type-' + recipeIndex">Type de pouvoir</label>
+            <select [id]="advantageId + '-power-type-' + recipeIndex" [value]="recipe.powerType" (change)="setRecipeChoice(advantageId, recipeIndex, 'powerType', $event)">
+              <option value="">Choisir un type</option><option value="communs">Communs</option><option value="mineurs">Mineurs</option><option value="majeurs">Majeurs</option>
+            </select>
+            @if (isMajorRecipe(recipe)) {
+              <label [for]="advantageId + '-rare-ingredient-' + recipeIndex">Ingrédient rarissime</label>
+              <input [id]="advantageId + '-rare-ingredient-' + recipeIndex" type="text" [value]="recipe.rareIngredient" (input)="setRecipeChoice(advantageId, recipeIndex, 'rareIngredient', $event)" />
+            }
+            <label [for]="advantageId + '-range-' + recipeIndex">Portée</label>
+            <input [id]="advantageId + '-range-' + recipeIndex" type="text" [value]="recipe.range" (input)="setRecipeChoice(advantageId, recipeIndex, 'range', $event)" />
+            <label [for]="advantageId + '-duration-' + recipeIndex">Durée</label>
+            <input [id]="advantageId + '-duration-' + recipeIndex" type="text" [value]="recipe.duration" (input)="setRecipeChoice(advantageId, recipeIndex, 'duration', $event)" />
+            <label [for]="advantageId + '-energy-cost-' + recipeIndex">Coût en énergie</label>
+            <input [id]="advantageId + '-energy-cost-' + recipeIndex" type="number" min="0" step="1" [value]="recipe.energyCost ?? ''" (input)="setRecipeChoice(advantageId, recipeIndex, 'energyCost', $event)" />
+          </fieldset>
+        }
+      </div>
+      <footer class="recipe-modal-actions">
+        <p>Chaque recette doit être complète. Un pouvoir majeur nécessite un ingrédient rarissime.</p>
+        <div><button class="button outline" type="button" (click)="closeRecipeModal()">Fermer</button><button class="button" type="button" [disabled]="!canConfirmRecipeModal" (click)="confirmRecipeModal()">Valider les recettes</button></div>
+      </footer>
+    </section>
+  </div>
+}

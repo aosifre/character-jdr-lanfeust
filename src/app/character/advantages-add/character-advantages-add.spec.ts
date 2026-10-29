@@ -5,7 +5,9 @@ import { AdvantageService } from '../../advantage/advantage.service';
 import { Character } from '../character.model';
 import { CharacterService } from '../character.service';
 import { SettingsService } from '../../settings/settings.service';
+import { SkillService } from '../../skill/skill.service';
 import { CharacterAdvantagesAddPage } from './character-advantages-add';
+import { CharacterAdvantagesPage } from '../advantages/character-advantages';
 
 describe('CharacterAdvantagesAddPage', () => {
   const repeatableAdvantage = {
@@ -66,6 +68,44 @@ describe('CharacterAdvantagesAddPage', () => {
     repeatable: false,
     deityChoice: true,
   };
+  const shamanAdvantage = {
+    id: 'chaman',
+    title: 'Chaman',
+    category: 'origin' as const,
+    description: '',
+    conditionAttribute: null,
+    conditionMinimum: null,
+    conditionOrigin: 'region-primitive-reculee' as const,
+    conditionSkillId: 'metier-alchimiste',
+    conditionSkillMinimum: 5,
+    prerequisiteId: null,
+    excludedAdvantageIds: ['pouvoir-magique', 'sage-d-eckmul'],
+    recipeChoice: true,
+    recipeCount: 2,
+  };
+  const newRecipeAdvantage = {
+    id: 'nouvelle-recette',
+    title: 'Nouvelle recette',
+    category: 'origin' as const,
+    description: '',
+    conditionAttribute: null,
+    conditionMinimum: null,
+    prerequisiteId: 'chaman',
+    minimumLevel: 1,
+    repeatable: true,
+    recipeChoice: true,
+    recipeCount: 1,
+    evolutionOnly: true,
+  };
+  const magicPowerAdvantage = {
+    id: 'pouvoir-magique',
+    title: 'Pouvoir magique',
+    category: 'origin' as const,
+    description: '',
+    conditionAttribute: null,
+    conditionMinimum: null,
+    prerequisiteId: null,
+  };
   let character: Character;
   let setAdvantages: ReturnType<typeof vi.fn>;
   let page: CharacterAdvantagesAddPage;
@@ -76,7 +116,7 @@ describe('CharacterAdvantagesAddPage', () => {
       firstName: 'Test',
       lastName: 'Hero',
       description: '',
-      origin: 'human',
+      origin: 'darshan',
       level: 5,
       experience: 500,
       attributes: { force: 0, dexterite: 0, constitution: 0, sagesse: 0, intelligence: 0, charisme: 0 },
@@ -93,13 +133,14 @@ describe('CharacterAdvantagesAddPage', () => {
     setAdvantages = vi.fn();
 
     TestBed.configureTestingModule({
-      imports: [CharacterAdvantagesAddPage],
+      imports: [CharacterAdvantagesAddPage, CharacterAdvantagesPage],
       providers: [
         { provide: ActivatedRoute, useValue: { snapshot: { paramMap: { get: () => character.id } } } },
         { provide: Router, useValue: { navigate: vi.fn() } },
         { provide: CharacterService, useValue: { findById: () => character, setAdvantages } },
-        { provide: AdvantageService, useValue: { advantageList: signal([repeatableAdvantage, specializationAdvantage, weaponChoiceAdvantage, souardAdvantage, deityChoiceAdvantage]) } },
-        { provide: SettingsService, useValue: { currentSettings: signal({ availableAdvantages: 0 }) } },
+        { provide: AdvantageService, useValue: { advantageList: signal([repeatableAdvantage, specializationAdvantage, weaponChoiceAdvantage, souardAdvantage, deityChoiceAdvantage, shamanAdvantage, newRecipeAdvantage, magicPowerAdvantage]) } },
+        { provide: SkillService, useValue: { skillList: signal([{ id: 'metier-alchimiste', label: 'Alchimie', attributeOne: 'intelligence', attributeTwo: 'sagesse' }]) } },
+        { provide: SettingsService, useValue: { currentSettings: signal({ availableAdvantages: 2 }) } },
       ],
     });
 
@@ -221,5 +262,100 @@ describe('CharacterAdvantagesAddPage', () => {
         chosenDeity: { name: 'Mon dieu', circumstances: 'En cas de danger', helpingHand: 'Protège le héros' },
       },
     ]);
+  });
+
+  it('requires Alchemy 5 and blocks Chaman when an excluded advantage is selected', () => {
+    const internalPage = page as unknown as {
+      isAvailable(advantage: { id: string }): boolean;
+      selected: Map<string, number>;
+    };
+    character.origin = 'region-primitive-reculee';
+    character.skills = [{ skillId: 'metier-alchimiste', degree: 4 }];
+
+    expect(internalPage.isAvailable(shamanAdvantage)).toBe(false);
+
+    character.skills = [{ skillId: 'metier-alchimiste', degree: 5 }];
+    expect(internalPage.isAvailable(shamanAdvantage)).toBe(true);
+
+    internalPage.selected.set(magicPowerAdvantage.id, 1);
+    expect(internalPage.isAvailable(shamanAdvantage)).toBe(false);
+
+    internalPage.selected.clear();
+    internalPage.selected.set(shamanAdvantage.id, 1);
+    expect(internalPage.isAvailable(magicPowerAdvantage)).toBe(false);
+  });
+
+  it('requires a rare ingredient for major Chaman recipes and saves an extra recipe during level-up', () => {
+    const internalPage = page as unknown as {
+      toggle(id: string): void;
+      setRecipeChoice(id: string, index: number, field: string, event: Event): void;
+      recipeChoices: Map<string, { ingredients: string; power: string; powerType: string; range: string; duration: string; energyCost: number | null; rareIngredient: string }[]>;
+      selected: Map<string, number>;
+      advantageMaximum: number;
+      canSave: boolean;
+      canConfirmRecipeModal: boolean;
+      recipeModalAdvantageId: string | null;
+      confirmRecipeModal(): void;
+      save(): void;
+    };
+    const recipe = (powerType = 'communs') => ({
+      ingredients: 'Herbes',
+      power: 'Soin',
+      powerType,
+      range: 'Toucher',
+      duration: 'Instantanée',
+      energyCost: 2,
+      rareIngredient: '',
+    });
+    const enterRecipe = (advantageId: string, index: number, values: ReturnType<typeof recipe>) => {
+      for (const [field, value] of Object.entries(values)) {
+        internalPage.setRecipeChoice(advantageId, index, field, { target: { value: String(value) } } as unknown as Event);
+      }
+    };
+
+    internalPage.advantageMaximum = 3;
+    character.origin = 'region-primitive-reculee';
+    character.skills = [{ skillId: 'metier-alchimiste', degree: 5 }];
+    internalPage.toggle(shamanAdvantage.id);
+    expect(internalPage.recipeModalAdvantageId).toBe(shamanAdvantage.id);
+    enterRecipe(shamanAdvantage.id, 0, recipe('majeurs'));
+    enterRecipe(shamanAdvantage.id, 1, recipe());
+    expect(internalPage.canConfirmRecipeModal).toBe(false);
+    internalPage.setRecipeChoice(shamanAdvantage.id, 0, 'rareIngredient', { target: { value: 'Racine rare' } } as unknown as Event);
+    expect(internalPage.canConfirmRecipeModal).toBe(true);
+    internalPage.confirmRecipeModal();
+
+    internalPage.toggle(newRecipeAdvantage.id);
+    expect(internalPage.recipeModalAdvantageId).toBe(newRecipeAdvantage.id);
+    enterRecipe(newRecipeAdvantage.id, 0, recipe());
+    expect(internalPage.canSave).toBe(false);
+    internalPage.confirmRecipeModal();
+    expect(internalPage.canSave).toBe(true);
+
+    internalPage.save();
+
+    expect(setAdvantages).toHaveBeenCalledWith(character.id, [
+      { advantageId: repeatableAdvantage.id },
+      { advantageId: shamanAdvantage.id, recipes: [{ ...recipe('majeurs'), rareIngredient: 'Racine rare' }, recipe()] },
+      { advantageId: newRecipeAdvantage.id, recipes: [recipe()] },
+    ]);
+  });
+
+  it('keeps the extra Chaman recipe unavailable during character creation', () => {
+    const creationPage = TestBed.createComponent(CharacterAdvantagesPage).componentInstance as unknown as {
+      isAvailable(advantage: typeof newRecipeAdvantage): boolean;
+      toggle(id: string): void;
+      selected: Map<string, number>;
+      recipeModalAdvantageId: string | null;
+    };
+    creationPage.selected.set(shamanAdvantage.id, 1);
+
+    expect(creationPage.isAvailable(newRecipeAdvantage)).toBe(false);
+
+    creationPage.selected.clear();
+    character.origin = 'region-primitive-reculee';
+    character.skills = [{ skillId: 'metier-alchimiste', degree: 5 }];
+    creationPage.toggle(shamanAdvantage.id);
+    expect(creationPage.recipeModalAdvantageId).toBe(shamanAdvantage.id);
   });
 });

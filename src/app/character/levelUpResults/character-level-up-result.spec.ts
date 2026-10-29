@@ -16,7 +16,7 @@ describe('CharacterLevelUpResultPage', () => {
       firstName: 'Test',
       lastName: 'Hero',
       description: '',
-      origin: 'human',
+      origin: 'darshan',
       level: 4,
       experience: 400,
       attributes: { force: 0, dexterite: 0, constitution: 0, sagesse: 0, intelligence: 0, charisme: 0 },
