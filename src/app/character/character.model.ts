@@ -72,6 +72,7 @@ export interface CharacterSkill {
 
 export interface CharacterAdvantage {
   advantageId: string;
+  specializationWeapon?: string;
 }
 
 export interface CharacterFlaw {

@@ -108,14 +108,19 @@ export class CharacterViewPage implements AfterViewInit {
       .filter((item): item is Equipment => item !== undefined) ?? [];
   }
 
-  protected get selectedAdvantageSummaries(): { id: string; title: string; description: string; count: number }[] {
-    const counts = new Map<string, number>();
+  protected get selectedAdvantageSummaries(): { id: string; title: string; description: string; count: number; weapons: string }[] {
+    const selections = new Map<string, { count: number; weapons: string[] }>();
     for (const selected of this.character?.advantages ?? []) {
-      counts.set(selected.advantageId, (counts.get(selected.advantageId) ?? 0) + 1);
+      const summary = selections.get(selected.advantageId) ?? { count: 0, weapons: [] };
+      summary.count++;
+      if (selected.specializationWeapon) summary.weapons.push(selected.specializationWeapon);
+      selections.set(selected.advantageId, summary);
     }
-    return [...counts].flatMap(([id, count]) => {
+    return [...selections].flatMap(([id, summary]) => {
       const advantage = this.advantages().find((item) => item.id === id);
-      return advantage ? [{ id, title: advantage.title, description: advantage.description || 'Aucune description.', count }] : [];
+      return advantage
+        ? [{ id, title: advantage.title, description: advantage.description || 'Aucune description.', count: summary.count, weapons: summary.weapons.join(', ') }]
+        : [];
     });
   }
 
