@@ -8,7 +8,7 @@ export interface CharacterAttributes {
 }
 
 export type CombatBonus = 'attack' | 'defense' | 'save' | null;
-export type CharacterOrigin = 'human' | 'darshan' | 'troll' | 'eckmul';
+export type CharacterOrigin = 'human' | 'darshan' | 'troll' | 'eckmul' | 'souardie';
 
 export interface CharacterOtherScores {
   attack: number;
@@ -74,6 +74,11 @@ export interface CharacterAdvantage {
   advantageId: string;
   chosenWeapon?: string;
   specializationWeapon?: string;
+  chosenDeity?: {
+    name: string;
+    circumstances: string;
+    helpingHand: string;
+  };
 }
 
 export interface CharacterFlaw {

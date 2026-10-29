@@ -43,6 +43,29 @@ describe('CharacterAdvantagesAddPage', () => {
     repeatable: true,
     weaponChoice: true,
   };
+  const souardAdvantage = {
+    id: 'bon-sens-souard',
+    title: 'Bon sens souard',
+    category: 'origin' as const,
+    description: '',
+    conditionAttribute: null,
+    conditionMinimum: null,
+    conditionOrigin: 'souardie' as const,
+    prerequisiteId: null,
+    minimumLevel: null,
+  };
+  const deityChoiceAdvantage = {
+    id: 'chouchou-d-un-dieu',
+    title: "Chouchou d'un dieu",
+    category: 'origin' as const,
+    description: '',
+    conditionAttribute: null,
+    conditionMinimum: null,
+    prerequisiteId: null,
+    minimumLevel: null,
+    repeatable: false,
+    deityChoice: true,
+  };
   let character: Character;
   let setAdvantages: ReturnType<typeof vi.fn>;
   let page: CharacterAdvantagesAddPage;
@@ -75,7 +98,7 @@ describe('CharacterAdvantagesAddPage', () => {
         { provide: ActivatedRoute, useValue: { snapshot: { paramMap: { get: () => character.id } } } },
         { provide: Router, useValue: { navigate: vi.fn() } },
         { provide: CharacterService, useValue: { findById: () => character, setAdvantages } },
-        { provide: AdvantageService, useValue: { advantageList: signal([repeatableAdvantage, specializationAdvantage, weaponChoiceAdvantage]) } },
+        { provide: AdvantageService, useValue: { advantageList: signal([repeatableAdvantage, specializationAdvantage, weaponChoiceAdvantage, souardAdvantage, deityChoiceAdvantage]) } },
         { provide: SettingsService, useValue: { currentSettings: signal({ availableAdvantages: 0 }) } },
       ],
     });
@@ -156,6 +179,47 @@ describe('CharacterAdvantagesAddPage', () => {
     expect(setAdvantages).toHaveBeenCalledWith(character.id, [
       { advantageId: repeatableAdvantage.id },
       { advantageId: weaponChoiceAdvantage.id, chosenWeapon: 'Épée' },
+    ]);
+  });
+
+  it('only makes the Bon sens souard advantage available to Souardie characters', () => {
+    const internalPage = page as unknown as { isAvailable(advantage: typeof souardAdvantage): boolean };
+
+    expect(internalPage.isAvailable(souardAdvantage)).toBe(false);
+
+    character.origin = 'souardie';
+    expect(internalPage.isAvailable(souardAdvantage)).toBe(true);
+  });
+
+  it('stores the chosen deity and custom details for Chouchou d’un dieu', () => {
+    const internalPage = page as unknown as {
+      toggle(id: string): void;
+      selectedCount(id: string): number;
+      isRepeatable(advantage: typeof deityChoiceAdvantage): boolean;
+      setDeityChoice(id: string, field: string, event: Event): void;
+      canSave: boolean;
+      save(): void;
+      advantageMaximum: number;
+    };
+    character.origin = 'darshan';
+    internalPage.advantageMaximum = 2;
+    internalPage.toggle(deityChoiceAdvantage.id);
+
+    expect(internalPage.isRepeatable(deityChoiceAdvantage)).toBe(false);
+    internalPage.setDeityChoice(deityChoiceAdvantage.id, 'selection', { target: { value: 'Autre' } } as unknown as Event);
+    internalPage.setDeityChoice(deityChoiceAdvantage.id, 'customName', { target: { value: 'Mon dieu' } } as unknown as Event);
+    internalPage.setDeityChoice(deityChoiceAdvantage.id, 'circumstances', { target: { value: 'En cas de danger' } } as unknown as Event);
+    internalPage.setDeityChoice(deityChoiceAdvantage.id, 'helpingHand', { target: { value: 'Protège le héros' } } as unknown as Event);
+
+    expect(internalPage.canSave).toBe(true);
+    internalPage.save();
+
+    expect(setAdvantages).toHaveBeenCalledWith(character.id, [
+      { advantageId: repeatableAdvantage.id },
+      {
+        advantageId: deityChoiceAdvantage.id,
+        chosenDeity: { name: 'Mon dieu', circumstances: 'En cas de danger', helpingHand: 'Protège le héros' },
+      },
     ]);
   });
 });

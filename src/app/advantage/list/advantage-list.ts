@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import { AdvantageService } from '../advantage.service';
 import { AdvantageCategory } from '../advantage.model';
 import { AttributeKey } from '../../skill/skill.model';
+import { CharacterOrigin } from '../../character/character.model';
 
 @Component({
   imports: [ReactiveFormsModule, RouterLink],
@@ -17,6 +18,13 @@ export class AdvantageList {
   protected readonly attributes: { key: AttributeKey; label: string }[] = [
     { key: 'force', label: 'Force' }, { key: 'dexterite', label: 'Dextérité' }, { key: 'constitution', label: 'Constitution' },
     { key: 'sagesse', label: 'Sagesse' }, { key: 'intelligence', label: 'Intelligence' }, { key: 'charisme', label: 'Charisme' },
+  ];
+  protected readonly origins: { key: CharacterOrigin; label: string }[] = [
+    { key: 'human', label: 'Humain' },
+    { key: 'darshan', label: 'Darshan' },
+    { key: 'troll', label: 'Troll' },
+    { key: 'eckmul', label: 'Eckmül' },
+    { key: 'souardie', label: 'Souardie' },
   ];
   protected readonly categories: { key: AdvantageCategory; label: string }[] = [
     { key: 'combat', label: 'Atouts de combat' }, { key: 'origin', label: "Atouts d'origine" },
@@ -33,10 +41,12 @@ export class AdvantageList {
     description: new FormControl('', { nonNullable: true }),
     conditionAttribute: new FormControl<AttributeKey | null>(null, { nonNullable: true }),
     conditionMinimum: new FormControl<number | null>(null, { nonNullable: true }),
+    conditionOrigin: new FormControl<CharacterOrigin | null>(null, { nonNullable: true }),
     prerequisiteId: new FormControl<string | null>(null, { nonNullable: true }),
     minimumLevel: new FormControl<number | null>(null, { nonNullable: true }),
     repeatable: new FormControl(false, { nonNullable: true }),
     weaponChoice: new FormControl(false, { nonNullable: true }),
+    deityChoice: new FormControl(false, { nonNullable: true }),
   });
   protected importError = false;
   protected modalOpen = false;
@@ -44,8 +54,8 @@ export class AdvantageList {
   protected add(): void {
     if (this.form.invalid) return;
     const value = this.form.getRawValue();
-    this.service.add(value.title.trim(), value.category, value.description.trim(), value.conditionAttribute, value.conditionMinimum, value.prerequisiteId, value.minimumLevel, value.repeatable, value.weaponChoice);
-    this.form.reset({ title: '', category: 'heroic', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null, minimumLevel: null, repeatable: false, weaponChoice: false });
+    this.service.add(value.title.trim(), value.category, value.description.trim(), value.conditionAttribute, value.conditionMinimum, value.prerequisiteId, value.minimumLevel, value.repeatable, value.weaponChoice, value.conditionOrigin, value.deityChoice);
+    this.form.reset({ title: '', category: 'heroic', description: '', conditionAttribute: null, conditionMinimum: null, conditionOrigin: null, prerequisiteId: null, minimumLevel: null, repeatable: false, weaponChoice: false, deityChoice: false });
     this.modalOpen = false;
   }
 

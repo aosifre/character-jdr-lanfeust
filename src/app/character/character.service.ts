@@ -224,7 +224,7 @@ export class CharacterService {
   }
 
   private isOrigin(value: unknown): value is CharacterOrigin {
-    return value === 'human' || value === 'darshan' || value === 'troll' || value === 'eckmul';
+    return value === 'human' || value === 'darshan' || value === 'troll' || value === 'eckmul' || value === 'souardie';
   }
 
   private normalizeCharacter(value: Character): Character {

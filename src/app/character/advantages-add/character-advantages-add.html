@@ -32,6 +32,24 @@
                   <small>Chaque occurrence doit concerner une arme différente.</small>
                 </div>
               }
+              @if (advantage.deityChoice && isSelected(advantage.id)) {
+                <div class="specialization-weapons">
+                  <label [for]="advantage.id + '-deity'">Dieu choisi</label>
+                  <select [id]="advantage.id + '-deity'" [value]="deityChoiceFor(advantage.id).selection" (change)="setDeityChoice(advantage.id, 'selection', $event)">
+                    <option value="">Choisir un dieu</option>
+                    @for (deity of deities; track deity.name) { <option [value]="deity.name">{{ deity.name }}</option> }
+                    <option value="Autre">Autre</option>
+                  </select>
+                  @if (deityChoiceFor(advantage.id).selection === 'Autre') {
+                    <label [for]="advantage.id + '-custom-deity'">Nom du dieu</label>
+                    <input [id]="advantage.id + '-custom-deity'" type="text" [value]="deityChoiceFor(advantage.id).customName" (input)="setDeityChoice(advantage.id, 'customName', $event)" />
+                  }
+                  <label [for]="advantage.id + '-circumstances'">Circonstances</label>
+                  <textarea [id]="advantage.id + '-circumstances'" rows="2" [value]="deityChoiceFor(advantage.id).circumstances" (input)="setDeityChoice(advantage.id, 'circumstances', $event)"></textarea>
+                  <label [for]="advantage.id + '-helping-hand'">Coup de main</label>
+                  <textarea [id]="advantage.id + '-helping-hand'" rows="2" [value]="deityChoiceFor(advantage.id).helpingHand" (input)="setDeityChoice(advantage.id, 'helpingHand', $event)"></textarea>
+                </div>
+              }
               @if (isRepeatable(advantage) && isSelected(advantage.id)) {<button class="remove-selection" type="button" (click)="removeOne(advantage.id)">Retirer une occurrence</button>}
             </div>
           } @empty {
