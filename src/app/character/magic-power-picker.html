@@ -1,0 +1,50 @@
+<div class="modal-backdrop" role="presentation" (click)="closed.emit()">
+  <section class="magic-modal" role="dialog" aria-modal="true" aria-labelledby="magic-modal-title" (click)="$event.stopPropagation()">
+    <header class="magic-modal-header">
+      <div><p class="eyebrow">Atout : Pouvoir magique</p><h2 id="magic-modal-title">Choisir un pouvoir</h2></div>
+      <button class="close-button" type="button" aria-label="Fermer" (click)="closed.emit()">×</button>
+    </header>
+
+    <div class="magic-modal-content">
+      <button class="button random-button" type="button" (click)="rollRandom()">Choisir aléatoirement (2 dés par table)</button>
+      @if (rollResult()) { <small aria-live="polite">{{ rollResult() }}</small> }
+      @if (randomError()) { <small class="error-message" role="alert">{{ randomError() }}</small> }
+
+      <label for="magic-level">Niveau du pouvoir</label>
+      <select id="magic-level" [value]="powerLevel()" (change)="changeLevel($event)">
+        @for (level of levels; track level.value) { <option [value]="level.value">{{ level.label }}</option> }
+      </select>
+
+      <div class="selection-heading"><label for="magic-power">Pouvoir prédéfini</label><button class="text-button" type="button" (click)="creatingPower.update((value) => !value)">{{ creatingPower() ? 'Annuler' : 'Créer un pouvoir' }}</button></div>
+      <select id="magic-power" [value]="powerNumber() ?? ''" (change)="setPowerNumber($event)">
+        <option value="">Sélectionner un pouvoir</option>
+        @for (power of powersForLevel(); track power.number) { <option [value]="power.number">{{ power.number }} — {{ power.label }}</option> }
+      </select>
+      @if (creatingPower()) {
+        <div class="custom-fields">
+          <label for="custom-power-number">Numéro</label><input id="custom-power-number" type="number" min="0" max="99" [value]="customPowerNumber()" (input)="setCustomValue('powerNumber', $event)" />
+          <label for="custom-power-label">Nom du pouvoir</label><input id="custom-power-label" type="text" [value]="customPowerLabel()" (input)="setCustomValue('powerLabel', $event)" />
+          <button class="button outline" type="button" [disabled]="!canCreatePower" (click)="createPower()">Ajouter ce pouvoir</button>
+        </div>
+      }
+
+      <div class="selection-heading"><label for="magic-condition">Condition</label><button class="text-button" type="button" (click)="creatingCondition.update((value) => !value)">{{ creatingCondition() ? 'Annuler' : 'Créer une condition' }}</button></div>
+      <select id="magic-condition" [value]="conditionNumber() ?? ''" (change)="setConditionNumber($event)">
+        <option value="">Sélectionner une condition</option>
+        @for (condition of conditions(); track condition.number) { <option [value]="condition.number">{{ condition.number }} — {{ condition.label }}</option> }
+      </select>
+      @if (creatingCondition()) {
+        <div class="custom-fields">
+          <label for="custom-condition-number">Numéro</label><input id="custom-condition-number" type="number" min="0" max="99" [value]="customConditionNumber()" (input)="setCustomValue('conditionNumber', $event)" />
+          <label for="custom-condition-label">Libellé de la condition</label><input id="custom-condition-label" type="text" [value]="customConditionLabel()" (input)="setCustomValue('conditionLabel', $event)" />
+          <button class="button outline" type="button" [disabled]="!canCreateCondition" (click)="createCondition()">Ajouter cette condition</button>
+        </div>
+      }
+    </div>
+
+    <footer class="magic-modal-actions">
+      <p>Les listes prédéfinies seront renseignées à partir de vos tables.</p>
+      <div><button class="button outline" type="button" (click)="closed.emit()">Annuler</button><button class="button" type="button" [disabled]="!canConfirm" (click)="confirm()">Valider le choix</button></div>
+    </footer>
+  </section>
+</div>

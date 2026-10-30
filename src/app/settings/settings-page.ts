@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FontStyle, SettingsService } from './settings.service';
 import { CharacterService } from '../character/character.service';
@@ -19,6 +19,18 @@ export class SettingsPage {
   private readonly advantageService = inject(AdvantageService);
   private readonly flawService = inject(FlawService);
   protected importError = false;
+  protected readonly dataCleared = signal(false);
+
+  protected clearApplicationData(): void {
+    this.dataCleared.set(false);
+    if (typeof window === 'undefined' || !window.confirm('Cette action supprimera définitivement tous les personnages, catalogues personnalisés et préférences enregistrés dans cette application. Continuer ?')) return;
+    this.characterService.clearAllData();
+    this.advantageService.resetToDefaults();
+    this.skillService.resetToDefaults();
+    this.flawService.resetToDefaults();
+    this.settingsService.resetToDefaults();
+    this.dataCleared.set(true);
+  }
 
   protected exportData(): void {
     const settings = this.settingsService.currentSettings();

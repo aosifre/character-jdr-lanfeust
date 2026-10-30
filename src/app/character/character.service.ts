@@ -76,6 +76,11 @@ export class CharacterService {
     return this.characters().find((character) => character.id === id);
   }
 
+  clearAllData(): void {
+    this.characters.set([]);
+    if (this.isBrowser) localStorage.removeItem(this.storageKey);
+  }
+
   copyFromSnapshot(characterId: string, snapshotId: string): Character | undefined {
     const character = this.findById(characterId);
     const snapshot = character?.history?.find((item) => item.snapshotId === snapshotId);

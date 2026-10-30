@@ -69,6 +69,11 @@ export class FlawService {
     return true;
   }
 
+  resetToDefaults(): void {
+    this.flaws.set([...defaultFlaws]);
+    if (this.isBrowser) localStorage.removeItem(this.storageKey);
+  }
+
   private mergeWithDefaults(customFlaws: Flaw[]): Flaw[] {
     const flawsById = new Map(defaultFlaws.map((flaw) => [flaw.id, flaw]));
     for (const flaw of customFlaws) flawsById.set(flaw.id, flaw);

@@ -8,9 +8,11 @@ import { SkillService } from '../../skill/skill.service';
 import { Advantage, DARSHAN_DEITIES, DeityChoiceDraft } from '../../advantage/advantage.model';
 import { AdvantageCategory } from '../../advantage/advantage.model';
 import { AdvantageDescriptionPipe } from '../../advantage/advantage-description.pipe';
+import { MagicPowerChoice } from '../magic-power.model';
+import { MagicPowerPicker } from '../magic-power-picker';
 
 @Component({
-  imports: [RouterLink, AdvantageDescriptionPipe],
+  imports: [RouterLink, AdvantageDescriptionPipe, MagicPowerPicker],
   selector: 'app-character-advantage-add',
   templateUrl: './character-advantages-add.html',
   styleUrl: './character-advantages-add.scss'
@@ -32,9 +34,11 @@ export class CharacterAdvantagesAddPage {
   protected readonly weaponChoices = new Map<string, string[]>();
   protected readonly deityChoices = new Map<string, DeityChoiceDraft>();
   protected readonly recipeChoices = new Map<string, CharacterRecipe[]>();
+  protected readonly magicPowerChoices = new Map<string, MagicPowerChoice>();
   protected readonly confirmedRecipeChoices = new Set<string>();
   protected readonly deities = DARSHAN_DEITIES;
   protected recipeModalAdvantageId: string | null = null;
+  protected magicModalAdvantageId: string | null = null;
   public advantageMaximum = 0;
 
  // ajout d'un avantage supplémentaire pour le personnage en + du nombre d'avantages actuel du personnage
@@ -69,6 +73,7 @@ export class CharacterAdvantagesAddPage {
          }
          this.recipeChoices.set(advantageId, recipes);
        }
+       if (selectedAdvantage.magicPowerChoice) this.magicPowerChoices.set(advantageId, selectedAdvantage.magicPowerChoice);
      }
      for (const advantageId of this.selected.keys()) {
        if (this.areRecipesValid(advantageId)) this.confirmedRecipeChoices.add(advantageId);
@@ -163,6 +168,7 @@ export class CharacterAdvantagesAddPage {
      if (advantage?.recipeChoice) {
        if (!this.confirmedRecipeChoices.has(advantageId) || !this.areRecipesValid(advantageId)) return false;
      }
+      if (advantageId === 'pouvoir-magique' && !this.magicPowerChoices.has(advantageId)) return false;
      return true;
    });
  }
@@ -221,8 +227,10 @@ export class CharacterAdvantagesAddPage {
     if (count > 0 && advantage && !this.isRepeatable(advantage)) {
       this.selected.delete(id);
       this.clearChoices(id, advantage);
+      this.magicPowerChoices.delete(id);
       this.confirmedRecipeChoices.delete(id);
       if (this.recipeModalAdvantageId === id) this.closeRecipeModal();
+      if (this.magicModalAdvantageId === id) this.closeMagicPowerModal();
     }
     else {
       if (advantage && this.isAvailable(advantage) && this.selectedTotal < this.advantageMaximum) {
@@ -239,6 +247,7 @@ export class CharacterAdvantagesAddPage {
           this.confirmedRecipeChoices.delete(id);
           this.openRecipeModal(id);
         }
+        if (id === 'pouvoir-magique') this.openMagicPowerModal(id);
       }
     }
   }
@@ -250,6 +259,7 @@ export class CharacterAdvantagesAddPage {
     const advantage = this.advantages().find((item) => item.id === id);
     if (advantage) {
       this.clearChoices(id, advantage, advantage.recipeCount ?? 1);
+      if (id === 'pouvoir-magique') this.magicPowerChoices.delete(id);
       this.confirmedRecipeChoices.delete(id);
       if (this.recipeModalAdvantageId === id) this.closeRecipeModal();
     }
@@ -280,6 +290,10 @@ export class CharacterAdvantagesAddPage {
           recipes: recipes.slice(occurrence * recipesPerOccurrence, (occurrence + 1) * recipesPerOccurrence),
         }));
       }
+      if (advantageId === 'pouvoir-magique') {
+        const choice = this.magicPowerChoices.get(advantageId);
+        return choice ? Array.from({ length: count }, () => ({ advantageId, magicPowerChoice: choice })) : [];
+      }
       return Array.from({ length: count }, () => ({ advantageId }));
     });
     this.characterService.setAdvantages(this.characterId, selected);
@@ -295,5 +309,14 @@ export class CharacterAdvantagesAddPage {
       else recipes.length = 0;
       this.recipeChoices.set(id, recipes);
     }
+  }
+
+  protected openMagicPowerModal(advantageId: string): void {
+    if (this.isSelected(advantageId)) this.magicModalAdvantageId = advantageId;
+  }
+  protected closeMagicPowerModal(): void { this.magicModalAdvantageId = null; }
+  protected setMagicPowerChoice(advantageId: string, choice: MagicPowerChoice): void {
+    this.magicPowerChoices.set(advantageId, choice);
+    this.closeMagicPowerModal();
   }
 }

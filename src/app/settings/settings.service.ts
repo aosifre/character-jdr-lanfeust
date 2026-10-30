@@ -50,6 +50,12 @@ export class SettingsService {
     return true;
   }
 
+  resetToDefaults(): void {
+    this.settings.set(defaultSettings);
+    this.applyAppearance();
+    if (this.isBrowser) localStorage.removeItem(this.storageKey);
+  }
+
   private normalizeSettings(value: unknown): GlobalSettings | null {
     if (typeof value !== 'object' || value === null) return null;
     const settings = value as Record<string, unknown>;

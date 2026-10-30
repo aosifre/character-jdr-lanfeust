@@ -9,6 +9,7 @@ import { FlawService } from '../../flaw/flaw.service';
 import { Skill } from '../../skill/skill.model';
 import { equipmentIcon, Equipment } from '../../equipment/equipment.model';
 import { CharacterMoney, CharacterRecipe } from '../character.model';
+import { MagicPowerChoice } from '../magic-power.model';
 import { CharacterAttributes } from '../character.model';
 import { AdvantageDescriptionPipe } from '../../advantage/advantage-description.pipe';
 
@@ -122,8 +123,8 @@ export class CharacterViewPage implements AfterViewInit {
       .filter((item): item is Equipment => item !== undefined) ?? [];
   }
 
-  protected get selectedAdvantageSummaries(): { id: string; title: string; description: string; count: number; weapons: string; deity?: { name: string; circumstances: string; helpingHand: string }; recipes: CharacterRecipe[] }[] {
-    const selections = new Map<string, { count: number; weapons: string[]; deity?: { name: string; circumstances: string; helpingHand: string }; recipes: CharacterRecipe[] }>();
+  protected get selectedAdvantageSummaries(): { id: string; title: string; description: string; count: number; weapons: string; deity?: { name: string; circumstances: string; helpingHand: string }; recipes: CharacterRecipe[]; magicPowerChoice?: MagicPowerChoice }[] {
+    const selections = new Map<string, { count: number; weapons: string[]; deity?: { name: string; circumstances: string; helpingHand: string }; recipes: CharacterRecipe[]; magicPowerChoice?: MagicPowerChoice }>();
     for (const selected of this.character?.advantages ?? []) {
       const summary = selections.get(selected.advantageId) ?? { count: 0, weapons: [], recipes: [] };
       summary.count++;
@@ -131,12 +132,13 @@ export class CharacterViewPage implements AfterViewInit {
       if (weapon) summary.weapons.push(weapon);
       if (selected.chosenDeity) summary.deity = selected.chosenDeity;
       if (selected.recipes) summary.recipes.push(...selected.recipes);
+      if (selected.magicPowerChoice) summary.magicPowerChoice = selected.magicPowerChoice;
       selections.set(selected.advantageId, summary);
     }
     return [...selections].flatMap(([id, summary]) => {
       const advantage = this.advantages().find((item) => item.id === id);
       return advantage
-        ? [{ id, title: advantage.title, description: advantage.description || 'Aucune description.', count: summary.count, weapons: summary.weapons.join(', '), deity: summary.deity, recipes: summary.recipes }]
+        ? [{ id, title: advantage.title, description: advantage.description || 'Aucune description.', count: summary.count, weapons: summary.weapons.join(', '), deity: summary.deity, recipes: summary.recipes, magicPowerChoice: summary.magicPowerChoice }]
         : [];
     });
   }

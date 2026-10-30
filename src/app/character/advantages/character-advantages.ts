@@ -8,8 +8,10 @@ import { SkillService } from '../../skill/skill.service';
 import { Advantage, DARSHAN_DEITIES, DeityChoiceDraft } from '../../advantage/advantage.model';
 import { AdvantageCategory } from '../../advantage/advantage.model';
 import { AdvantageDescriptionPipe } from '../../advantage/advantage-description.pipe';
+import { MagicPowerChoice } from '../magic-power.model';
+import { MagicPowerPicker } from '../magic-power-picker';
 
-@Component({ imports: [RouterLink, AdvantageDescriptionPipe], selector: 'app-character-advantages', templateUrl: './character-advantages.html', styleUrl: './character-advantages.scss' })
+@Component({ imports: [RouterLink, AdvantageDescriptionPipe, MagicPowerPicker], selector: 'app-character-advantages', templateUrl: './character-advantages.html', styleUrl: './character-advantages.scss' })
 export class CharacterAdvantagesPage {
   private readonly characterService = inject(CharacterService);
   private readonly advantageService = inject(AdvantageService);
@@ -27,10 +29,12 @@ export class CharacterAdvantagesPage {
   protected readonly weaponChoices = new Map<string, string[]>();
   protected readonly deityChoices = new Map<string, DeityChoiceDraft>();
   protected readonly recipeChoices = new Map<string, CharacterRecipe[]>();
+  protected readonly magicPowerChoices = new Map<string, MagicPowerChoice>();
   protected readonly confirmedRecipeChoices = new Set<string>();
   protected readonly deities = DARSHAN_DEITIES;
   protected readonly availableAdvantages = this.settingsService.currentSettings;
   protected recipeModalAdvantageId: string | null = null;
+  protected magicModalAdvantageId: string | null = null;
 
   constructor() {
     for (const selectedAdvantage of this.character?.advantages ?? []) {
@@ -60,6 +64,7 @@ export class CharacterAdvantagesPage {
         }
         this.recipeChoices.set(advantageId, recipes);
       }
+      if (selectedAdvantage.magicPowerChoice) this.magicPowerChoices.set(advantageId, selectedAdvantage.magicPowerChoice);
     }
     for (const advantageId of this.selected.keys()) {
       if (this.areRecipesValid(advantageId)) this.confirmedRecipeChoices.add(advantageId);
@@ -154,6 +159,7 @@ export class CharacterAdvantagesPage {
       if (advantage?.recipeChoice) {
         if (!this.confirmedRecipeChoices.has(advantageId) || !this.areRecipesValid(advantageId)) return false;
       }
+      if (advantageId === 'pouvoir-magique' && !this.magicPowerChoices.has(advantageId)) return false;
       return true;
     });
   }
@@ -208,8 +214,10 @@ export class CharacterAdvantagesPage {
     if (count > 0 && advantage && !this.isRepeatable(advantage)) {
       this.selected.delete(id);
       this.clearChoices(id, advantage);
+      this.magicPowerChoices.delete(id);
       this.confirmedRecipeChoices.delete(id);
       if (this.recipeModalAdvantageId === id) this.closeRecipeModal();
+      if (this.magicModalAdvantageId === id) this.closeMagicPowerModal();
     }
     else {
       if (advantage && this.isAvailable(advantage) && this.selectedTotal < maximum) {
@@ -226,6 +234,7 @@ export class CharacterAdvantagesPage {
           this.confirmedRecipeChoices.delete(id);
           this.openRecipeModal(id);
         }
+        if (id === 'pouvoir-magique') this.openMagicPowerModal(id);
       }
     }
   }
@@ -237,6 +246,7 @@ export class CharacterAdvantagesPage {
     const advantage = this.advantages().find((item) => item.id === id);
     if (advantage) {
       this.clearChoices(id, advantage, advantage.recipeCount ?? 1);
+      if (id === 'pouvoir-magique') this.magicPowerChoices.delete(id);
       this.confirmedRecipeChoices.delete(id);
       if (this.recipeModalAdvantageId === id) this.closeRecipeModal();
     }
@@ -267,6 +277,10 @@ export class CharacterAdvantagesPage {
           recipes: recipes.slice(occurrence * recipesPerOccurrence, (occurrence + 1) * recipesPerOccurrence),
         }));
       }
+      if (advantageId === 'pouvoir-magique') {
+        const choice = this.magicPowerChoices.get(advantageId);
+        return choice ? Array.from({ length: count }, () => ({ advantageId, magicPowerChoice: choice })) : [];
+      }
       return Array.from({ length: count }, () => ({ advantageId }));
     });
     this.characterService.setAdvantages(this.characterId, selected);
@@ -281,5 +295,13 @@ export class CharacterAdvantagesPage {
       else recipes.length = 0;
       this.recipeChoices.set(id, recipes);
     }
+  }
+  protected openMagicPowerModal(advantageId: string): void {
+    if (this.isSelected(advantageId)) this.magicModalAdvantageId = advantageId;
+  }
+  protected closeMagicPowerModal(): void { this.magicModalAdvantageId = null; }
+  protected setMagicPowerChoice(advantageId: string, choice: MagicPowerChoice): void {
+    this.magicPowerChoices.set(advantageId, choice);
+    this.closeMagicPowerModal();
   }
 }

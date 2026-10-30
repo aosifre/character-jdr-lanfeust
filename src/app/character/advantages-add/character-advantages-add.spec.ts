@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AdvantageService } from '../../advantage/advantage.service';
 import { Character } from '../character.model';
+import { MagicPowerChoice } from '../magic-power.model';
 import { CharacterService } from '../character.service';
 import { SettingsService } from '../../settings/settings.service';
 import { SkillService } from '../../skill/skill.service';
@@ -361,5 +362,34 @@ describe('CharacterAdvantagesAddPage', () => {
     character.skills = [{ skillId: 'metier-alchimiste', degree: 5 }];
     creationPage.toggle(shamanAdvantage.id);
     expect(creationPage.recipeModalAdvantageId).toBe(shamanAdvantage.id);
+  });
+
+  it('requires and saves a magic power with its condition during level-up', () => {
+    const internalPage = page as unknown as {
+      toggle(id: string): void;
+      setMagicPowerChoice(id: string, choice: MagicPowerChoice): void;
+      magicModalAdvantageId: string | null;
+      canSave: boolean;
+      save(): void;
+    };
+    const choice: MagicPowerChoice = {
+      level: 'mineur',
+      power: { number: 35, label: 'Pouvoir de test' },
+      condition: { number: 42, label: 'Condition de test' },
+    };
+
+    internalPage.toggle(magicPowerAdvantage.id);
+
+    expect(internalPage.magicModalAdvantageId).toBe(magicPowerAdvantage.id);
+    expect(internalPage.canSave).toBe(false);
+
+    internalPage.setMagicPowerChoice(magicPowerAdvantage.id, choice);
+    expect(internalPage.canSave).toBe(true);
+    internalPage.save();
+
+    expect(setAdvantages).toHaveBeenCalledWith(character.id, [
+      { advantageId: repeatableAdvantage.id },
+      { advantageId: magicPowerAdvantage.id, magicPowerChoice: choice },
+    ]);
   });
 });

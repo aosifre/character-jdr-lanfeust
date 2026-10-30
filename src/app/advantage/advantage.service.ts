@@ -68,7 +68,7 @@ const defaultAdvantages: Advantage[] = [
     conditionAttribute: null, conditionMinimum: null, prerequisiteId: null, excludedAdvantageIds: ['sage-d-eckmul', 'chevalier', 'armes-armures-brutasse', 'lancer-de-gens', 'chaman'] },
   { id: 'gris-gris-qui-marchent', title: 'Gris-gris qui marchent', category: 'origin', description: 'Tant que vous portez vos gris-gris, vous bénéficiez d\'un bonus de +4 à vos jets de Sauvegarde contre les pouvoirs magiques.', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null, conditionSkillId: 'troll' },
   { id: 'nain', title: 'Nain', category: 'origin', description: 'Vous êtes plus difficile à toucher en combat, pour commencer : votre Défense reçoit un bonus permanent de +2. De plus, vous pouvez vous cacher beaucoup plus facilement : vous recevez un bonus de +4 à vos jets de Discrétion.', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null, skillBonuses: { discretion: 4 }, combatBonuses: { defense: 2 }},
-  { id: 'pouvoir-magique', title: 'Pouvoir magique', category: 'origin', description: 'Vous êtes l\'heureux détenteur d\'un pouvoir magique. Reportez-vous aux règles de magie page 134 pour savoir ce que vous pouvez choisir comme pouvoir.', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null, conditionOrigin: 'eckmul', excludedAdvantageIds: ['sage-d-eckmul'] },
+  { id: 'pouvoir-magique', title: 'Pouvoir magique', category: 'origin', description: 'Vous êtes l\'heureux détenteur d\'un pouvoir magique. Reportez-vous aux règles de magie page 134 pour savoir ce que vous pouvez choisir comme pouvoir.', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null, conditionOrigin: 'eckmul', excludedAdvantageIds: ['sage-d-eckmul']},
   { id: 'refractaire-a-la-magie', title: 'Réfractaire à la magie', category: 'origin', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
   { id: 'sage-d-eckmul', title: 'Sage d\'Eckmül', category: 'origin', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
   { id: 'troll', title: 'Troll', category: 'origin', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
@@ -172,6 +172,11 @@ export class AdvantageService {
     this.advantages.set(data.map((advantage) => this.normalize(advantage)));
     this.save();
     return true;
+  }
+
+  resetToDefaults(): void {
+    this.advantages.set([...defaultAdvantages]);
+    if (this.isBrowser) localStorage.removeItem(this.storageKey);
   }
 
   private isAdvantage(value: unknown): value is Advantage {

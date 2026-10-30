@@ -1,3 +1,5 @@
+import { MagicPowerChoice } from './magic-power.model';
+
 export interface CharacterAttributes {
   force: number;
   dexterite: number;
@@ -75,6 +77,7 @@ export interface CharacterAdvantage {
   chosenWeapon?: string;
   specializationWeapon?: string;
   recipes?: CharacterRecipe[];
+  magicPowerChoice?: MagicPowerChoice;
   chosenDeity?: {
     name: string;
     circumstances: string;

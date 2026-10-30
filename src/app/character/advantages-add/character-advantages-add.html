@@ -59,6 +59,12 @@
                   <small>{{ confirmedRecipeChoices.has(advantage.id) ? 'Recettes validées' : 'Recettes à valider' }}</small>
                 </div>
               }
+              @if (advantage.id === 'pouvoir-magique' && isSelected(advantage.id)) {
+                <div class="recipe-selection">
+                  <button class="button outline" type="button" (click)="openMagicPowerModal(advantage.id)">{{ magicPowerChoices.has(advantage.id) ? 'Modifier le pouvoir' : 'Choisir le pouvoir et sa condition' }}</button>
+                  @if (magicPowerChoices.get(advantage.id); as magicChoice) { <small>{{ magicChoice.level }} · {{ magicChoice.power.number }} — {{ magicChoice.power.label }} · Condition {{ magicChoice.condition.number }} — {{ magicChoice.condition.label }}</small> }
+                </div>
+              }
               @if (isRepeatable(advantage) && isSelected(advantage.id)) {<button class="remove-selection" type="button" (click)="removeOne(advantage.id)">Retirer une occurrence</button>}
             </div>
           } @empty {
@@ -111,4 +117,7 @@
       </footer>
     </section>
   </div>
+}
+@if (magicModalAdvantageId; as advantageId) {
+  <app-magic-power-picker [initialChoice]="magicPowerChoices.get(advantageId)" (choiceSelected)="setMagicPowerChoice(advantageId, $event)" (closed)="closeMagicPowerModal()" />
 }
