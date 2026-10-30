@@ -4,19 +4,28 @@ import { RouterLink } from '@angular/router';
 import { AdvantageService } from '../advantage.service';
 import { AdvantageCategory } from '../advantage.model';
 import { AttributeKey } from '../../skill/skill.model';
+import { CharacterOrigin } from '../../character/character.model';
+import { SkillService } from '../../skill/skill.service';
+import { AdvantageDescriptionPipe } from '../advantage-description.pipe';
 
 @Component({
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, AdvantageDescriptionPipe],
   selector: 'app-advantage-list',
   templateUrl: './advantage-list.html',
   styleUrl: './advantage-list.scss',
 })
 export class AdvantageList {
   private readonly service = inject(AdvantageService);
+  protected readonly skills = inject(SkillService).skillList;
   protected readonly advantages = this.service.advantageList;
   protected readonly attributes: { key: AttributeKey; label: string }[] = [
     { key: 'force', label: 'Force' }, { key: 'dexterite', label: 'Dextérité' }, { key: 'constitution', label: 'Constitution' },
     { key: 'sagesse', label: 'Sagesse' }, { key: 'intelligence', label: 'Intelligence' }, { key: 'charisme', label: 'Charisme' },
+  ];
+  protected readonly origins: { key: CharacterOrigin; label: string }[] = [
+    { key: 'darshan', label: 'Darshan' },
+    { key: 'souardie', label: 'Souardie' },
+    { key: 'region-primitive-reculee', label: 'Région primitive reculée' },
   ];
   protected readonly categories: { key: AdvantageCategory; label: string }[] = [
     { key: 'combat', label: 'Atouts de combat' }, { key: 'origin', label: "Atouts d'origine" },
@@ -33,7 +42,18 @@ export class AdvantageList {
     description: new FormControl('', { nonNullable: true }),
     conditionAttribute: new FormControl<AttributeKey | null>(null, { nonNullable: true }),
     conditionMinimum: new FormControl<number | null>(null, { nonNullable: true }),
+    conditionOrigin: new FormControl<CharacterOrigin | null>(null, { nonNullable: true }),
+    conditionSkillId: new FormControl<string | null>(null, { nonNullable: true }),
+    conditionSkillMinimum: new FormControl<number | null>(null, { nonNullable: true }),
+    excludedAdvantageIds: new FormControl<string[]>([], { nonNullable: true }),
     prerequisiteId: new FormControl<string | null>(null, { nonNullable: true }),
+    minimumLevel: new FormControl<number | null>(null, { nonNullable: true }),
+    repeatable: new FormControl(false, { nonNullable: true }),
+    weaponChoice: new FormControl(false, { nonNullable: true }),
+    deityChoice: new FormControl(false, { nonNullable: true }),
+    recipeChoice: new FormControl(false, { nonNullable: true }),
+    recipeCount: new FormControl(1, { nonNullable: true, validators: [Validators.min(1)] }),
+    evolutionOnly: new FormControl(false, { nonNullable: true }),
   });
   protected importError = false;
   protected modalOpen = false;
@@ -41,8 +61,8 @@ export class AdvantageList {
   protected add(): void {
     if (this.form.invalid) return;
     const value = this.form.getRawValue();
-    this.service.add(value.title.trim(), value.category, value.description.trim(), value.conditionAttribute, value.conditionMinimum, value.prerequisiteId);
-    this.form.reset({ title: '', category: 'heroic', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null });
+    this.service.add(value.title.trim(), value.category, value.description.trim(), value.conditionAttribute, value.conditionMinimum, value.prerequisiteId, value.minimumLevel, value.repeatable, value.weaponChoice, value.conditionOrigin, value.deityChoice, value.conditionSkillId, value.conditionSkillMinimum, value.excludedAdvantageIds, value.recipeChoice, value.recipeCount, value.evolutionOnly);
+    this.form.reset({ title: '', category: 'heroic', description: '', conditionAttribute: null, conditionMinimum: null, conditionOrigin: null, conditionSkillId: null, conditionSkillMinimum: null, excludedAdvantageIds: [], prerequisiteId: null, minimumLevel: null, repeatable: false, weaponChoice: false, deityChoice: false, recipeChoice: false, recipeCount: 1, evolutionOnly: false });
     this.modalOpen = false;
   }
 

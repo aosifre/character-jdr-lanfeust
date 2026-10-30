@@ -26,11 +26,23 @@ export class CharacterLevelUpResultPage {
   protected selectedCombatBonuses: Exclude<CombatBonus, null>[] = [];
   protected combatBonusSelectionComplete = false;
 
-  public optionsLevelUp = [
+  private readonly allLevelUpOptions = [
     { value: 'skills', label: 'Apprendre de nouvelles compétences' },
     { value: 'advantages', label: 'Obtenir de nouveaux atouts' },
     { value: 'characteristics', label: 'Améliorer les caractéristiques du personnage' },
   ];
+
+  protected get optionsLevelUp() {
+    return this.allLevelUpOptions.filter((option) =>
+      option.value !== 'characteristics' || this.canImproveCharacteristics,
+    );
+  }
+
+  private get canImproveCharacteristics(): boolean {
+    const level = this.character?.level ?? 0;
+    return level === 1 || (level > 0 && level % 5 === 0);
+  }
+
   protected nextLevelAchievement = false;
 
   protected selectCombatBonus(bonus: Exclude<CombatBonus, null>): void {
@@ -63,6 +75,7 @@ export class CharacterLevelUpResultPage {
         this.router.navigate(['/characters', this.characterId, 'advantages', 'add']);
         break;
       case 'characteristics':
+        if (!this.canImproveCharacteristics) return;
         this.router.navigate(['/characters', this.characterId, 'characteristics', 'add']);
         break;
       default:

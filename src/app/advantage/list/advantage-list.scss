@@ -30,3 +30,8 @@ footer p { color: #9d413f; flex-basis: 100%; }
 .close-button { background: none; border: 0; color: #66747a; cursor: pointer; font-size: 1.8rem; line-height: 1; padding: .2rem .4rem; }
 .modal-actions { display: flex; gap: .75rem; justify-content: end; margin-top: .8rem; }
 @media (max-width: 650px) { .advantages-shell { padding-inline: 1rem; } form, footer { align-items: stretch; flex-direction: column; } form input, form textarea, form select, form .button, footer .button { width: 100%; } }
+.advantage-list article { align-items: flex-start; }
+.advantage-list .category { font-size: .75rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+.advantage-list .advantage-description { color: var(--ink-soft); line-height: 1.55; max-width: 70ch; }
+.advantage-list .advantage-description strong { color: var(--ink); }
+.description-help { color: var(--ink-soft); font-size: .8rem; }

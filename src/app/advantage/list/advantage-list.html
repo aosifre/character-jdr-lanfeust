@@ -10,7 +10,7 @@
   </label>
   <section class="advantage-list">
     @for (advantage of filteredAdvantages(); track advantage.id) {
-      <article><div><strong>{{ advantage.title }}</strong><p class="category">{{ categoryLabel(advantage.category) }}</p><p>{{ advantage.description }}</p></div><button class="delete" type="button" (click)="remove(advantage.id)">Supprimer</button></article>
+      <article><div><strong>{{ advantage.title }}</strong><p class="category">{{ categoryLabel(advantage.category) }}</p><p class="advantage-description" [innerHTML]="advantage.description | advantageDescription"></p></div><button class="delete" type="button" (click)="remove(advantage.id)">Supprimer</button></article>
     } @empty {
       <p class="empty-filter">Aucun atout dans cette catégorie.</p>
     }
@@ -25,10 +25,21 @@
       <form [formGroup]="form" (ngSubmit)="add()">
         <label for="advantage-title">Titre</label><input id="advantage-title" formControlName="title" placeholder="Titre de l'atout" />
         <label for="category">Catégorie</label><select id="category" formControlName="category">@for (category of categories; track category.key) {<option [value]="category.key">{{ category.label }}</option>}</select>
-        <label for="advantage-description">Description</label><textarea id="advantage-description" formControlName="description" rows="5" placeholder="Description"></textarea>
+        <label for="advantage-description">Description</label><textarea id="advantage-description" formControlName="description" rows="5" placeholder="Description"></textarea><small class="description-help">Les retours à la ligne et les balises &lt;br/&gt; sont affichés.</small>
         <label for="condition-attribute">Caractéristique requise</label><select id="condition-attribute" formControlName="conditionAttribute"><option [ngValue]="null">Aucune condition</option>@for (attribute of attributes; track attribute.key) {<option [value]="attribute.key">{{ attribute.label }}</option>}</select>
         <label for="condition-minimum">Seuil</label><input id="condition-minimum" formControlName="conditionMinimum" type="number" min="0" placeholder="Seuil" />
+        <label for="condition-origin">Origine requise</label><select id="condition-origin" formControlName="conditionOrigin"><option [ngValue]="null">Toutes les origines</option>@for (origin of origins; track origin.key) {<option [value]="origin.key">{{ origin.label }}</option>}</select>
+        <label for="condition-skill">Compétence requise</label><select id="condition-skill" formControlName="conditionSkillId"><option [ngValue]="null">Aucune compétence requise</option>@for (skill of skills(); track skill.id) {<option [value]="skill.id">{{ skill.label }}</option>}</select>
+        <label for="condition-skill-minimum">Score minimum de compétence</label><input id="condition-skill-minimum" formControlName="conditionSkillMinimum" type="number" min="0" placeholder="Score minimum" />
         <label for="prerequisite">Atout prérequis</label><select id="prerequisite" formControlName="prerequisiteId"><option [ngValue]="null">Aucun prérequis</option>@for (advantage of advantages(); track advantage.id) {<option [value]="advantage.id">{{ advantage.title }}</option>}</select>
+        <label for="excluded-advantages">Atouts incompatibles</label><select id="excluded-advantages" formControlName="excludedAdvantageIds" multiple>@for (advantage of advantages(); track advantage.id) {<option [value]="advantage.id">{{ advantage.title }}</option>}</select>
+        <label for="minimum-level">Niveau minimum</label><input id="minimum-level" formControlName="minimumLevel" type="number" min="0" placeholder="Niveau minimum" />
+        <label for="repeatable">Peut être choisi plusieurs fois</label><input id="repeatable" formControlName="repeatable" type="checkbox" />
+        <label for="weapon-choice">Permet de choisir une arme</label><input id="weapon-choice" formControlName="weaponChoice" type="checkbox" />
+        <label for="deity-choice">Permet de choisir un dieu</label><input id="deity-choice" formControlName="deityChoice" type="checkbox" />
+        <label for="recipe-choice">Permet de choisir des recettes</label><input id="recipe-choice" formControlName="recipeChoice" type="checkbox" />
+        <label for="recipe-count">Nombre de recettes par occurrence</label><input id="recipe-count" formControlName="recipeCount" type="number" min="1" />
+        <label for="evolution-only">Réservé aux évolutions</label><input id="evolution-only" formControlName="evolutionOnly" type="checkbox" />
         <div class="modal-actions"><button class="button outline" type="button" (click)="closeModal()">Annuler</button><button class="button" type="submit">Ajouter</button></div>
       </form>
     </section>

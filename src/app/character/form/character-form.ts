@@ -25,7 +25,7 @@ export class CharacterForm {
     firstName: new FormControl(this.character?.firstName ?? '', { nonNullable: true, validators: [Validators.required] }),
     lastName: new FormControl(this.character?.lastName ?? '', { nonNullable: true, validators: [Validators.required] }),
     description: new FormControl(this.character?.description ?? '', { nonNullable: true }),
-    origin: new FormControl<CharacterOrigin>(this.character?.origin ?? 'human', { nonNullable: true }),
+    origin: new FormControl<CharacterOrigin>(this.character?.origin ?? 'other', { nonNullable: true }),
   });
 
   protected save(): void {

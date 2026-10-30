@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { AfterViewInit, Component, HostListener, inject, signal } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CharacterService } from '../character.service';
@@ -8,15 +8,16 @@ import { SkillService } from '../../skill/skill.service';
 import { FlawService } from '../../flaw/flaw.service';
 import { Skill } from '../../skill/skill.model';
 import { equipmentIcon, Equipment } from '../../equipment/equipment.model';
-import { CharacterMoney } from '../character.model';
+import { CharacterMoney, CharacterRecipe } from '../character.model';
+import { AdvantageDescriptionPipe } from '../../advantage/advantage-description.pipe';
 
 @Component({
-  imports: [RouterLink, DecimalPipe],
+  imports: [RouterLink, DecimalPipe, AdvantageDescriptionPipe],
   selector: 'app-character-view-page',
   templateUrl: './character-view-page.html',
   styleUrl: './character-view-page.scss',
 })
-export class CharacterViewPage {
+export class CharacterViewPage implements AfterViewInit {
   private readonly characterService = inject(CharacterService);
   private readonly advantageService = inject(AdvantageService);
   private readonly equipmentService = inject(EquipmentService);
@@ -30,11 +31,21 @@ export class CharacterViewPage {
   protected readonly advantages = this.advantageService.advantageList;
   protected readonly flaws = this.flawService.flawList;
   protected readonly equipment = this.equipmentService.equipmentList;
+  protected readonly activeSection = signal('attributes');
   protected damageTaken = 0;
   protected energySpent = 0;
   protected globalSkillPenalty = 0;
   protected combatPenalty = 0;
   protected readonly skillPenalties: Record<string, number> = {};
+
+  ngAfterViewInit(): void {
+    this.updateActiveSection();
+  }
+
+  @HostListener('window:scroll')
+  protected onWindowScroll(): void {
+    this.updateActiveSection();
+  }
 
   protected get remainingHitPoints(): number {
     return Math.max(0, (this.character?.otherScores.hitPoints ?? 0) - this.numberOrZero(this.damageTaken));
@@ -98,6 +109,25 @@ export class CharacterViewPage {
       .filter((item): item is Equipment => item !== undefined) ?? [];
   }
 
+  protected get selectedAdvantageSummaries(): { id: string; title: string; description: string; count: number; weapons: string; deity?: { name: string; circumstances: string; helpingHand: string }; recipes: CharacterRecipe[] }[] {
+    const selections = new Map<string, { count: number; weapons: string[]; deity?: { name: string; circumstances: string; helpingHand: string }; recipes: CharacterRecipe[] }>();
+    for (const selected of this.character?.advantages ?? []) {
+      const summary = selections.get(selected.advantageId) ?? { count: 0, weapons: [], recipes: [] };
+      summary.count++;
+      const weapon = selected.chosenWeapon ?? selected.specializationWeapon;
+      if (weapon) summary.weapons.push(weapon);
+      if (selected.chosenDeity) summary.deity = selected.chosenDeity;
+      if (selected.recipes) summary.recipes.push(...selected.recipes);
+      selections.set(selected.advantageId, summary);
+    }
+    return [...selections].flatMap(([id, summary]) => {
+      const advantage = this.advantages().find((item) => item.id === id);
+      return advantage
+        ? [{ id, title: advantage.title, description: advantage.description || 'Aucune description.', count: summary.count, weapons: summary.weapons.join(', '), deity: summary.deity, recipes: summary.recipes }]
+        : [];
+    });
+  }
+
   protected get carriedWeight(): number {
     return this.ownedItems.reduce((total, item) => total + this.equipmentService.weight(item) * this.equipmentQuantity(item.id), 0);
   }
@@ -127,7 +157,22 @@ export class CharacterViewPage {
   }
   protected goToSection(event: Event, sectionId: string): void {
     event.preventDefault();
+    this.activeSection.set(sectionId);
     document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  private updateActiveSection(): void {
+    if (typeof window === 'undefined') return;
+
+    const navigation = document.querySelector<HTMLElement>('.section-nav');
+    if (!navigation) return;
+
+    const activationLine = navigation.getBoundingClientRect().bottom + 16;
+    const sectionIds = ['attributes', 'scores', 'skills', 'advantages', 'flaws', 'equipment', 'encumbrance'];
+    this.activeSection.set(sectionIds.reduce((activeId, sectionId) => {
+      const section = document.getElementById(sectionId);
+      return section && section.getBoundingClientRect().top <= activationLine ? sectionId : activeId;
+    }, sectionIds[0]));
   }
 
   private nonNegativeValue(value: string): number { return Math.max(0, Number.parseInt(value, 10) || 0); }
