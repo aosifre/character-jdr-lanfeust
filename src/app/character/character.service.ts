@@ -110,9 +110,9 @@ export class CharacterService {
     const levelUps = Math.max(0, level);
     return {
       ...currentScores,
-      attack: effectiveAttributes.force + effectiveAttributes.intelligence + points.attack + equipmentBonuses.attack,
-      defense: effectiveAttributes.dexterite + effectiveAttributes.sagesse + points.defense + equipmentBonuses.defense,
-      save: effectiveAttributes.constitution + effectiveAttributes.charisme + points.save,
+      attack: effectiveAttributes.force + effectiveAttributes.intelligence + points.attack + equipmentBonuses.attack + this.advantageService.combatScoreBonus(advantageIds, 'attack'),
+      defense: effectiveAttributes.dexterite + effectiveAttributes.sagesse + points.defense + equipmentBonuses.defense + this.advantageService.combatScoreBonus(advantageIds, 'defense'),
+      save: effectiveAttributes.constitution + effectiveAttributes.charisme + points.save + this.advantageService.combatScoreBonus(advantageIds, 'save'),
       hitPoints: 10 + effectiveAttributes.constitution + (levelUps * (5 + effectiveAttributes.constitution)),
       energyPoints: 5 + effectiveAttributes.sagesse + (levelUps * (1 + effectiveAttributes.sagesse)),
     };

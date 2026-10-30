@@ -36,4 +36,10 @@ describe('AdvantageService', () => {
     expect(service.skillBonus(['gnome-de-troy'], 'bluff')).toBe(4);
     expect(service.skillBonus([], 'bluff')).toBe(0);
   });
+
+  it('applies the Dwarf defense bonus only when selected', () => {
+    expect(service.combatScoreBonus(['nain'], 'defense')).toBe(2);
+    expect(service.combatScoreBonus([], 'defense')).toBe(0);
+    expect(service.combatScoreBonus(['nain'], 'attack')).toBe(0);
+  });
 });

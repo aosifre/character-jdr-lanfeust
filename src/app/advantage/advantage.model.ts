@@ -46,6 +46,8 @@ export interface AdvantageBenefit {
 
 export type AdvantageAttributeBonuses = Partial<Record<AttributeKey, number>>;
 export type AdvantageSkillBonuses = Record<string, number>;
+export type CombatScoreKey = 'attack' | 'defense' | 'save';
+export type AdvantageCombatBonuses = Partial<Record<CombatScoreKey, number>>;
 
 export interface Advantage {
   id: string;
@@ -56,6 +58,7 @@ export interface Advantage {
   attributeBonuses?: AdvantageAttributeBonuses;
   attributeMinimums?: Partial<Record<AttributeKey, number>>;
   skillBonuses?: AdvantageSkillBonuses;
+  combatBonuses?: AdvantageCombatBonuses;
   conditionAttribute: AttributeKey | null;
   conditionMinimum: number | null;
   conditionOrigin?: CharacterOrigin | null;
