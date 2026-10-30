@@ -50,6 +50,26 @@
 
     <section id="advantages" class="panel collection-panel"><div class="section-heading"><div><p class="eyebrow">Atouts</p></div></div><div class="collection-list">@for (selected of selectedAdvantageSummaries; track selected.id) {<article><strong>{{ selected.title }}@if (selected.count > 1) { ×{{ selected.count }}}</strong><span class="advantage-description" [innerHTML]="selected.description | advantageDescription"></span>@if (selected.magicPowerChoice; as magicChoice) {<section class="recipe-summary"><strong>Pouvoir {{ magicChoice.level }} : {{ magicChoice.power.number }} — {{ magicChoice.power.label }}</strong><span>Condition {{ magicChoice.condition.number }} — {{ magicChoice.condition.label }}</span></section>}@if (selected.weapons) {<span>Armes : {{ selected.weapons }}</span>}@if (selected.deity; as deity) {<span>Dieu : {{ deity.name }}</span><span>Circonstances : {{ deity.circumstances }}</span><span>Coup de main : {{ deity.helpingHand }}</span>}@if (selected.recipes.length > 0) {@for (recipe of selected.recipes; track $index) {<section class="recipe-summary"><strong>Recette {{ $index + 1 }} : {{ recipe.power }}</strong><span>Ingrédients : {{ recipe.ingredients }}</span>@if (recipe.powerType === 'majeurs') {<span>Ingrédient rarissime : {{ recipe.rareIngredient }}</span>}<span>Type : {{ recipe.powerType }} · Portée : {{ recipe.range }} · Durée : {{ recipe.duration }} · Coût énergie : {{ recipe.energyCost }}</span></section>}}</article>} @empty {<p class="empty-state">Aucun atout sélectionné.</p>}</div></section>
 
+    @if (hasSageOfEckmul) {
+      <section class="panel major-enchantments-panel" aria-labelledby="major-enchantments-title">
+        <div class="section-heading"><div><p class="eyebrow">Sage d’Eckmül</p><h2 id="major-enchantments-title">Les huit enchantements majeurs</h2></div></div>
+        <p class="enchantment-note">Les détails de ces enchantements pourront être renseignés dans les fiches ci-dessous.</p>
+        <div class="enchantment-grid">
+          @for (enchantment of majorEnchantments; track enchantment.title) {
+            <article class="enchantment-card">
+              <h3>{{ enchantment.title }}</h3>
+              <dl>
+                <div><dt>Matériel</dt><dd>{{ enchantment.materials || 'À compléter' }}</dd></div>
+                <div><dt>Dépense d’énergie</dt><dd>{{ enchantment.energyCost || 'À compléter' }}</dd></div>
+                <div><dt>Concentration demandée</dt><dd>{{ enchantment.concentration || 'À compléter' }}</dd></div>
+              </dl>
+              <p>{{ enchantment.description || 'Description à compléter.' }}</p>
+            </article>
+          }
+        </div>
+      </section>
+    }
+
     <section id="flaws" class="panel collection-panel"><div class="section-heading"><div><p class="eyebrow">Travers</p></div></div><div class="collection-list">@for (selected of currentCharacter.flaws; track selected.flawId) {@if (flaws().find((item) => item.id === selected.flawId); as flaw) {<article><strong>{{ flaw.title }}</strong><span>{{ flaw.description || 'Aucune description.' }}</span></article>}} @empty {<p class="empty-state">Aucun travers sélectionné.</p>}</div></section>
 
     <section id="equipment" class="panel collection-panel">

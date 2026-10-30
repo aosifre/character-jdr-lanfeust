@@ -12,6 +12,7 @@ import { CharacterMoney, CharacterRecipe } from '../character.model';
 import { MagicPowerChoice } from '../magic-power.model';
 import { CharacterAttributes } from '../character.model';
 import { AdvantageDescriptionPipe } from '../../advantage/advantage-description.pipe';
+import { MAJOR_ENCHANTMENTS } from '../major-enchantment.model';
 
 @Component({
   imports: [RouterLink, DecimalPipe, AdvantageDescriptionPipe],
@@ -33,6 +34,7 @@ export class CharacterViewPage implements AfterViewInit {
   protected readonly advantages = this.advantageService.advantageList;
   protected readonly flaws = this.flawService.flawList;
   protected readonly equipment = this.equipmentService.equipmentList;
+  protected readonly majorEnchantments = MAJOR_ENCHANTMENTS;
   protected readonly activeSection = signal('attributes');
   protected damageTaken = 0;
   protected energySpent = 0;
@@ -55,6 +57,10 @@ export class CharacterViewPage implements AfterViewInit {
 
   protected get remainingEnergy(): number {
     return Math.max(0, (this.character?.otherScores.energyPoints ?? 0) - this.numberOrZero(this.energySpent));
+  }
+
+  protected get hasSageOfEckmul(): boolean {
+    return this.character?.advantages.some((item) => item.advantageId === 'sage-d-eckmul') ?? false;
   }
 
   protected get effectiveAttributes(): CharacterAttributes | undefined {
