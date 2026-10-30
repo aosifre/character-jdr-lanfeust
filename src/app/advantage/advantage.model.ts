@@ -39,11 +39,23 @@ export interface DeityChoiceDraft {
   helpingHand: string;
 }
 
+export interface AdvantageBenefit {
+  title: string;
+  description: string;
+}
+
+export type AdvantageAttributeBonuses = Partial<Record<AttributeKey, number>>;
+export type AdvantageSkillBonuses = Record<string, number>;
+
 export interface Advantage {
   id: string;
   title: string;
   category: AdvantageCategory;
   description: string;
+  benefits?: AdvantageBenefit[];
+  attributeBonuses?: AdvantageAttributeBonuses;
+  attributeMinimums?: Partial<Record<AttributeKey, number>>;
+  skillBonuses?: AdvantageSkillBonuses;
   conditionAttribute: AttributeKey | null;
   conditionMinimum: number | null;
   conditionOrigin?: CharacterOrigin | null;

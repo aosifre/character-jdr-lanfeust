@@ -9,6 +9,7 @@ import { FlawService } from '../../flaw/flaw.service';
 import { Skill } from '../../skill/skill.model';
 import { equipmentIcon, Equipment } from '../../equipment/equipment.model';
 import { CharacterMoney, CharacterRecipe } from '../character.model';
+import { CharacterAttributes } from '../character.model';
 import { AdvantageDescriptionPipe } from '../../advantage/advantage-description.pipe';
 
 @Component({
@@ -55,6 +56,14 @@ export class CharacterViewPage implements AfterViewInit {
     return Math.max(0, (this.character?.otherScores.energyPoints ?? 0) - this.numberOrZero(this.energySpent));
   }
 
+  protected get effectiveAttributes(): CharacterAttributes | undefined {
+    if (!this.character) return undefined;
+    return this.advantageService.effectiveAttributes(
+      this.character.attributes,
+      this.character.advantages.map((item) => item.advantageId),
+    );
+  }
+
   protected getSkill(skillId: string): Skill | undefined {
     return this.skills().find((skill) => skill.id === skillId);
   }
@@ -66,13 +75,17 @@ export class CharacterViewPage implements AfterViewInit {
   protected skillTotal(skillId: string): number {
     const skill = this.getSkill(skillId);
     if (!skill || !this.character) return 0;
-    const attributes = this.character.attributes;
+    const attributes = this.advantageService.effectiveAttributes(
+      this.character.attributes,
+      this.character.advantages.map((item) => item.advantageId),
+    );
     const selected = this.character.skills.find((item) => item.skillId === skillId);
     const equipmentIds = this.character.equipment.filter((item) => item.equipped).map((item) => item.equipmentId);
     return attributes[skill.attributeOne]
       + attributes[skill.attributeTwo]
       + (selected?.degree ?? 0)
       + this.equipmentService.skillBonus(skillId, equipmentIds)
+      + this.advantageService.skillBonus(this.character.advantages.map((item) => item.advantageId), skillId)
       - this.numberOrZero(this.globalSkillPenalty)
       - this.numberOrZero(this.skillPenalties[skillId]);
   }
@@ -132,7 +145,7 @@ export class CharacterViewPage implements AfterViewInit {
     return this.ownedItems.reduce((total, item) => total + this.equipmentService.weight(item) * this.equipmentQuantity(item.id), 0);
   }
 
-  protected get carryingCapacity(): number { return 10 + 10 * (this.character?.attributes.force ?? 0); }
+  protected get carryingCapacity(): number { return 10 + 10 * (this.effectiveAttributes?.force ?? 0); }
   protected get encumbrancePercentage(): number { return Math.min(100, this.carryingCapacity ? this.carriedWeight / this.carryingCapacity * 100 : 0); }
 
   protected damageDice(item: Equipment): string { return item.category ? `${item.category}D6` : 'Non applicable'; }
@@ -142,7 +155,7 @@ export class CharacterViewPage implements AfterViewInit {
   }
 
   protected damageBonus(item: Equipment): number {
-    return (this.character?.attributes.force ?? 0) + (this.isWeaponWeighted(item.id) ? 2 : 0);
+    return (this.effectiveAttributes?.force ?? 0) + (this.isWeaponWeighted(item.id) ? 2 : 0);
   }
 
   protected setDamage(value: string): void { this.damageTaken = this.nonNegativeValue(value); }

@@ -138,7 +138,11 @@ describe('CharacterAdvantagesAddPage', () => {
         { provide: ActivatedRoute, useValue: { snapshot: { paramMap: { get: () => character.id } } } },
         { provide: Router, useValue: { navigate: vi.fn() } },
         { provide: CharacterService, useValue: { findById: () => character, setAdvantages } },
-        { provide: AdvantageService, useValue: { advantageList: signal([repeatableAdvantage, specializationAdvantage, weaponChoiceAdvantage, souardAdvantage, deityChoiceAdvantage, shamanAdvantage, newRecipeAdvantage, magicPowerAdvantage]) } },
+        { provide: AdvantageService, useValue: {
+          advantageList: signal([repeatableAdvantage, specializationAdvantage, weaponChoiceAdvantage, souardAdvantage, deityChoiceAdvantage, shamanAdvantage, newRecipeAdvantage, magicPowerAdvantage]),
+          effectiveAttributes: (attributes: Character['attributes']) => attributes,
+          skillBonus: () => 0,
+        } },
         { provide: SkillService, useValue: { skillList: signal([{ id: 'metier-alchimiste', label: 'Alchimie', attributeOne: 'intelligence', attributeTwo: 'sagesse' }]) } },
         { provide: SettingsService, useValue: { currentSettings: signal({ availableAdvantages: 2 }) } },
       ],

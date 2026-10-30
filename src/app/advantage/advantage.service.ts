@@ -1,8 +1,8 @@
 import { isPlatformBrowser } from '@angular/common';
 import { Inject, Injectable, PLATFORM_ID, signal } from '@angular/core';
-import { Advantage, AdvantageCategory } from './advantage.model';
+import { Advantage, AdvantageAttributeBonuses, AdvantageBenefit, AdvantageCategory } from './advantage.model';
 import { AttributeKey } from '../skill/skill.model';
-import { CharacterOrigin } from '../character/character.model';
+import { CharacterAttributes, CharacterOrigin } from '../character/character.model';
 
 const defaultAdvantages: Advantage[] = [
   { id: 'armes-armures-pro', title: 'Armes et armures de professionnel', category: 'combat', description: 'Vous ne subissez aucun malus quand vous utilisez des armes, boucliers et armures de professionnel p.123, 126', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
@@ -51,8 +51,21 @@ const defaultAdvantages: Advantage[] = [
   { id: 'chaman', title: 'Chaman', category: 'origin', description: 'La magie des chamans se confine le plus souvent à créer des potions, des onguents et d\'autres concoctions peu ragoûtantes mais néanmoins efficaces. Au départ, vous connaissez deux recettes magiques. Allez voir en page 155 pour plus de détails.', conditionAttribute: null, conditionMinimum: null, conditionOrigin: 'region-primitive-reculee', conditionSkillId: 'metier-alchimiste', conditionSkillMinimum: 5, prerequisiteId: null, excludedAdvantageIds: ['pouvoir-magique', 'sage-d-eckmul'], recipeChoice: true, recipeCount: 2 },
   { id: 'nouvelle-recette-chaman', title: 'Nouvelle recette', category: 'origin', description: 'Apprenez une recette supplémentaire grâce à votre talent de Chaman.', conditionAttribute: null, conditionMinimum: null, conditionOrigin: null, conditionSkillId: null, conditionSkillMinimum: null, prerequisiteId: 'chaman', minimumLevel: 1, repeatable: true, recipeChoice: true, recipeCount: 1, evolutionOnly: true },
   { id: 'fortune', title: 'Fortuné', category: 'origin', description: 'Au début de chaque nouvelle aventure, vous pouvez disposer d\'une somme de dragons d\'argent égale à 100 fois votre niveau en monnaie ou en équipement. Ce qui n\'est pas dépensé à la fin de l\'aventure est perdu. Si vous décidez un jour d\'acheter un bien de valeur, comme une maison par exemple, le conteur peut décider que vos bienfaiteurs sont prêts à en payer une partie (de 10 à 25% de la somme totale).', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
-  { id: 'chevalier', title: 'Chevalier', category: 'origin', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
-  { id: 'gnome-de-troy', title: 'Gnome de Troy', category: 'origin', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
+  { id: 'chevalier', title: 'Chevalier', category: 'origin', description: 'Votre port altier, vos vêtements dernier cri, votre insupportable arrogance le clament au monde entier : vous êtes de noble lignée. Cet Atout vous octroie plusieurs avantages :',
+    benefits: [
+      {title: 'Armes, armures et tout le saint-frusquin', description: 'Même si vous n\'avez pas d\'entraînement dans leur usage, vous vous devez de posséder une armure complète, un écu portant les armes de votre famille, une lance et diverses autres armes tranchantes et contandantes. Vous disposez également d\'une monture pour vous déplacer.'},
+      {title: 'Aristocrate', description: 'Vous êtes de noble extraction et les gens vous admirent ou vous craignent pour ça. Même hors de votre Hédulie natale, là  où l\'ordre social est différent et où les ge,s respectent moins la noblesse, vous recevez toujours un traitement particulier. C\'est sans doute dû à votre prestance hors du commun.'},
+      {title: 'Code de l\'honneur', description: 'En tant que chevalier hédule, vous êtes tenu de respecter un code d\'honneur simple mais strict. Les détails de ce code peuvent varier d\'une famille à l\'autre, aussi ne donnenrons-nous que les principaux points. Justice : un chevalier doit être juste dans ses paroles et ses actes. Il ne peut attaquer un ennemi par surprise ou utiliser des ruses indignes d\'un noble, pas plus qu\'il ne s\'abaissera à commettre des actions illégales. - Honneur : un chevalier doit protéger son honneur, celui de son suzerain et celui des dames. Une insulte doit être punie par un duel ou par une bonne bastonnade quand l\'offenseur est un manant.'}
+  ], conditionAttribute: null, conditionMinimum: null, prerequisiteId: null, conditionOrigin: 'barronies' },
+  { id: 'gnome-de-troy', title: 'Gnome de Troy', category: 'origin', description: 'Vous êtes ce qu\'on appelle dans le monde de Troy un gnome : un morveux, un chiard, un gosse quoi ; vous avez entre 6 et 10 ans. Etre un gnome présente un grand nombre d\'avantages, mais aussi quelques inconvénients.',
+    benefits: [
+      {title: 'Caractéristiques', description: 'Soustrayez 1 à votre bonus de Force (cela peut descendre jusqu\'à -1). En revanche, vous êtes bien plus mignon et agile qu\'un adulte : ajoutez 1 à vos bonus de Charisme et de Dextérité.'},
+      {title: 'Gueule d\'ange', description: 'On ne se méfie pas d\'un enfant. Vous pouvez bénéficiez d\'un bonus de +4 à tous vos jets de Bluff.'}
+    ],
+    attributeBonuses: { force: -1, dexterite: 1, charisme: 1 },
+    attributeMinimums: { force: -1 },
+    skillBonuses: { bluff: 4 },
+    conditionAttribute: null, conditionMinimum: null, prerequisiteId: null, excludedAdvantageIds: ['sage-d-eckmul', 'chevalier', 'armes-armures-brutasse', 'lancer-de-gens', 'chaman'] },
   { id: 'gris-gris-qui-marchent', title: 'Gris-gris qui marchent', category: 'origin', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
   { id: 'nain', title: 'Nain', category: 'origin', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
   { id: 'pouvoir-magique', title: 'Pouvoir magique', category: 'origin', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
@@ -90,6 +103,39 @@ export class AdvantageService {
   private readonly isBrowser: boolean;
   private readonly advantages = signal<Advantage[]>(defaultAdvantages);
   readonly advantageList = this.advantages.asReadonly();
+
+  effectiveAttributes(attributes: CharacterAttributes, selectedAdvantageIds: string[]): CharacterAttributes {
+    const bonuses: AdvantageAttributeBonuses = {};
+    const minimums: Partial<Record<AttributeKey, number>> = {};
+    for (const id of selectedAdvantageIds) {
+      const advantage = this.advantages().find((item) => item.id === id);
+      if (!advantage) continue;
+      for (const attribute of Object.keys(attributes) as AttributeKey[]) {
+        const bonus = advantage.attributeBonuses?.[attribute];
+        if (bonus !== undefined) bonuses[attribute] = (bonuses[attribute] ?? 0) + bonus;
+        const minimum = advantage.attributeMinimums?.[attribute];
+        if (minimum !== undefined) minimums[attribute] = Math.max(minimums[attribute] ?? Number.NEGATIVE_INFINITY, minimum);
+      }
+    }
+
+    const effectiveValue = (attribute: AttributeKey): number =>
+      Math.max(minimums[attribute] ?? Number.NEGATIVE_INFINITY, attributes[attribute] + (bonuses[attribute] ?? 0));
+    return {
+      force: effectiveValue('force'),
+      dexterite: effectiveValue('dexterite'),
+      constitution: effectiveValue('constitution'),
+      sagesse: effectiveValue('sagesse'),
+      intelligence: effectiveValue('intelligence'),
+      charisme: effectiveValue('charisme'),
+    };
+  }
+
+  skillBonus(selectedAdvantageIds: string[], skillId: string): number {
+    return selectedAdvantageIds.reduce((total, id) => {
+      const advantage = this.advantages().find((item) => item.id === id);
+      return total + (advantage?.skillBonuses?.[skillId] ?? 0);
+    }, 0);
+  }
 
   constructor(@Inject(PLATFORM_ID) platformId: object) {
     this.isBrowser = isPlatformBrowser(platformId);
@@ -141,12 +187,38 @@ export class AdvantageService {
       && (advantage['conditionOrigin'] === null || advantage['conditionOrigin'] === undefined || this.isOrigin(advantage['conditionOrigin']))
       && (advantage['conditionSkillId'] === null || advantage['conditionSkillId'] === undefined || typeof advantage['conditionSkillId'] === 'string')
       && (advantage['conditionSkillMinimum'] === null || advantage['conditionSkillMinimum'] === undefined || this.isNumber(advantage['conditionSkillMinimum']))
-      && (advantage['excludedAdvantageIds'] === undefined || (Array.isArray(advantage['excludedAdvantageIds']) && advantage['excludedAdvantageIds'].every((id) => typeof id === 'string')));
+      && (advantage['excludedAdvantageIds'] === undefined || (Array.isArray(advantage['excludedAdvantageIds']) && advantage['excludedAdvantageIds'].every((id) => typeof id === 'string')))
+      && (advantage['benefits'] === undefined || (Array.isArray(advantage['benefits']) && advantage['benefits'].every((benefit) => this.isBenefit(benefit))))
+      && this.isAttributeBonusRecord(advantage['attributeBonuses'])
+      && this.isAttributeBonusRecord(advantage['attributeMinimums'])
+      && this.isSkillBonusRecord(advantage['skillBonuses']);
+  }
+
+  private isAttributeBonusRecord(value: unknown): boolean {
+    if (value === undefined) return true;
+    if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
+    return Object.entries(value).every(([attribute, bonus]) =>
+      this.isAttribute(attribute) && typeof bonus === 'number' && Number.isInteger(bonus),
+    );
+  }
+
+  private isSkillBonusRecord(value: unknown): boolean {
+    if (value === undefined) return true;
+    if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
+    return Object.entries(value).every(([skillId, bonus]) =>
+      skillId.length > 0 && typeof bonus === 'number' && Number.isInteger(bonus),
+    );
+  }
+
+  private isBenefit(value: unknown): value is AdvantageBenefit {
+    if (typeof value !== 'object' || value === null) return false;
+    const benefit = value as Record<string, unknown>;
+    return typeof benefit['title'] === 'string' && typeof benefit['description'] === 'string';
   }
 
   private normalize(value: Advantage & { label?: string }): Advantage {
     const defaultAdvantage = defaultAdvantages.find((advantage) => advantage.id === value.id);
-    return { id: value.id, title: value.title ?? value.label ?? '', category: value.category ?? 'heroic', description: value.description ?? '', conditionAttribute: value.conditionAttribute ?? null, conditionMinimum: value.conditionMinimum ?? null, conditionOrigin: value.conditionOrigin ?? defaultAdvantage?.conditionOrigin ?? null, conditionSkillId: value.conditionSkillId ?? defaultAdvantage?.conditionSkillId ?? null, conditionSkillMinimum: value.conditionSkillMinimum ?? defaultAdvantage?.conditionSkillMinimum ?? null, excludedAdvantageIds: value.excludedAdvantageIds ?? defaultAdvantage?.excludedAdvantageIds ?? [], prerequisiteId: value.prerequisiteId ?? null, minimumLevel: value.minimumLevel === undefined ? defaultAdvantage?.minimumLevel ?? null : value.minimumLevel, repeatable: value.repeatable ?? defaultAdvantage?.repeatable ?? false, weaponChoice: value.weaponChoice ?? defaultAdvantage?.weaponChoice ?? false, deityChoice: value.deityChoice ?? defaultAdvantage?.deityChoice ?? false, recipeChoice: value.recipeChoice ?? defaultAdvantage?.recipeChoice ?? false, recipeCount: value.recipeCount ?? defaultAdvantage?.recipeCount ?? 1, evolutionOnly: value.evolutionOnly ?? defaultAdvantage?.evolutionOnly ?? false };
+    return { id: value.id, title: value.title ?? value.label ?? '', category: value.category ?? 'heroic', description: value.description ?? '', benefits: value.benefits ?? defaultAdvantage?.benefits ?? [], attributeBonuses: value.attributeBonuses ?? defaultAdvantage?.attributeBonuses ?? {}, attributeMinimums: value.attributeMinimums ?? defaultAdvantage?.attributeMinimums ?? {}, skillBonuses: value.skillBonuses ?? defaultAdvantage?.skillBonuses ?? {}, conditionAttribute: value.conditionAttribute ?? null, conditionMinimum: value.conditionMinimum ?? null, conditionOrigin: value.conditionOrigin ?? defaultAdvantage?.conditionOrigin ?? null, conditionSkillId: value.conditionSkillId ?? defaultAdvantage?.conditionSkillId ?? null, conditionSkillMinimum: value.conditionSkillMinimum ?? defaultAdvantage?.conditionSkillMinimum ?? null, excludedAdvantageIds: value.excludedAdvantageIds ?? defaultAdvantage?.excludedAdvantageIds ?? [], prerequisiteId: value.prerequisiteId ?? null, minimumLevel: value.minimumLevel === undefined ? defaultAdvantage?.minimumLevel ?? null : value.minimumLevel, repeatable: value.repeatable ?? defaultAdvantage?.repeatable ?? false, weaponChoice: value.weaponChoice ?? defaultAdvantage?.weaponChoice ?? false, deityChoice: value.deityChoice ?? defaultAdvantage?.deityChoice ?? false, recipeChoice: value.recipeChoice ?? defaultAdvantage?.recipeChoice ?? false, recipeCount: value.recipeCount ?? defaultAdvantage?.recipeCount ?? 1, evolutionOnly: value.evolutionOnly ?? defaultAdvantage?.evolutionOnly ?? false };
   }
 
   private isOrigin(value: unknown): value is CharacterOrigin { return ['human', 'darshan', 'troll', 'eckmul', 'souardie', 'region-primitive-reculee'].includes(value as string); }

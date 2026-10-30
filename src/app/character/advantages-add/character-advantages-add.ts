@@ -184,13 +184,15 @@ export class CharacterAdvantagesAddPage {
   }
 
   protected isAvailable(advantage: Advantage): boolean {
-    const attributes = this.character?.attributes;
+    const attributes = this.character
+      ? this.advantageService.effectiveAttributes(this.character.attributes, [...this.selected.keys()])
+      : undefined;
     const meetsCondition = !advantage.conditionAttribute || (attributes?.[advantage.conditionAttribute] ?? 0) >= (advantage.conditionMinimum ?? 0);
     const meetsOrigin = !advantage.conditionOrigin || this.character?.origin === advantage.conditionOrigin;
     const skill = advantage.conditionSkillId ? this.skills().find((item) => item.id === advantage.conditionSkillId) : undefined;
     const selectedSkill = this.character?.skills.find((item) => item.skillId === advantage.conditionSkillId);
-    const skillScore = skill && this.character
-      ? this.character.attributes[skill.attributeOne] + this.character.attributes[skill.attributeTwo] + (selectedSkill?.degree ?? 0)
+    const skillScore = skill && attributes
+      ? attributes[skill.attributeOne] + attributes[skill.attributeTwo] + (selectedSkill?.degree ?? 0) + this.advantageService.skillBonus([...this.selected.keys()], skill.id)
       : 0;
     const meetsSkill = !advantage.conditionSkillId || (!!skill && skillScore >= (advantage.conditionSkillMinimum ?? 0));
     const meetsPrerequisite = !advantage.prerequisiteId || this.isSelected(advantage.prerequisiteId);

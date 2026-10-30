@@ -8,7 +8,7 @@ export interface CharacterAttributes {
 }
 
 export type CombatBonus = 'attack' | 'defense' | 'save' | null;
-export type CharacterOrigin = 'darshan' | 'eckmul' | 'souardie' | 'region-primitive-reculee' | 'other';
+export type CharacterOrigin = 'darshan' | 'eckmul' | 'souardie' | 'region-primitive-reculee' | 'barronies' | 'other';
 
 export interface CharacterOtherScores {
   attack: number;

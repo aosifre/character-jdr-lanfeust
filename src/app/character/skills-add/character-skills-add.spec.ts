@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Character } from '../character.model';
 import { CharacterService } from '../character.service';
 import { EquipmentService } from '../../equipment/equipment.service';
+import { AdvantageService } from '../../advantage/advantage.service';
 import { Skill } from '../../skill/skill.model';
 import { SkillService } from '../../skill/skill.service';
 import { CharacterSkillsAddPage } from './character-skills-add';
@@ -67,6 +68,7 @@ describe('CharacterSkillsAddPage', () => {
         { provide: CharacterService, useValue: { findById: () => testCharacter, setSkills } },
         { provide: SkillService, useValue: { skillList: signal(skillList), add: vi.fn() } },
         { provide: EquipmentService, useValue: { skillBonus: () => 0 } },
+        { provide: AdvantageService, useValue: { effectiveAttributes: (attributes: Character['attributes']) => attributes, skillBonus: () => 0 } },
       ],
     });
     const fixture = TestBed.createComponent(CharacterSkillsAddPage);
