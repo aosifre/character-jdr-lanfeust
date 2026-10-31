@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AdvantageService } from '../../advantage/advantage.service';
 import { Character } from '../character.model';
+import { MagicPowerChoice } from '../magic-power.model';
 import { CharacterService } from '../character.service';
 import { SettingsService } from '../../settings/settings.service';
 import { SkillService } from '../../skill/skill.service';
@@ -106,9 +107,30 @@ describe('CharacterAdvantagesAddPage', () => {
     conditionMinimum: null,
     prerequisiteId: null,
   };
+  const maxRepeatableAdvantage = {
+    id: 'longue-duree',
+    title: 'Longue durée',
+    category: 'magic' as const,
+    description: '',
+    conditionAttribute: null,
+    conditionMinimum: null,
+    prerequisiteId: null,
+    repeatable: true,
+    maxRepeatable: 3,
+  };
+  const turfAdvantage = {
+    id: 'turf-attitre',
+    title: 'Turf attitré',
+    category: 'origin' as const,
+    description: '',
+    conditionAttribute: null,
+    conditionMinimum: null,
+    prerequisiteId: null,
+  };
   let character: Character;
   let setAdvantages: ReturnType<typeof vi.fn>;
   let page: CharacterAdvantagesAddPage;
+  let availableAdvantages = signal({ availableAdvantages: 2 });
 
   beforeEach(() => {
     character = {
@@ -131,6 +153,7 @@ describe('CharacterAdvantagesAddPage', () => {
       equipment: [],
     };
     setAdvantages = vi.fn();
+    availableAdvantages = signal({ availableAdvantages: 2 });
 
     TestBed.configureTestingModule({
       imports: [CharacterAdvantagesAddPage, CharacterAdvantagesPage],
@@ -138,9 +161,13 @@ describe('CharacterAdvantagesAddPage', () => {
         { provide: ActivatedRoute, useValue: { snapshot: { paramMap: { get: () => character.id } } } },
         { provide: Router, useValue: { navigate: vi.fn() } },
         { provide: CharacterService, useValue: { findById: () => character, setAdvantages } },
-        { provide: AdvantageService, useValue: { advantageList: signal([repeatableAdvantage, specializationAdvantage, weaponChoiceAdvantage, souardAdvantage, deityChoiceAdvantage, shamanAdvantage, newRecipeAdvantage, magicPowerAdvantage]) } },
+        { provide: AdvantageService, useValue: {
+          advantageList: signal([repeatableAdvantage, specializationAdvantage, weaponChoiceAdvantage, souardAdvantage, deityChoiceAdvantage, shamanAdvantage, newRecipeAdvantage, magicPowerAdvantage, turfAdvantage, maxRepeatableAdvantage]),
+          effectiveAttributes: (attributes: Character['attributes']) => attributes,
+          skillBonus: () => 0,
+        } },
         { provide: SkillService, useValue: { skillList: signal([{ id: 'metier-alchimiste', label: 'Alchimie', attributeOne: 'intelligence', attributeTwo: 'sagesse' }]) } },
-        { provide: SettingsService, useValue: { currentSettings: signal({ availableAdvantages: 2 }) } },
+        { provide: SettingsService, useValue: { currentSettings: availableAdvantages } },
       ],
     });
 
@@ -167,6 +194,79 @@ describe('CharacterAdvantagesAddPage', () => {
     expect(setAdvantages).toHaveBeenCalledWith(character.id, [
       { advantageId: repeatableAdvantage.id },
       { advantageId: repeatableAdvantage.id },
+    ]);
+  });
+
+  it('does not allow choosing a repeatable advantage beyond its maxRepeatable during level-up', () => {
+    const internalPage = page as unknown as {
+      toggle(id: string): void;
+      selectedCount(id: string): number;
+      advantageMaximum: number;
+    };
+    internalPage.advantageMaximum = 10;
+
+    for (let index = 0; index < 4; index++) internalPage.toggle(maxRepeatableAdvantage.id);
+
+    expect(internalPage.selectedCount(maxRepeatableAdvantage.id)).toBe(3);
+  });
+
+  it('does not allow choosing a repeatable advantage beyond its maxRepeatable during character creation', () => {
+    availableAdvantages.set({ availableAdvantages: 10 });
+    const fixture = TestBed.createComponent(CharacterAdvantagesPage);
+    fixture.detectChanges();
+    const internalPage = fixture.componentInstance as unknown as {
+      toggle(id: string): void;
+      selectedCount(id: string): number;
+    };
+
+    for (let index = 0; index < 4; index++) internalPage.toggle(maxRepeatableAdvantage.id);
+
+    expect(internalPage.selectedCount(maxRepeatableAdvantage.id)).toBe(3);
+  });
+
+  it('requires and saves the chosen region for Turf attitré during level-up', () => {
+    const internalPage = page as unknown as {
+      toggle(id: string): void;
+      setRegionChoice(id: string, event: Event): void;
+      save(): void;
+      canSave: boolean;
+    };
+
+    internalPage.toggle(turfAdvantage.id);
+    expect(internalPage.canSave).toBe(false);
+
+    internalPage.setRegionChoice(turfAdvantage.id, { target: { value: 'Eckmül' } } as unknown as Event);
+    expect(internalPage.canSave).toBe(true);
+
+    internalPage.save();
+
+    expect(setAdvantages).toHaveBeenCalledWith(character.id, [
+      { advantageId: repeatableAdvantage.id },
+      { advantageId: turfAdvantage.id, chosenRegion: 'Eckmül' },
+    ]);
+  });
+
+  it('requires and saves the chosen region for Turf attitré during character creation', () => {
+    const fixture = TestBed.createComponent(CharacterAdvantagesPage);
+    fixture.detectChanges();
+    const internalPage = fixture.componentInstance as unknown as {
+      toggle(id: string): void;
+      setRegionChoice(id: string, event: Event): void;
+      save(): void;
+      canSave: boolean;
+    };
+
+    internalPage.toggle(turfAdvantage.id);
+    expect(internalPage.canSave).toBe(false);
+
+    internalPage.setRegionChoice(turfAdvantage.id, { target: { value: 'Eckmül' } } as unknown as Event);
+    expect(internalPage.canSave).toBe(true);
+
+    internalPage.save();
+
+    expect(setAdvantages).toHaveBeenCalledWith(character.id, [
+      { advantageId: repeatableAdvantage.id },
+      { advantageId: turfAdvantage.id, chosenRegion: 'Eckmül' },
     ]);
   });
 
@@ -357,5 +457,34 @@ describe('CharacterAdvantagesAddPage', () => {
     character.skills = [{ skillId: 'metier-alchimiste', degree: 5 }];
     creationPage.toggle(shamanAdvantage.id);
     expect(creationPage.recipeModalAdvantageId).toBe(shamanAdvantage.id);
+  });
+
+  it('requires and saves a magic power with its condition during level-up', () => {
+    const internalPage = page as unknown as {
+      toggle(id: string): void;
+      setMagicPowerChoice(id: string, choice: MagicPowerChoice): void;
+      magicModalAdvantageId: string | null;
+      canSave: boolean;
+      save(): void;
+    };
+    const choice: MagicPowerChoice = {
+      level: 'mineur',
+      power: { number: 35, label: 'Pouvoir de test' },
+      condition: { number: 42, label: 'Condition de test' },
+    };
+
+    internalPage.toggle(magicPowerAdvantage.id);
+
+    expect(internalPage.magicModalAdvantageId).toBe(magicPowerAdvantage.id);
+    expect(internalPage.canSave).toBe(false);
+
+    internalPage.setMagicPowerChoice(magicPowerAdvantage.id, choice);
+    expect(internalPage.canSave).toBe(true);
+    internalPage.save();
+
+    expect(setAdvantages).toHaveBeenCalledWith(character.id, [
+      { advantageId: repeatableAdvantage.id },
+      { advantageId: magicPowerAdvantage.id, magicPowerChoice: choice },
+    ]);
   });
 });

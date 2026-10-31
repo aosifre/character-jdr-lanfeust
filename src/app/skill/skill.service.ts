@@ -61,6 +61,11 @@ export class SkillService {
     return true;
   }
 
+  resetToDefaults(): void {
+    this.skills.set([...defaultSkills]);
+    if (this.isBrowser) localStorage.removeItem(this.storageKey);
+  }
+
   private isSkill(value: unknown): value is Skill {
     if (typeof value !== 'object' || value === null) return false;
     const skill = value as Record<string, unknown>;

@@ -15,6 +15,11 @@ section { border-bottom: 1px solid #cfd6d4; margin-bottom: 2rem; padding-bottom:
 .data-actions > p { color: #66747a; }
 .archive-actions { display: flex; flex-wrap: wrap; gap: 1rem; }
 .import-error { color: #9d413f; flex-basis: 100%; margin: 1rem 0 0; }
+.danger-zone h2 { color: #9d413f; }
+.danger-zone > p { color: #66747a; }
+.danger-button { background: #9d413f; }
+.danger-button:hover { background: #7d302e; }
+.clear-success { color: #386b48 !important; font-weight: 700; }
 form { align-items: end; display: flex; flex-wrap: wrap; gap: .7rem; }
 form label { flex-basis: 100%; font-weight: 800; }
 input { background: #fffdf8; border: 1px solid #aebbb8; border-radius: 3px; font: inherit; min-height: 3rem; padding: .7rem; }

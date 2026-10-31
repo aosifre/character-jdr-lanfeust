@@ -9,7 +9,10 @@ import { FlawService } from '../../flaw/flaw.service';
 import { Skill } from '../../skill/skill.model';
 import { equipmentIcon, Equipment } from '../../equipment/equipment.model';
 import { CharacterMoney, CharacterRecipe } from '../character.model';
+import { MagicPowerChoice } from '../magic-power.model';
+import { CharacterAttributes } from '../character.model';
 import { AdvantageDescriptionPipe } from '../../advantage/advantage-description.pipe';
+import { MAJOR_ENCHANTMENTS } from '../major-enchantment.model';
 
 @Component({
   imports: [RouterLink, DecimalPipe, AdvantageDescriptionPipe],
@@ -31,6 +34,7 @@ export class CharacterViewPage implements AfterViewInit {
   protected readonly advantages = this.advantageService.advantageList;
   protected readonly flaws = this.flawService.flawList;
   protected readonly equipment = this.equipmentService.equipmentList;
+  protected readonly majorEnchantments = MAJOR_ENCHANTMENTS;
   protected readonly activeSection = signal('attributes');
   protected damageTaken = 0;
   protected energySpent = 0;
@@ -55,24 +59,67 @@ export class CharacterViewPage implements AfterViewInit {
     return Math.max(0, (this.character?.otherScores.energyPoints ?? 0) - this.numberOrZero(this.energySpent));
   }
 
+  protected get hasSageOfEckmul(): boolean {
+    return this.character?.advantages.some((item) => item.advantageId === 'sage-d-eckmul') ?? false;
+  }
+
+  protected get magicEmissionSurface(): number | undefined {
+    if (!this.character || !this.effectiveAttributes) return undefined;
+    return this.advantageService.emissionSurface(
+      this.character.advantages.map((item) => item.advantageId),
+      this.effectiveAttributes,
+      this.character.level,
+    );
+  }
+
+  protected get effectiveAttributes(): CharacterAttributes | undefined {
+    if (!this.character) return undefined;
+    return this.advantageService.effectiveAttributes(
+      this.character.attributes,
+      this.character.advantages.map((item) => item.advantageId),
+    );
+  }
+
   protected getSkill(skillId: string): Skill | undefined {
     return this.skills().find((skill) => skill.id === skillId);
   }
 
   protected getSkillName(skillId: string): string {
-    return this.getSkill(skillId)?.label ?? 'Compétence inconnue';
+    const skill = this.getSkill(skillId);
+    if (!skill) return 'Compétence inconnue';
+    const region = this.regionalRegion;
+    return this.regionalSkillBonus(skill) > 0
+      ? `${skill.label} (+4 dans ${region ? `la région « ${region} »` : 'la région'})`
+      : skill.label;
+  }
+
+  protected get regionalRegion(): string | undefined {
+    return this.character?.advantages.find((item) => item.advantageId === 'turf-attitre')?.chosenRegion?.trim() || undefined;
+  }
+
+  protected regionalSkillBonus(skill: Skill): number {
+    return this.advantageService.contextualSkillBonus(
+      this.character?.advantages.map((item) => item.advantageId) ?? [],
+      skill.id,
+      skill.label,
+    );
   }
 
   protected skillTotal(skillId: string): number {
     const skill = this.getSkill(skillId);
     if (!skill || !this.character) return 0;
-    const attributes = this.character.attributes;
+    const attributes = this.advantageService.effectiveAttributes(
+      this.character.attributes,
+      this.character.advantages.map((item) => item.advantageId),
+    );
     const selected = this.character.skills.find((item) => item.skillId === skillId);
     const equipmentIds = this.character.equipment.filter((item) => item.equipped).map((item) => item.equipmentId);
     return attributes[skill.attributeOne]
       + attributes[skill.attributeTwo]
       + (selected?.degree ?? 0)
       + this.equipmentService.skillBonus(skillId, equipmentIds)
+      + this.advantageService.skillBonus(this.character.advantages.map((item) => item.advantageId), skillId)
+      + this.regionalSkillBonus(skill)
       - this.numberOrZero(this.globalSkillPenalty)
       - this.numberOrZero(this.skillPenalties[skillId]);
   }
@@ -109,30 +156,38 @@ export class CharacterViewPage implements AfterViewInit {
       .filter((item): item is Equipment => item !== undefined) ?? [];
   }
 
-  protected get selectedAdvantageSummaries(): { id: string; title: string; description: string; count: number; weapons: string; deity?: { name: string; circumstances: string; helpingHand: string }; recipes: CharacterRecipe[] }[] {
-    const selections = new Map<string, { count: number; weapons: string[]; deity?: { name: string; circumstances: string; helpingHand: string }; recipes: CharacterRecipe[] }>();
+  protected get selectedAdvantageSummaries(): { id: string; title: string; description: string; benefits: { title: string; description: string }[]; drawbacks: { title: string; description: string }[]; count: number; weapons: string; region?: string; deity?: { name: string; circumstances: string; helpingHand: string }; recipes: CharacterRecipe[]; magicPowerChoice?: MagicPowerChoice }[] {
+    const selections = new Map<string, { count: number; weapons: string[]; region?: string; deity?: { name: string; circumstances: string; helpingHand: string }; recipes: CharacterRecipe[]; magicPowerChoice?: MagicPowerChoice }>();
     for (const selected of this.character?.advantages ?? []) {
       const summary = selections.get(selected.advantageId) ?? { count: 0, weapons: [], recipes: [] };
       summary.count++;
       const weapon = selected.chosenWeapon ?? selected.specializationWeapon;
       if (weapon) summary.weapons.push(weapon);
+      if (selected.chosenRegion) summary.region = selected.chosenRegion;
       if (selected.chosenDeity) summary.deity = selected.chosenDeity;
       if (selected.recipes) summary.recipes.push(...selected.recipes);
+      if (selected.magicPowerChoice) summary.magicPowerChoice = selected.magicPowerChoice;
       selections.set(selected.advantageId, summary);
     }
     return [...selections].flatMap(([id, summary]) => {
       const advantage = this.advantages().find((item) => item.id === id);
       return advantage
-        ? [{ id, title: advantage.title, description: advantage.description || 'Aucune description.', count: summary.count, weapons: summary.weapons.join(', '), deity: summary.deity, recipes: summary.recipes }]
+        ? [{ id, title: advantage.title, description: advantage.description || 'Aucune description.', benefits: advantage.benefits ?? [], drawbacks: advantage.drawbacks ?? [], count: summary.count, weapons: summary.weapons.join(', '), region: summary.region, deity: summary.deity, recipes: summary.recipes, magicPowerChoice: summary.magicPowerChoice }]
         : [];
     });
+  }
+
+  protected get naturalArmorReduction(): number {
+    return this.advantageService.damageReduction(
+      this.character?.advantages.map((item) => item.advantageId) ?? [],
+    );
   }
 
   protected get carriedWeight(): number {
     return this.ownedItems.reduce((total, item) => total + this.equipmentService.weight(item) * this.equipmentQuantity(item.id), 0);
   }
 
-  protected get carryingCapacity(): number { return 10 + 10 * (this.character?.attributes.force ?? 0); }
+  protected get carryingCapacity(): number { return 10 + 10 * (this.effectiveAttributes?.force ?? 0); }
   protected get encumbrancePercentage(): number { return Math.min(100, this.carryingCapacity ? this.carriedWeight / this.carryingCapacity * 100 : 0); }
 
   protected damageDice(item: Equipment): string { return item.category ? `${item.category}D6` : 'Non applicable'; }
@@ -142,7 +197,7 @@ export class CharacterViewPage implements AfterViewInit {
   }
 
   protected damageBonus(item: Equipment): number {
-    return (this.character?.attributes.force ?? 0) + (this.isWeaponWeighted(item.id) ? 2 : 0);
+    return (this.effectiveAttributes?.force ?? 0) + (this.isWeaponWeighted(item.id) ? 2 : 0);
   }
 
   protected setDamage(value: string): void { this.damageTaken = this.nonNegativeValue(value); }

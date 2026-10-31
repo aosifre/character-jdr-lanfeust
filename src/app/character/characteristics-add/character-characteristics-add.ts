@@ -4,6 +4,7 @@ import { CharacterAttributes, CharacterOtherScores } from '../character.model';
 import { CharacterService } from '../character.service';
 import { Skill } from '../../skill/skill.model';
 import { SkillService } from '../../skill/skill.service';
+import { AdvantageService } from '../../advantage/advantage.service';
 
 type CharacteristicKey = keyof CharacterAttributes;
 
@@ -21,6 +22,7 @@ interface Characteristic {
 export class CharacterCharacteristicsAddPage {
   private readonly characterService = inject(CharacterService);
   private readonly skillService = inject(SkillService);
+  private readonly advantageService = inject(AdvantageService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   protected readonly characterId = this.route.snapshot.paramMap.get('id');
@@ -71,7 +73,11 @@ export class CharacterCharacteristicsAddPage {
   }
 
   protected getSkillBonus(skill: Skill, attributes: CharacterAttributes): number {
-    return attributes[skill.attributeOne] + attributes[skill.attributeTwo];
+    const selectedAdvantages = this.character?.advantages.map((item) => item.advantageId) ?? [];
+    const effectiveAttributes = this.advantageService.effectiveAttributes(attributes, selectedAdvantages);
+    return effectiveAttributes[skill.attributeOne]
+      + effectiveAttributes[skill.attributeTwo]
+      + this.advantageService.skillBonus(selectedAdvantages, skill.id);
   }
 
   protected get currentScores(): CharacterOtherScores | undefined {
@@ -85,6 +91,7 @@ export class CharacterCharacteristicsAddPage {
       this.character.level,
       this.character.otherScores,
       this.character.equipment.filter((item) => item.equipped).map((item) => item.equipmentId),
+      this.character.advantages.map((item) => item.advantageId),
     );
   }
 

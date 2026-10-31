@@ -2,6 +2,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { Inject, Injectable, PLATFORM_ID, inject, signal } from '@angular/core';
 import { Character, CharacterAdvantage, CharacterAttributes, CharacterEquipment, CharacterFlaw, CharacterMoney, CharacterOrigin, CharacterOtherScores, CharacterSkill, CharacterSnapshot, CombatBonus } from './character.model';
 import { EquipmentService } from '../equipment/equipment.service';
+import { AdvantageService } from '../advantage/advantage.service';
 
 export const MAX_CHARACTER_STORAGE_BYTES = 4 * 1024 * 1024;
 export const MAX_PORTRAIT_DATA_URL_LENGTH = 420_000;
@@ -12,6 +13,7 @@ export class CharacterService {
   private readonly isBrowser: boolean;
   private readonly characters = signal<Character[]>([]);
   private readonly equipmentService = inject(EquipmentService);
+  private readonly advantageService = inject(AdvantageService);
   readonly characterList = this.characters.asReadonly();
 
   constructor(@Inject(PLATFORM_ID) platformId: object) {
@@ -26,8 +28,8 @@ export class CharacterService {
           }
           this.characters.set(parsedCharacters.map((character) => this.normalizeCharacter(character)));
           this.saveToStorage();
-        } catch {
-          localStorage.removeItem(this.storageKey);
+        } catch (error) {
+          console.error('Impossible de charger les personnages sauvegardés ; les données ont été conservées.', error);
         }
       }
     }
@@ -74,6 +76,11 @@ export class CharacterService {
     return this.characters().find((character) => character.id === id);
   }
 
+  clearAllData(): void {
+    this.characters.set([]);
+    if (this.isBrowser) localStorage.removeItem(this.storageKey);
+  }
+
   copyFromSnapshot(characterId: string, snapshotId: string): Character | undefined {
     const character = this.findById(characterId);
     const snapshot = character?.history?.find((item) => item.snapshotId === snapshotId);
@@ -96,22 +103,23 @@ export class CharacterService {
 
   setAttributes(id: string, attributes: CharacterAttributes): void {
     this.characters.update((characters) => characters.map((character) =>
-      character.id === id ? { ...character, attributes, otherScores: this.recalculateOtherScores(attributes, character.level, character.otherScores, character.equipment.filter((item) => item.equipped).map((item) => item.equipmentId)) } : character,
+      character.id === id ? { ...character, attributes, otherScores: this.recalculateOtherScores(attributes, character.level, character.otherScores, character.equipment.filter((item) => item.equipped).map((item) => item.equipmentId), character.advantages.map((item) => item.advantageId)) } : character,
     ));
     this.saveToStorage();
   }
 
-  recalculateOtherScores(attributes: CharacterAttributes, level: number, currentScores: CharacterOtherScores, equipmentIds: string[] = []): CharacterOtherScores {
+  recalculateOtherScores(attributes: CharacterAttributes, level: number, currentScores: CharacterOtherScores, equipmentIds: string[] = [], advantageIds: string[] = []): CharacterOtherScores {
+    const effectiveAttributes = this.advantageService.effectiveAttributes(attributes, advantageIds);
     const points = currentScores.combatBonusPoints;
     const equipmentBonuses = this.equipmentService.combatBonuses(equipmentIds);
     const levelUps = Math.max(0, level);
     return {
       ...currentScores,
-      attack: attributes.force + attributes.intelligence + points.attack + equipmentBonuses.attack,
-      defense: attributes.dexterite + attributes.sagesse + points.defense + equipmentBonuses.defense,
-      save: attributes.constitution + attributes.charisme + points.save,
-      hitPoints: 10 + attributes.constitution + (levelUps * (5 + attributes.constitution)),
-      energyPoints: 5 + attributes.sagesse + (levelUps * (1 + attributes.sagesse)),
+      attack: effectiveAttributes.force + effectiveAttributes.intelligence + points.attack + equipmentBonuses.attack + this.advantageService.combatScoreBonus(advantageIds, 'attack'),
+      defense: effectiveAttributes.dexterite + effectiveAttributes.sagesse + points.defense + equipmentBonuses.defense + this.advantageService.combatScoreBonus(advantageIds, 'defense'),
+      save: effectiveAttributes.constitution + effectiveAttributes.charisme + points.save + this.advantageService.combatScoreBonus(advantageIds, 'save'),
+      hitPoints: 10 + effectiveAttributes.constitution + (levelUps * (5 + effectiveAttributes.constitution)),
+      energyPoints: 5 + effectiveAttributes.sagesse + (levelUps * (1 + effectiveAttributes.sagesse)) + this.advantageService.energyPointsBonus(advantageIds),
     };
   }
 
@@ -132,7 +140,7 @@ export class CharacterService {
       const otherScores = this.recalculateOtherScores(character.attributes, character.level, {
         ...character.otherScores,
         combatBonusPoints,
-      }, character.equipment.filter((item) => item.equipped).map((item) => item.equipmentId));
+      }, character.equipment.filter((item) => item.equipped).map((item) => item.equipmentId), character.advantages.map((item) => item.advantageId));
       return { ...character, otherScores };
     }));
     this.saveToStorage();
@@ -154,7 +162,18 @@ export class CharacterService {
 
   setAdvantages(id: string, advantages: CharacterAdvantage[]): void {
     this.characters.update((characters) => characters.map((character) =>
-      character.id === id ? { ...character, advantages } : character,
+      character.id === id ? {
+        ...character,
+        advantages,
+        equipment: this.withoutArmorWhenTroll(character.equipment, advantages),
+        otherScores: this.recalculateOtherScores(
+          character.attributes,
+          character.level,
+          character.otherScores,
+          this.withoutArmorWhenTroll(character.equipment, advantages).filter((item) => item.equipped).map((item) => item.equipmentId),
+          advantages.map((item) => item.advantageId),
+        ),
+      } : character,
     ));
     this.saveToStorage();
   }
@@ -168,9 +187,27 @@ export class CharacterService {
 
   setEquipment(id: string, equipment: CharacterEquipment[]): void {
     this.characters.update((characters) => characters.map((character) =>
-      character.id === id ? { ...character, equipment, otherScores: this.recalculateOtherScores(character.attributes, character.level, character.otherScores, equipment.filter((item) => item.equipped).map((item) => item.equipmentId)) } : character,
+      character.id === id ? {
+        ...character,
+        equipment: this.withoutArmorWhenTroll(equipment, character.advantages),
+        otherScores: this.recalculateOtherScores(
+          character.attributes,
+          character.level,
+          character.otherScores,
+          this.withoutArmorWhenTroll(equipment, character.advantages).filter((item) => item.equipped).map((item) => item.equipmentId),
+          character.advantages.map((item) => item.advantageId),
+        ),
+      } : character,
     ));
     this.saveToStorage();
+  }
+
+  private withoutArmorWhenTroll(equipment: CharacterEquipment[], advantages: CharacterAdvantage[]): CharacterEquipment[] {
+    if (!advantages.some((item) => item.advantageId === 'troll')) return equipment;
+    const armorIds = new Set(this.equipmentService.equipmentList().filter((item) => item.type === 'armor').map((item) => item.id));
+    return equipment.map((item) =>
+      armorIds.has(item.equipmentId) ? { ...item, equipped: false } : item,
+    );
   }
 
   setExperience(id: string, experience: number): { level: number; experience: number; hitPoints: number; energyPoints: number } {
@@ -178,7 +215,7 @@ export class CharacterService {
     const level = Math.floor(experience / 100);
 
     const character = this.findById(id);
-    const scores = character ? this.recalculateOtherScores(character.attributes, level, character.otherScores, character.equipment.filter((item) => item.equipped).map((item) => item.equipmentId)) : undefined;
+    const scores = character ? this.recalculateOtherScores(character.attributes, level, character.otherScores, character.equipment.filter((item) => item.equipped).map((item) => item.equipmentId), character.advantages.map((item) => item.advantageId)) : undefined;
 
     this.characters.update((characters) => characters.map((character) => {
       if (character.id !== id || !scores) return character;
@@ -224,7 +261,13 @@ export class CharacterService {
   }
 
   private isOrigin(value: unknown): value is CharacterOrigin {
-    return  value === 'darshan' || value === 'eckmul' || value === 'souardie' || value === 'region-primitive-reculee';
+    return value === 'darshan'
+      || value === 'eckmul'
+      || value === 'souardie'
+      || value === 'region-primitive-reculee'
+      || value === 'baronies'
+      || value === 'barronies'
+      || value === 'other';
   }
 
   private normalizeCharacter(value: Character): Character {
@@ -238,6 +281,7 @@ export class CharacterService {
     const attributes = this.isAttributes(value.attributes) ? value.attributes : this.emptyAttributes();
     const otherScores = this.isOtherScores(value.otherScores) ? this.normalizeOtherScores(value.otherScores) : this.emptyOtherScores();
     const level = Math.floor(experience / 100);
+    const advantages = Array.isArray(value.advantages) ? value.advantages : [];
 
     return {
       id: value.id,
@@ -249,10 +293,10 @@ export class CharacterService {
       experience,
       level,
       attributes,
-      otherScores: this.recalculateOtherScores(attributes, level, otherScores, equipment.filter((item) => item.equipped).map((item) => item.equipmentId)),
+      otherScores: this.recalculateOtherScores(attributes, level, otherScores, equipment.filter((item) => item.equipped).map((item) => item.equipmentId), advantages.map((item) => item.advantageId)),
       money: this.isMoney(value.money) ? value.money : this.emptyMoney(),
       skills: Array.isArray(value.skills) ? value.skills : [],
-      advantages: Array.isArray(value.advantages) ? value.advantages : [],
+      advantages,
       flaws: Array.isArray(value.flaws) ? value.flaws : [],
       equipment,
       history: Array.isArray(value.history)

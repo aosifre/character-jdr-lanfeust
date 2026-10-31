@@ -133,6 +133,11 @@ export class EquipmentService {
     }
   }
 
+  resetToDefaults(): void {
+    this.equipment.set(defaultEquipment.map((item) => ({ ...item, weight: item.weight ?? 0 })));
+    if (this.isBrowser) localStorage.removeItem(this.storageKey);
+  }
+
   add(label: string, type: EquipmentType, category: EquipmentCategory | null, attackBonus: number, defenseBonus: number, damageReduction: number, weight: number, skillBonuses: Record<string, number>, icon?: string): Equipment {
     const item = { id: crypto.randomUUID(), label, ...(icon?.trim() ? { icon: icon.trim() } : {}), type, category, attackBonus, defenseBonus, damageReduction, weight, skillBonuses };
     this.equipment.update((items) => [...items, item]);

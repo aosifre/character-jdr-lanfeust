@@ -39,19 +39,44 @@ export interface DeityChoiceDraft {
   helpingHand: string;
 }
 
+export interface AdvantageBenefit {
+  title: string;
+  description: string;
+}
+
+export type AdvantageAttributeBonuses = Partial<Record<AttributeKey, number>>;
+export type AdvantageSkillBonuses = Record<string, number>;
+export type CombatScoreKey = 'attack' | 'defense' | 'save';
+export type AdvantageCombatBonuses = Partial<Record<CombatScoreKey, number>>;
+
 export interface Advantage {
   id: string;
   title: string;
   category: AdvantageCategory;
   description: string;
+  benefits?: AdvantageBenefit[];
+  drawbacks?: AdvantageBenefit[];
+  attributeBonuses?: AdvantageAttributeBonuses;
+  attributeMinimums?: Partial<Record<AttributeKey, number>>;
+  skillBonuses?: AdvantageSkillBonuses;
+  contextualSkillBonuses?: AdvantageSkillBonuses;
+  combatBonuses?: AdvantageCombatBonuses;
+  energyPointsBonus?: number;
+  additionalEnergyPointsBonus?: number;
+  emissionSurfaceBase?: number;
+  emissionSurfaceAttribute?: AttributeKey;
+  emissionSurfaceLevelBonus?: boolean;
+  damageReduction?: number;
   conditionAttribute: AttributeKey | null;
   conditionMinimum: number | null;
   conditionOrigin?: CharacterOrigin | null;
   conditionSkillId?: string | null;
   conditionSkillMinimum?: number | null;
+  conditionDescription?: string;
   prerequisiteId: string | null;
   minimumLevel?: number | null;
   repeatable?: boolean;
+  maxRepeatable?: number;
   weaponChoice?: boolean;
   deityChoice?: boolean;
   excludedAdvantageIds?: string[];

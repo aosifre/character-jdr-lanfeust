@@ -6,6 +6,7 @@ import { CharacterService } from '../character.service';
 import { Skill } from '../../skill/skill.model';
 import { SkillService } from '../../skill/skill.service';
 import { EquipmentService } from '../../equipment/equipment.service';
+import { AdvantageService } from '../../advantage/advantage.service';
 
 @Component({
   imports: [ReactiveFormsModule, RouterLink],
@@ -17,6 +18,7 @@ export class CharacterSkillsPage {
   private readonly characterService = inject(CharacterService);
   private readonly skillService = inject(SkillService);
   private readonly equipmentService = inject(EquipmentService);
+  private readonly advantageService = inject(AdvantageService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   protected readonly characterId = this.route.snapshot.paramMap.get('id');
@@ -34,7 +36,13 @@ export class CharacterSkillsPage {
     attributeTwo: new FormControl<'force' | 'dexterite' | 'constitution' | 'sagesse' | 'intelligence' | 'charisme'>('force', { nonNullable: true }),
   });
 
-  protected get maximum(): number { return 4 + (this.character?.attributes.intelligence ?? 0); }
+  protected get maximum(): number {
+    const selectedAdvantages = this.character?.advantages.map((item) => item.advantageId) ?? [];
+    const attributes = this.character
+      ? this.advantageService.effectiveAttributes(this.character.attributes, selectedAdvantages)
+      : undefined;
+    return 4 + (attributes?.intelligence ?? 0);
+  }
   protected isSelected(id: string): boolean { return this.selected.has(id); }
   protected toggle(skill: Skill): void {
     if (this.selected.has(skill.id)) this.selected.delete(skill.id);
@@ -47,9 +55,14 @@ export class CharacterSkillsPage {
     this.skillForm.controls.label.reset();
   }
   protected getBonus(skill: Skill): number {
-    const attributes = this.character?.attributes;
+    const selectedAdvantages = this.character?.advantages.map((item) => item.advantageId) ?? [];
+    const attributes = this.character
+      ? this.advantageService.effectiveAttributes(this.character.attributes, selectedAdvantages)
+      : undefined;
     const equipmentIds = this.character?.equipment.filter((item) => item.equipped).map((item) => item.equipmentId) ?? [];
-    return attributes ? attributes[skill.attributeOne] + attributes[skill.attributeTwo] + this.equipmentService.skillBonus(skill.id, equipmentIds) : 0;
+    return attributes
+      ? attributes[skill.attributeOne] + attributes[skill.attributeTwo] + this.equipmentService.skillBonus(skill.id, equipmentIds) + this.advantageService.skillBonus(selectedAdvantages, skill.id)
+      : 0;
   }
   protected save(): void {
     if (!this.characterId || this.selected.size !== this.maximum) return;

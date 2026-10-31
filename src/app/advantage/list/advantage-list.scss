@@ -34,4 +34,11 @@ footer p { color: #9d413f; flex-basis: 100%; }
 .advantage-list .category { font-size: .75rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
 .advantage-list .advantage-description { color: var(--ink-soft); line-height: 1.55; max-width: 70ch; }
 .advantage-list .advantage-description strong { color: var(--ink); }
+.advantage-list .advantage-condition { color: var(--ink-soft); font-style: italic; line-height: 1.5; }
 .description-help { color: var(--ink-soft); font-size: .8rem; }
+.advantage-list .advantage-benefits { color: var(--ink-soft); margin: .75rem 0 0; padding-left: 1.25rem; }
+.advantage-list .advantage-benefits li + li { margin-top: .5rem; }
+.advantage-list .advantage-benefits p { line-height: 1.5; margin-top: .15rem; }
+.advantage-list .advantage-drawbacks { color: var(--danger); margin: .75rem 0 0; padding-left: 1.25rem; }
+.advantage-list .advantage-drawbacks li + li { margin-top: .5rem; }
+.advantage-list .advantage-drawbacks p { line-height: 1.5; margin-top: .15rem; }

@@ -1,8 +1,8 @@
 import { isPlatformBrowser } from '@angular/common';
 import { Inject, Injectable, PLATFORM_ID, signal } from '@angular/core';
-import { Advantage, AdvantageCategory } from './advantage.model';
+import { Advantage, AdvantageAttributeBonuses, AdvantageBenefit, AdvantageCategory } from './advantage.model';
 import { AttributeKey } from '../skill/skill.model';
-import { CharacterOrigin } from '../character/character.model';
+import { CharacterAttributes, CharacterOrigin } from '../character/character.model';
 
 const defaultAdvantages: Advantage[] = [
   { id: 'armes-armures-pro', title: 'Armes et armures de professionnel', category: 'combat', description: 'Vous ne subissez aucun malus quand vous utilisez des armes, boucliers et armures de professionnel p.123, 126', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
@@ -49,28 +49,46 @@ const defaultAdvantages: Advantage[] = [
   { id: 'bon-sens-souard', title: 'Bon sens souard', category: 'origin', description: 'Le conteur ne peut jamais faire de tentative de Krâsse quand un de ses seconds rôles essaie de vous embobiner ou de vous mentir. Votre bon sens s\'étend également aux effets magiques qui essaieraient de vous faire prendre des vessises pour des lanternes. Vous bénéficiez d\'un bonus de +4 aux jets de Sauvegarde contre de tels pouvoirs.', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null, conditionOrigin: 'souardie' },
   { id: 'chouchou-d-un-dieu', title: 'Chouchou d\'un dieu', category: 'origin', description: 'Choisissez avec le conteur dans la liste située en page 148 quel est le dieu qui vous convient le mieux à votre concept de héros. Les règles concenrant les interventions divines se trouvent également en page 148.', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null, conditionOrigin: 'darshan', deityChoice: true },
   { id: 'chaman', title: 'Chaman', category: 'origin', description: 'La magie des chamans se confine le plus souvent à créer des potions, des onguents et d\'autres concoctions peu ragoûtantes mais néanmoins efficaces. Au départ, vous connaissez deux recettes magiques. Allez voir en page 155 pour plus de détails.', conditionAttribute: null, conditionMinimum: null, conditionOrigin: 'region-primitive-reculee', conditionSkillId: 'metier-alchimiste', conditionSkillMinimum: 5, prerequisiteId: null, excludedAdvantageIds: ['pouvoir-magique', 'sage-d-eckmul'], recipeChoice: true, recipeCount: 2 },
-  { id: 'nouvelle-recette-chaman', title: 'Nouvelle recette', category: 'origin', description: 'Apprenez une recette supplémentaire grâce à votre talent de Chaman.', conditionAttribute: null, conditionMinimum: null, conditionOrigin: null, conditionSkillId: null, conditionSkillMinimum: null, prerequisiteId: 'chaman', minimumLevel: 1, repeatable: true, recipeChoice: true, recipeCount: 1, evolutionOnly: true },
+  { id: 'nouvelle-recette-chaman', title: 'Nouvelle recette', category: 'magic', description: 'Apprenez une recette supplémentaire grâce à votre talent de Chaman.', conditionAttribute: null, conditionMinimum: null, conditionOrigin: null, conditionSkillId: null, conditionSkillMinimum: null, prerequisiteId: 'chaman', minimumLevel: 1, repeatable: true, recipeChoice: true, recipeCount: 1, evolutionOnly: true },
   { id: 'fortune', title: 'Fortuné', category: 'origin', description: 'Au début de chaque nouvelle aventure, vous pouvez disposer d\'une somme de dragons d\'argent égale à 100 fois votre niveau en monnaie ou en équipement. Ce qui n\'est pas dépensé à la fin de l\'aventure est perdu. Si vous décidez un jour d\'acheter un bien de valeur, comme une maison par exemple, le conteur peut décider que vos bienfaiteurs sont prêts à en payer une partie (de 10 à 25% de la somme totale).', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
-  { id: 'chevalier', title: 'Chevalier', category: 'origin', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
-  { id: 'gnome-de-troy', title: 'Gnome de Troy', category: 'origin', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
-  { id: 'gris-gris-qui-marchent', title: 'Gris-gris qui marchent', category: 'origin', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
-  { id: 'nain', title: 'Nain', category: 'origin', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
-  { id: 'pouvoir-magique', title: 'Pouvoir magique', category: 'origin', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
-  { id: 'refractaire-a-la-magie', title: 'Réfractaire à la magie', category: 'origin', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
-  { id: 'sage-d-eckmul', title: 'Sage d\'Eckmül', category: 'origin', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
-  { id: 'troll', title: 'Troll', category: 'origin', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
-  { id: 'turf-attitre', title: 'Turf attitré', category: 'origin', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
+  { id: 'chevalier', title: 'Chevalier', category: 'origin', description: 'Votre port altier, vos vêtements dernier cri, votre insupportable arrogance le clament au monde entier : vous êtes de noble lignée. Cet Atout vous octroie plusieurs avantages :',
+    benefits: [
+      {title: 'Armes, armures et tout le saint-frusquin', description: 'Même si vous n\'avez pas d\'entraînement dans leur usage, vous vous devez de posséder une armure complète, un écu portant les armes de votre famille, une lance et diverses autres armes tranchantes et contandantes. Vous disposez également d\'une monture pour vous déplacer.'},
+      {title: 'Aristocrate', description: 'Vous êtes de noble extraction et les gens vous admirent ou vous craignent pour ça. Même hors de votre Hédulie natale, là  où l\'ordre social est différent et où les ge,s respectent moins la noblesse, vous recevez toujours un traitement particulier. C\'est sans doute dû à votre prestance hors du commun.'},
+      {title: 'Code de l\'honneur', description: 'En tant que chevalier hédule, vous êtes tenu de respecter un code d\'honneur simple mais strict. Les détails de ce code peuvent varier d\'une famille à l\'autre, aussi ne donnenrons-nous que les principaux points. Justice : un chevalier doit être juste dans ses paroles et ses actes. Il ne peut attaquer un ennemi par surprise ou utiliser des ruses indignes d\'un noble, pas plus qu\'il ne s\'abaissera à commettre des actions illégales. - Honneur : un chevalier doit protéger son honneur, celui de son suzerain et celui des dames. Une insulte doit être punie par un duel ou par une bonne bastonnade quand l\'offenseur est un manant.'}
+  ], conditionAttribute: null, conditionMinimum: null, prerequisiteId: null, conditionOrigin: 'barronies' },
+  { id: 'gnome-de-troy', title: 'Gnome de Troy', category: 'origin', description: 'Vous êtes ce qu\'on appelle dans le monde de Troy un gnome : un morveux, un chiard, un gosse quoi ; vous avez entre 6 et 10 ans. Etre un gnome présente un grand nombre d\'avantages, mais aussi quelques inconvénients.',
+    benefits: [
+      {title: 'Caractéristiques', description: 'Soustrayez 1 à votre bonus de Force (cela peut descendre jusqu\'à -1). En revanche, vous êtes bien plus mignon et agile qu\'un adulte : ajoutez 1 à vos bonus de Charisme et de Dextérité.'},
+      {title: 'Gueule d\'ange', description: 'On ne se méfie pas d\'un enfant. Vous pouvez bénéficiez d\'un bonus de +4 à tous vos jets de Bluff.'}
+    ],
+    attributeBonuses: { force: -1, dexterite: 1, charisme: 1 },
+    attributeMinimums: { force: -1 },
+    skillBonuses: { bluff: 4 },
+    conditionAttribute: null, conditionMinimum: null, prerequisiteId: null, excludedAdvantageIds: ['sage-d-eckmul', 'chevalier', 'armes-armures-brutasse', 'lancer-de-gens', 'chaman'] },
+  { id: 'gris-gris-qui-marchent', title: 'Gris-gris qui marchent', category: 'origin', description: 'Tant que vous portez vos gris-gris, vous bénéficiez d\'un bonus de +4 à vos jets de Sauvegarde contre les pouvoirs magiques.', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null, conditionSkillId: 'troll' },
+  { id: 'nain', title: 'Nain', category: 'origin', description: 'Vous êtes plus difficile à toucher en combat, pour commencer : votre Défense reçoit un bonus permanent de +2. De plus, vous pouvez vous cacher beaucoup plus facilement : vous recevez un bonus de +4 à vos jets de Discrétion.', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null, skillBonuses: { discretion: 4 }, combatBonuses: { defense: 2 }},
+  { id: 'pouvoir-magique', title: 'Pouvoir magique', category: 'origin', description: 'Vous êtes l\'heureux détenteur d\'un pouvoir magique. Reportez-vous aux règles de magie page 134 pour savoir ce que vous pouvez choisir comme pouvoir.', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null, conditionOrigin: 'eckmul', excludedAdvantageIds: ['sage-d-eckmul']},
+  { id: 'refractaire-a-la-magie', title: 'Réfractaire à la magie', category: 'origin', description: 'Vous êtes un des très rare habitants de Troy pour qui la magie n\'est pas naturelle. Vous n\'avez aucune capacité en la matière, mais en même temps la magie a du mal à vous affecter. Vous bénéficiez d\'un bonus de +4 à tous les jets de Sauvegarde pour résister à un effet magique quel qu\'il soit.', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null, excludedAdvantageIds: ['chaman', 'chouchou-d-un-dieu','pouvoir-magique', 'sage-d-eckmul', 'troll'] },
+  { id: 'sage-d-eckmul', title: 'Sage d\'Eckmül', category: 'origin', description: 'Vous êtes un de ces individus qui ont renoncé à l\'usage de leur pouvoir magique pour permettre aux autres de se servir des leurs. Cet Atout vous donne accès aux enchantements du Conservatoire (p.144). Vous projetez également un champ de magie autour de vous (p.143).', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null, conditionOrigin: 'eckmul', excludedAdvantageIds: ['pouvoir-magique'], emissionSurfaceBase: 10, emissionSurfaceAttribute: 'sagesse' },
+  { id: 'troll', title: 'Troll', category: 'origin', description: "Vous êtes grand, costaud et plein de poils. Cet état de fait vous apporte pasz mal d'avantages et quelques inconvénients", conditionAttribute: null, conditionMinimum: null, prerequisiteId: null, excludedAdvantageIds: ['sage-d-eckmul', 'pouvoir-magique', 'chevalier'], attributeBonuses: { force: 2, sagesse: -1 }, attributeMinimums: { force: 1, sagesse: -1, charisme: -1 }, benefits: [
+    { title: 'Cuir épais', description: 'Votre peau constitue une armure naturelle non retirable qui réduit de 4 points les dégâts reçus. Vous ne pouvez porter aucune autre armure.' },
+    { title: 'Armes de brutasse', description: 'Vous pouvez manier les armes de brutasse.' },
+  ], drawbacks: [
+    { title: 'Peur de l’eau', description: 'Face à l’eau, vous devez réussir un jet de Sauvegarde dont la difficulté varie de 10 à 30 selon la quantité d’eau.' },
+  ], damageReduction: 4 },
+  { id: 'turf-attitre', title: 'Turf attitré', category: 'origin', description: 'Vous connaissez votre région et ses secrets comme le fond de votre poche. + 4 aux comptéences renseignement, connaissance, diplomatie, survie.', conditionDescription: 'Vous devez avoir vécu pendant plusieurs années dans la région que vous choisissez.', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null, contextualSkillBonuses: { renseignement: 4, connaissances: 4, diplomatie: 4, survie: 4 } },
   { id: 'robuste', title: 'Robuste', category: 'combat', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
-  { id: 'longue-duree', title: 'Longue durée', category: 'magic', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
-  { id: 'longue-portee', title: 'Longue portée', category: 'magic', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
+  { id: 'longue-duree', title: 'Longue durée', category: 'magic', description: "Tous les effets magiques que vous produisez ont une durée doublée. Si vous prenez plusieurs fois cet Atout, vous poussez encore plus loin les limites de l'éconnomie et vous pouvez tripler (avec un deuxième Atout), voire quadrupler la durée de vos effets. Vous ne pouvez pas prendre plus de 3 Atouts de Longue durée.", conditionAttribute: null, conditionMinimum: null, prerequisiteId: null, repeatable: true, maxRepeatable: 3 },
+  { id: 'longue-portee', title: 'Longue portée', category: 'magic', description: "Voter pouvoir peut atteindre une cible deux fois plus éloignée que ceux de vos camarades. Si vous prenez une deuxième fois cet atout, votre portée est triplée. etc... Vous ne pouvez pas prendre plus de trois atouts de Longue portée.", conditionAttribute: null, conditionMinimum: null, prerequisiteId: null, repeatable: true, maxRepeatable: 3 },
   { id: 'nouvelles-recettes', title: 'Nouvelles recettes', category: 'magic', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
-  { id: 'pompe-a-energie', title: 'Pompe à énergie', category: 'magic', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
-  { id: 'pouvoir-devastateur', title: 'Pouvoir dévastateur', category: 'magic', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
-  { id: 'pouvoir-discret', title: 'Pouvoir discret', category: 'magic', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
-  { id: 'pouvoir-etendu', title: 'Pouvoir étendu', category: 'magic', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
-  { id: 'puissance-magique', title: 'Puissance magique', category: 'magic', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
-  { id: 'reserves-d-energie', title: 'Réserves d\'énergie', category: 'magic', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
-  { id: 'zone-etendue', title: 'Zone étendue', category: 'magic', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
+  { id: 'pompe-a-energie', title: 'Pompe à énergie', category: 'magic', description: "En vous concentrant très fort, vous êtes capable de puiser l'énergie ambiante pour suppléer à la votre. Cela ne fonctionne pas à tous les coups et vous avez besoin d'un peu d'aide de la part du destin, mais c'est parfois utile. Vous pouvez prélever des Krâsses pour récupérer des points d'énergie. Jetez le même nombre de dés de Krâsses et ajoutez leur résultat à votre total d'énergie.", conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
+  { id: 'pouvoir-devastateur', title: 'Pouvoir dévastateur', category: 'magic', description: "Avec les années, votre pouvoir a atteint un stade qui le rend très inquiétant - pour vos ennemis en tout cas. Si vous dépensez le double de points d'énergie, vous pouvez jeter le double de dés de dégâts quand vous activez votre pouvoir.", conditionAttribute: null, conditionMinimum: null, prerequisiteId: "pouvoir-magique", minimumLevel: 8 },
+  { id: 'pouvoir-discret', title: 'Pouvoir discret', category: 'magic', description: "Utiliser votre pouvoir sans être vu. Vous devez faire un deuxième jet de Concentration si vous souhaitez rester discret. Ceux qui vous regardent ont droit à un jet de Perception en Opposition pour vous repérer.", conditionMinimum: null, prerequisiteId: null, minimumLevel: 5 , conditionAttribute: null, conditionSkillId: 'discretion', conditionSkillMinimum: 1 },
+  { id: 'pouvoir-etendu', title: 'Pouvoir étendu', category: 'magic', description: "Vos effets magiques peuvent affecter une plus grande zone ou faire plus de victimes. Le volume, la surface ou le nombre de personnes affectées est doublé. Si vous prenez plusieurs fois cet Atout, vous pouvez étendre encore plus les effets. 2x (triplez), 3x (quadruplez). Il est impossible de prendre plus de trois fois l'Atout Pouvoir étendu.", conditionAttribute: null, conditionMinimum: null, prerequisiteId: null, repeatable: true, maxRepeatable: 3 },
+  { id: 'puissance-magique', title: 'Puissance magique', category: 'magic', description: "Quand vous faites un jet de Concentration pour activer un effet magique, ajoutez +2 au jet. Vous pouvez prendre plusieurs fois cet Atout vous gagnez +1 à vos jets par Atouts supplémentaire.", conditionAttribute: null, conditionMinimum: null, prerequisiteId: null, repeatable: true},
+  { id: 'reserves-d-energie', title: 'Réserves d\'énergie', category: 'magic', description: "Vous disposez d'une plus grande quantité d'énergie que la plupart des gens. Ajoutez 10 points à votre total maximum d'énergie. Vous pouvez prendre plusieurs atouts en Réserves d'énergie, vous gagnerez +5 points par Atout supplémentaire.", conditionAttribute: null, conditionMinimum: null, prerequisiteId: null, repeatable: true, energyPointsBonus: 10, additionalEnergyPointsBonus: 5 },
+  { id: 'zone-etendue', title: 'Zone étendue', category: 'magic', description: "Ajoutez votre niveau au rayon de votre zone de couverture. Il est maintenant de 10 km + bonus de Sagesse + niveau.", conditionAttribute: null, conditionMinimum: null, prerequisiteId: 'sage-d-eckmul', emissionSurfaceLevelBonus: true },
   { id: 'allies', title: 'Alliés', category: 'social', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
   { id: 'ames-de-chef', title: 'Ames de chef', category: 'social', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
   { id: 'chevalier-blanc', title: 'Chevalier blanc', category: 'social', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
@@ -90,6 +108,94 @@ export class AdvantageService {
   private readonly isBrowser: boolean;
   private readonly advantages = signal<Advantage[]>(defaultAdvantages);
   readonly advantageList = this.advantages.asReadonly();
+
+  effectiveAttributes(attributes: CharacterAttributes, selectedAdvantageIds: string[]): CharacterAttributes {
+    const bonuses: AdvantageAttributeBonuses = {};
+    const minimums: Partial<Record<AttributeKey, number>> = {};
+    for (const id of selectedAdvantageIds) {
+      const advantage = this.advantages().find((item) => item.id === id);
+      if (!advantage) continue;
+      for (const attribute of Object.keys(attributes) as AttributeKey[]) {
+        const bonus = advantage.attributeBonuses?.[attribute];
+        if (bonus !== undefined) bonuses[attribute] = (bonuses[attribute] ?? 0) + bonus;
+        const minimum = advantage.attributeMinimums?.[attribute];
+        if (minimum !== undefined) minimums[attribute] = Math.max(minimums[attribute] ?? Number.NEGATIVE_INFINITY, minimum);
+      }
+    }
+
+    const effectiveValue = (attribute: AttributeKey): number =>
+      Math.max(minimums[attribute] ?? Number.NEGATIVE_INFINITY, attributes[attribute] + (bonuses[attribute] ?? 0));
+    return {
+      force: effectiveValue('force'),
+      dexterite: effectiveValue('dexterite'),
+      constitution: effectiveValue('constitution'),
+      sagesse: effectiveValue('sagesse'),
+      intelligence: effectiveValue('intelligence'),
+      charisme: effectiveValue('charisme'),
+    };
+  }
+
+  skillBonus(selectedAdvantageIds: string[], skillId: string): number {
+    return selectedAdvantageIds.reduce((total, id) => {
+      const advantage = this.advantages().find((item) => item.id === id);
+      return total + (advantage?.skillBonuses?.[skillId] ?? 0);
+    }, 0);
+  }
+
+  contextualSkillBonus(selectedAdvantageIds: string[], skillId: string, skillLabel: string): number {
+    const normalize = (value: string): string => value.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase().replace(/[^a-z0-9]/g, '').replace(/s$/, '');
+    const skillKeys = new Set([normalize(skillId), normalize(skillLabel)]);
+    return selectedAdvantageIds.reduce((total, id) => {
+      const advantage = this.advantages().find((item) => item.id === id);
+      const matchingBonus = Object.entries(advantage?.contextualSkillBonuses ?? {})
+        .find(([key]) => skillKeys.has(normalize(key)))?.[1] ?? 0;
+      return total + matchingBonus;
+    }, 0);
+  }
+
+  combatScoreBonus(selectedAdvantageIds: string[], score: 'attack' | 'defense' | 'save'): number {
+    return selectedAdvantageIds.reduce((total, id) => {
+      const advantage = this.advantages().find((item) => item.id === id);
+      return total + (advantage?.combatBonuses?.[score] ?? 0);
+    }, 0);
+  }
+
+  damageReduction(selectedAdvantageIds: string[]): number {
+    return selectedAdvantageIds.reduce((total, id) => {
+      const advantage = this.advantages().find((item) => item.id === id);
+      return total + (advantage?.damageReduction ?? 0);
+    }, 0);
+  }
+
+  energyPointsBonus(selectedAdvantageIds: string[]): number {
+    const occurrenceCounts = new Map<string, number>();
+    for (const id of selectedAdvantageIds) {
+      occurrenceCounts.set(id, (occurrenceCounts.get(id) ?? 0) + 1);
+    }
+    return [...occurrenceCounts].reduce((total, [id, count]) => {
+      const advantage = this.advantages().find((item) => item.id === id);
+      if (!advantage) return total;
+      return total
+        + (advantage.energyPointsBonus ?? 0)
+        + Math.max(0, count - 1) * (advantage.additionalEnergyPointsBonus ?? 0);
+    }, 0);
+  }
+
+  emissionSurface(selectedAdvantageIds: string[], attributes: CharacterAttributes, level: number): number | undefined {
+    const selectedAdvantages = selectedAdvantageIds
+      .map((id) => this.advantages().find((advantage) => advantage.id === id))
+      .filter((advantage): advantage is Advantage => advantage !== undefined);
+    const emitter = selectedAdvantages.find((advantage) => advantage.emissionSurfaceBase !== undefined);
+    if (!emitter || emitter.emissionSurfaceBase === undefined) return undefined;
+
+    const attributeBonus = emitter.emissionSurfaceAttribute
+      ? attributes[emitter.emissionSurfaceAttribute]
+      : 0;
+    const levelBonus = selectedAdvantages.some((advantage) => advantage.emissionSurfaceLevelBonus)
+      ? level
+      : 0;
+    return emitter.emissionSurfaceBase + attributeBonus + levelBonus;
+  }
 
   constructor(@Inject(PLATFORM_ID) platformId: object) {
     this.isBrowser = isPlatformBrowser(platformId);
@@ -121,6 +227,11 @@ export class AdvantageService {
     return true;
   }
 
+  resetToDefaults(): void {
+    this.advantages.set([...defaultAdvantages]);
+    if (this.isBrowser) localStorage.removeItem(this.storageKey);
+  }
+
   private isAdvantage(value: unknown): value is Advantage {
     if (typeof value !== 'object' || value === null) return false;
     const advantage = value as Record<string, unknown>;
@@ -133,6 +244,7 @@ export class AdvantageService {
       && (advantage['prerequisiteId'] === null || advantage['prerequisiteId'] === undefined || typeof advantage['prerequisiteId'] === 'string')
       && (advantage['minimumLevel'] === null || advantage['minimumLevel'] === undefined || this.isNumber(advantage['minimumLevel']))
       && (advantage['repeatable'] === undefined || typeof advantage['repeatable'] === 'boolean')
+      && (advantage['maxRepeatable'] === undefined || (typeof advantage['maxRepeatable'] === 'number' && this.isNumber(advantage['maxRepeatable']) && advantage['maxRepeatable'] > 0))
       && (advantage['weaponChoice'] === undefined || typeof advantage['weaponChoice'] === 'boolean')
       && (advantage['deityChoice'] === undefined || typeof advantage['deityChoice'] === 'boolean')
       && (advantage['recipeChoice'] === undefined || typeof advantage['recipeChoice'] === 'boolean')
@@ -141,12 +253,56 @@ export class AdvantageService {
       && (advantage['conditionOrigin'] === null || advantage['conditionOrigin'] === undefined || this.isOrigin(advantage['conditionOrigin']))
       && (advantage['conditionSkillId'] === null || advantage['conditionSkillId'] === undefined || typeof advantage['conditionSkillId'] === 'string')
       && (advantage['conditionSkillMinimum'] === null || advantage['conditionSkillMinimum'] === undefined || this.isNumber(advantage['conditionSkillMinimum']))
-      && (advantage['excludedAdvantageIds'] === undefined || (Array.isArray(advantage['excludedAdvantageIds']) && advantage['excludedAdvantageIds'].every((id) => typeof id === 'string')));
+      && (advantage['conditionDescription'] === undefined || typeof advantage['conditionDescription'] === 'string')
+      && (advantage['excludedAdvantageIds'] === undefined || (Array.isArray(advantage['excludedAdvantageIds']) && advantage['excludedAdvantageIds'].every((id) => typeof id === 'string')))
+      && (advantage['benefits'] === undefined || (Array.isArray(advantage['benefits']) && advantage['benefits'].every((benefit) => this.isBenefit(benefit))))
+      && this.isAttributeBonusRecord(advantage['attributeBonuses'])
+      && this.isAttributeBonusRecord(advantage['attributeMinimums'])
+      && this.isSkillBonusRecord(advantage['skillBonuses'])
+      && this.isSkillBonusRecord(advantage['contextualSkillBonuses'])
+      && this.isCombatBonusRecord(advantage['combatBonuses'])
+      && (advantage['energyPointsBonus'] === undefined || this.isNumber(advantage['energyPointsBonus']))
+      && (advantage['additionalEnergyPointsBonus'] === undefined || this.isNumber(advantage['additionalEnergyPointsBonus']))
+      && (advantage['emissionSurfaceBase'] === undefined || this.isNumber(advantage['emissionSurfaceBase']))
+      && (advantage['emissionSurfaceAttribute'] === undefined || this.isAttribute(advantage['emissionSurfaceAttribute']))
+      && (advantage['emissionSurfaceLevelBonus'] === undefined || typeof advantage['emissionSurfaceLevelBonus'] === 'boolean')
+      && (advantage['damageReduction'] === undefined || this.isNumber(advantage['damageReduction']))
+      && (advantage['drawbacks'] === undefined || (Array.isArray(advantage['drawbacks']) && advantage['drawbacks'].every((drawback) => this.isBenefit(drawback))));
+  }
+
+  private isAttributeBonusRecord(value: unknown): boolean {
+    if (value === undefined) return true;
+    if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
+    return Object.entries(value).every(([attribute, bonus]) =>
+      this.isAttribute(attribute) && typeof bonus === 'number' && Number.isInteger(bonus),
+    );
+  }
+
+  private isSkillBonusRecord(value: unknown): boolean {
+    if (value === undefined) return true;
+    if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
+    return Object.entries(value).every(([skillId, bonus]) =>
+      skillId.length > 0 && typeof bonus === 'number' && Number.isInteger(bonus),
+    );
+  }
+
+  private isCombatBonusRecord(value: unknown): boolean {
+    if (value === undefined) return true;
+    if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
+    return Object.entries(value).every(([score, bonus]) =>
+      ['attack', 'defense', 'save'].includes(score) && typeof bonus === 'number' && Number.isInteger(bonus),
+    );
+  }
+
+  private isBenefit(value: unknown): value is AdvantageBenefit {
+    if (typeof value !== 'object' || value === null) return false;
+    const benefit = value as Record<string, unknown>;
+    return typeof benefit['title'] === 'string' && typeof benefit['description'] === 'string';
   }
 
   private normalize(value: Advantage & { label?: string }): Advantage {
     const defaultAdvantage = defaultAdvantages.find((advantage) => advantage.id === value.id);
-    return { id: value.id, title: value.title ?? value.label ?? '', category: value.category ?? 'heroic', description: value.description ?? '', conditionAttribute: value.conditionAttribute ?? null, conditionMinimum: value.conditionMinimum ?? null, conditionOrigin: value.conditionOrigin ?? defaultAdvantage?.conditionOrigin ?? null, conditionSkillId: value.conditionSkillId ?? defaultAdvantage?.conditionSkillId ?? null, conditionSkillMinimum: value.conditionSkillMinimum ?? defaultAdvantage?.conditionSkillMinimum ?? null, excludedAdvantageIds: value.excludedAdvantageIds ?? defaultAdvantage?.excludedAdvantageIds ?? [], prerequisiteId: value.prerequisiteId ?? null, minimumLevel: value.minimumLevel === undefined ? defaultAdvantage?.minimumLevel ?? null : value.minimumLevel, repeatable: value.repeatable ?? defaultAdvantage?.repeatable ?? false, weaponChoice: value.weaponChoice ?? defaultAdvantage?.weaponChoice ?? false, deityChoice: value.deityChoice ?? defaultAdvantage?.deityChoice ?? false, recipeChoice: value.recipeChoice ?? defaultAdvantage?.recipeChoice ?? false, recipeCount: value.recipeCount ?? defaultAdvantage?.recipeCount ?? 1, evolutionOnly: value.evolutionOnly ?? defaultAdvantage?.evolutionOnly ?? false };
+    return { id: value.id, title: value.title ?? value.label ?? '', category: value.category ?? 'heroic', description: value.description ?? '', benefits: value.benefits ?? defaultAdvantage?.benefits ?? [], drawbacks: value.drawbacks ?? defaultAdvantage?.drawbacks ?? [], attributeBonuses: value.attributeBonuses ?? defaultAdvantage?.attributeBonuses ?? {}, attributeMinimums: value.attributeMinimums ?? defaultAdvantage?.attributeMinimums ?? {}, skillBonuses: value.skillBonuses ?? defaultAdvantage?.skillBonuses ?? {}, contextualSkillBonuses: value.contextualSkillBonuses ?? defaultAdvantage?.contextualSkillBonuses ?? {}, combatBonuses: value.combatBonuses ?? defaultAdvantage?.combatBonuses ?? {}, energyPointsBonus: value.energyPointsBonus ?? defaultAdvantage?.energyPointsBonus, additionalEnergyPointsBonus: value.additionalEnergyPointsBonus ?? defaultAdvantage?.additionalEnergyPointsBonus, emissionSurfaceBase: value.emissionSurfaceBase ?? defaultAdvantage?.emissionSurfaceBase, emissionSurfaceAttribute: value.emissionSurfaceAttribute ?? defaultAdvantage?.emissionSurfaceAttribute, emissionSurfaceLevelBonus: value.emissionSurfaceLevelBonus ?? defaultAdvantage?.emissionSurfaceLevelBonus, damageReduction: value.damageReduction ?? defaultAdvantage?.damageReduction ?? 0, conditionAttribute: value.conditionAttribute ?? null, conditionMinimum: value.conditionMinimum ?? null, conditionOrigin: value.conditionOrigin ?? defaultAdvantage?.conditionOrigin ?? null, conditionSkillId: value.conditionSkillId ?? defaultAdvantage?.conditionSkillId ?? null, conditionSkillMinimum: value.conditionSkillMinimum ?? defaultAdvantage?.conditionSkillMinimum ?? null, conditionDescription: value.conditionDescription ?? defaultAdvantage?.conditionDescription, excludedAdvantageIds: value.excludedAdvantageIds ?? defaultAdvantage?.excludedAdvantageIds ?? [], prerequisiteId: value.prerequisiteId ?? null, minimumLevel: value.minimumLevel === undefined ? defaultAdvantage?.minimumLevel ?? null : value.minimumLevel, repeatable: value.repeatable ?? defaultAdvantage?.repeatable ?? false, maxRepeatable: value.maxRepeatable ?? defaultAdvantage?.maxRepeatable, weaponChoice: value.weaponChoice ?? defaultAdvantage?.weaponChoice ?? false, deityChoice: value.deityChoice ?? defaultAdvantage?.deityChoice ?? false, recipeChoice: value.recipeChoice ?? defaultAdvantage?.recipeChoice ?? false, recipeCount: value.recipeCount ?? defaultAdvantage?.recipeCount ?? 1, evolutionOnly: value.evolutionOnly ?? defaultAdvantage?.evolutionOnly ?? false };
   }
 
   private isOrigin(value: unknown): value is CharacterOrigin { return ['human', 'darshan', 'troll', 'eckmul', 'souardie', 'region-primitive-reculee'].includes(value as string); }

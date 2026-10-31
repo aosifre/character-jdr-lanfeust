@@ -63,5 +63,16 @@ input { width: 100%; box-sizing: border-box; padding: .55rem .65rem; border: 1px
 .empty-state { color: #65736d; }.empty-state h1 { color: #23302d; }
 .collection-list .advantage-description { color: var(--ink-soft); line-height: 1.5; }
 .collection-list .advantage-description strong { color: var(--ink); }
+.major-enchantments-panel h2 { color: var(--ink); }
+.enchantment-note { color: var(--ink-soft); margin: -.5rem 0 1rem; }
+.enchantment-grid { display: grid; gap: .75rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.enchantment-card { background: var(--paper-light); border-left: 3px solid var(--copper); display: grid; gap: .65rem; padding: 1rem; }
+.enchantment-card h3 { color: var(--ink); font-family: Georgia, serif; font-size: 1.15rem; margin: 0; }
+.enchantment-card dl { display: grid; gap: .45rem; margin: 0; }
+.enchantment-card dl div { display: grid; gap: .15rem; }
+.enchantment-card dt { color: var(--ink-soft); font-size: .75rem; font-weight: 700; }
+.enchantment-card dd { color: var(--ink); margin: 0; }
+.enchantment-card p { color: var(--ink-soft); font-size: .9rem; line-height: 1.5; margin: 0; }
 @media (max-width: 800px) { .view-heading { align-items: start; flex-direction: column; gap: 1rem; }.header-stats { width: 100%; box-sizing: border-box; }.attribute-grid { grid-template-columns: repeat(3, 1fr); }.score-grid { grid-template-columns: repeat(2, 1fr); }.score-grid > div:last-child { grid-column: span 2; }.collection-list, .equipment-cards, .money-grid { grid-template-columns: 1fr; } }
-@media (max-width: 520px) { .view-shell { padding-inline: .8rem; }.panel { padding: 1rem; }.attribute-grid { grid-template-columns: repeat(2, 1fr); }.score-grid { grid-template-columns: 1fr; }.score-grid > div:last-child { grid-column: auto; }.section-heading, .penalty-controls { align-items: stretch; flex-direction: column; }.skill-row { grid-template-columns: 1fr auto; }.skill-row label { grid-column: span 2; } }
+@media (max-width: 520px) { .view-shell { padding-inline: .8rem; }.panel { padding: 1rem; }.attribute-grid { grid-template-columns: repeat(2, 1fr); }.score-grid { grid-template-columns: 1fr; }.score-grid > div:last-child { grid-column: auto; }.section-heading, .penalty-controls { align-items: stretch; flex-direction: column; }.skill-row { grid-template-columns: 1fr auto; }.skill-row label { grid-column: span 2; }.enchantment-grid { grid-template-columns: 1fr; } }
+.collection-list .advantage-drawback { color: var(--danger); }

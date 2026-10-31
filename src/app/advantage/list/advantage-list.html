@@ -10,7 +10,7 @@
   </label>
   <section class="advantage-list">
     @for (advantage of filteredAdvantages(); track advantage.id) {
-      <article><div><strong>{{ advantage.title }}</strong><p class="category">{{ categoryLabel(advantage.category) }}</p><p class="advantage-description" [innerHTML]="advantage.description | advantageDescription"></p></div><button class="delete" type="button" (click)="remove(advantage.id)">Supprimer</button></article>
+      <article><div><strong>{{ advantage.title }}</strong><p class="category">{{ categoryLabel(advantage.category) }}</p><p class="advantage-description" [innerHTML]="advantage.description | advantageDescription"></p>@if (advantage.conditionDescription) {<p class="advantage-condition">{{ advantage.conditionDescription }}</p>}@if (advantage.benefits?.length) {<ul class="advantage-benefits">@for (benefit of advantage.benefits; track $index) {<li><strong>{{ benefit.title }}</strong><p [innerHTML]="benefit.description | advantageDescription"></p></li>}</ul>}@if (advantage.drawbacks?.length) {<ul class="advantage-drawbacks">@for (drawback of advantage.drawbacks; track $index) {<li><strong>{{ drawback.title }}</strong><p [innerHTML]="drawback.description | advantageDescription"></p></li>}</ul>}</div><button class="delete" type="button" (click)="remove(advantage.id)">Supprimer</button></article>
     } @empty {
       <p class="empty-filter">Aucun atout dans cette catégorie.</p>
     }

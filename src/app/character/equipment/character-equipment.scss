@@ -17,6 +17,7 @@ h1 { color: #24323a; font-family: Georgia, serif; font-size: clamp(2.3rem, 6vw, 
 .cart-item-info > span, .cart-item-info > small { color: #65736d; font-size: .9rem; }
 .cart-item-info .cart-item-skills { color: #d0643b; }
 .active-equipment p { margin: .35rem 0; }
+.active-equipment .equipment-warning { color: var(--danger); font-weight: 700; }
 .active-equipment .button { margin-top: 1rem; }
 .button { background: #24323a; border: 0; border-radius: 4px; color: #fff; cursor: pointer; font: inherit; font-weight: 800; min-height: 3rem; padding: .75rem 1.5rem; }
 .button-icon { display: inline-block; font-size: 1.1em; line-height: 0; margin-right: .25rem; vertical-align: -.05em; }

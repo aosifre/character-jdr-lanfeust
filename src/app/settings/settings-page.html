@@ -8,4 +8,10 @@
     <div class="archive-actions"><button class="button button-outline" type="button" (click)="exportData()">Exporter l'archive</button><label class="button button-outline" for="data-import">Importer une archive</label><input id="data-import" class="hidden" type="file" accept="application/json,.json" (change)="importData($event)" /></div>
     @if (importError) {<p class="import-error" role="alert">Le fichier JSON n’est pas une archive Lanfeust valide.</p>}
   </section>
+  <section class="danger-zone" aria-labelledby="clear-data-title">
+    <h2 id="clear-data-title">Réinitialiser l'application</h2>
+    <p>Supprime tous les personnages et catalogues personnalisés, puis rétablit les catalogues et préférences par défaut. Cette action est irréversible.</p>
+    <button class="button danger-button" type="button" (click)="clearApplicationData()">Vider les données enregistrées</button>
+    @if (dataCleared()) { <p class="clear-success" role="status">Les données ont été supprimées et les catalogues par défaut sont chargés.</p> }
+  </section>
 </main>
