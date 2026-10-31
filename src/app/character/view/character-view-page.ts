@@ -76,7 +76,24 @@ export class CharacterViewPage implements AfterViewInit {
   }
 
   protected getSkillName(skillId: string): string {
-    return this.getSkill(skillId)?.label ?? 'Compétence inconnue';
+    const skill = this.getSkill(skillId);
+    if (!skill) return 'Compétence inconnue';
+    const region = this.regionalRegion;
+    return this.regionalSkillBonus(skill) > 0
+      ? `${skill.label} (+4 dans ${region ? `la région « ${region} »` : 'la région'})`
+      : skill.label;
+  }
+
+  protected get regionalRegion(): string | undefined {
+    return this.character?.advantages.find((item) => item.advantageId === 'turf-attitre')?.chosenRegion?.trim() || undefined;
+  }
+
+  protected regionalSkillBonus(skill: Skill): number {
+    return this.advantageService.contextualSkillBonus(
+      this.character?.advantages.map((item) => item.advantageId) ?? [],
+      skill.id,
+      skill.label,
+    );
   }
 
   protected skillTotal(skillId: string): number {
@@ -93,6 +110,7 @@ export class CharacterViewPage implements AfterViewInit {
       + (selected?.degree ?? 0)
       + this.equipmentService.skillBonus(skillId, equipmentIds)
       + this.advantageService.skillBonus(this.character.advantages.map((item) => item.advantageId), skillId)
+      + this.regionalSkillBonus(skill)
       - this.numberOrZero(this.globalSkillPenalty)
       - this.numberOrZero(this.skillPenalties[skillId]);
   }
@@ -129,13 +147,14 @@ export class CharacterViewPage implements AfterViewInit {
       .filter((item): item is Equipment => item !== undefined) ?? [];
   }
 
-  protected get selectedAdvantageSummaries(): { id: string; title: string; description: string; benefits: { title: string; description: string }[]; drawbacks: { title: string; description: string }[]; count: number; weapons: string; deity?: { name: string; circumstances: string; helpingHand: string }; recipes: CharacterRecipe[]; magicPowerChoice?: MagicPowerChoice }[] {
-    const selections = new Map<string, { count: number; weapons: string[]; deity?: { name: string; circumstances: string; helpingHand: string }; recipes: CharacterRecipe[]; magicPowerChoice?: MagicPowerChoice }>();
+  protected get selectedAdvantageSummaries(): { id: string; title: string; description: string; benefits: { title: string; description: string }[]; drawbacks: { title: string; description: string }[]; count: number; weapons: string; region?: string; deity?: { name: string; circumstances: string; helpingHand: string }; recipes: CharacterRecipe[]; magicPowerChoice?: MagicPowerChoice }[] {
+    const selections = new Map<string, { count: number; weapons: string[]; region?: string; deity?: { name: string; circumstances: string; helpingHand: string }; recipes: CharacterRecipe[]; magicPowerChoice?: MagicPowerChoice }>();
     for (const selected of this.character?.advantages ?? []) {
       const summary = selections.get(selected.advantageId) ?? { count: 0, weapons: [], recipes: [] };
       summary.count++;
       const weapon = selected.chosenWeapon ?? selected.specializationWeapon;
       if (weapon) summary.weapons.push(weapon);
+      if (selected.chosenRegion) summary.region = selected.chosenRegion;
       if (selected.chosenDeity) summary.deity = selected.chosenDeity;
       if (selected.recipes) summary.recipes.push(...selected.recipes);
       if (selected.magicPowerChoice) summary.magicPowerChoice = selected.magicPowerChoice;
@@ -144,7 +163,7 @@ export class CharacterViewPage implements AfterViewInit {
     return [...selections].flatMap(([id, summary]) => {
       const advantage = this.advantages().find((item) => item.id === id);
       return advantage
-        ? [{ id, title: advantage.title, description: advantage.description || 'Aucune description.', benefits: advantage.benefits ?? [], drawbacks: advantage.drawbacks ?? [], count: summary.count, weapons: summary.weapons.join(', '), deity: summary.deity, recipes: summary.recipes, magicPowerChoice: summary.magicPowerChoice }]
+        ? [{ id, title: advantage.title, description: advantage.description || 'Aucune description.', benefits: advantage.benefits ?? [], drawbacks: advantage.drawbacks ?? [], count: summary.count, weapons: summary.weapons.join(', '), region: summary.region, deity: summary.deity, recipes: summary.recipes, magicPowerChoice: summary.magicPowerChoice }]
         : [];
     });
   }

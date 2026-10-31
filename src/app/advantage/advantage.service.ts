@@ -77,7 +77,7 @@ const defaultAdvantages: Advantage[] = [
   ], drawbacks: [
     { title: 'Peur de l’eau', description: 'Face à l’eau, vous devez réussir un jet de Sauvegarde dont la difficulté varie de 10 à 30 selon la quantité d’eau.' },
   ], damageReduction: 4 },
-  { id: 'turf-attitre', title: 'Turf attitré', category: 'origin', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
+  { id: 'turf-attitre', title: 'Turf attitré', category: 'origin', description: 'Vous connaissez votre région et ses secrets comme le fond de votre poche. + 4 aux comptéences renseignement, connaissance, diplomatie, survie.', conditionDescription: 'Vous devez avoir vécu pendant plusieurs années dans la région que vous choisissez.', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null, contextualSkillBonuses: { renseignement: 4, connaissances: 4, diplomatie: 4, survie: 4 } },
   { id: 'robuste', title: 'Robuste', category: 'combat', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
   { id: 'longue-duree', title: 'Longue durée', category: 'magic', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
   { id: 'longue-portee', title: 'Longue portée', category: 'magic', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
@@ -139,6 +139,17 @@ export class AdvantageService {
     return selectedAdvantageIds.reduce((total, id) => {
       const advantage = this.advantages().find((item) => item.id === id);
       return total + (advantage?.skillBonuses?.[skillId] ?? 0);
+    }, 0);
+  }
+
+  contextualSkillBonus(selectedAdvantageIds: string[], skillId: string, skillLabel: string): number {
+    const normalize = (value: string): string => value.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase().replace(/[^a-z0-9]/g, '').replace(/s$/, '');
+    const skillKeys = new Set([normalize(skillId), normalize(skillLabel)]);
+    return selectedAdvantageIds.reduce((total, id) => {
+      const advantage = this.advantages().find((item) => item.id === id);
+      const matchingBonus = Object.entries(advantage?.contextualSkillBonuses ?? {})
+        .find(([key]) => skillKeys.has(normalize(key)))?.[1] ?? 0;
+      return total + matchingBonus;
     }, 0);
   }
 
@@ -211,11 +222,13 @@ export class AdvantageService {
       && (advantage['conditionOrigin'] === null || advantage['conditionOrigin'] === undefined || this.isOrigin(advantage['conditionOrigin']))
       && (advantage['conditionSkillId'] === null || advantage['conditionSkillId'] === undefined || typeof advantage['conditionSkillId'] === 'string')
       && (advantage['conditionSkillMinimum'] === null || advantage['conditionSkillMinimum'] === undefined || this.isNumber(advantage['conditionSkillMinimum']))
+      && (advantage['conditionDescription'] === undefined || typeof advantage['conditionDescription'] === 'string')
       && (advantage['excludedAdvantageIds'] === undefined || (Array.isArray(advantage['excludedAdvantageIds']) && advantage['excludedAdvantageIds'].every((id) => typeof id === 'string')))
       && (advantage['benefits'] === undefined || (Array.isArray(advantage['benefits']) && advantage['benefits'].every((benefit) => this.isBenefit(benefit))))
       && this.isAttributeBonusRecord(advantage['attributeBonuses'])
       && this.isAttributeBonusRecord(advantage['attributeMinimums'])
       && this.isSkillBonusRecord(advantage['skillBonuses'])
+      && this.isSkillBonusRecord(advantage['contextualSkillBonuses'])
       && this.isCombatBonusRecord(advantage['combatBonuses'])
       && (advantage['damageReduction'] === undefined || this.isNumber(advantage['damageReduction']))
       && (advantage['drawbacks'] === undefined || (Array.isArray(advantage['drawbacks']) && advantage['drawbacks'].every((drawback) => this.isBenefit(drawback))));
@@ -253,7 +266,7 @@ export class AdvantageService {
 
   private normalize(value: Advantage & { label?: string }): Advantage {
     const defaultAdvantage = defaultAdvantages.find((advantage) => advantage.id === value.id);
-    return { id: value.id, title: value.title ?? value.label ?? '', category: value.category ?? 'heroic', description: value.description ?? '', benefits: value.benefits ?? defaultAdvantage?.benefits ?? [], drawbacks: value.drawbacks ?? defaultAdvantage?.drawbacks ?? [], attributeBonuses: value.attributeBonuses ?? defaultAdvantage?.attributeBonuses ?? {}, attributeMinimums: value.attributeMinimums ?? defaultAdvantage?.attributeMinimums ?? {}, skillBonuses: value.skillBonuses ?? defaultAdvantage?.skillBonuses ?? {}, combatBonuses: value.combatBonuses ?? defaultAdvantage?.combatBonuses ?? {}, damageReduction: value.damageReduction ?? defaultAdvantage?.damageReduction ?? 0, conditionAttribute: value.conditionAttribute ?? null, conditionMinimum: value.conditionMinimum ?? null, conditionOrigin: value.conditionOrigin ?? defaultAdvantage?.conditionOrigin ?? null, conditionSkillId: value.conditionSkillId ?? defaultAdvantage?.conditionSkillId ?? null, conditionSkillMinimum: value.conditionSkillMinimum ?? defaultAdvantage?.conditionSkillMinimum ?? null, excludedAdvantageIds: value.excludedAdvantageIds ?? defaultAdvantage?.excludedAdvantageIds ?? [], prerequisiteId: value.prerequisiteId ?? null, minimumLevel: value.minimumLevel === undefined ? defaultAdvantage?.minimumLevel ?? null : value.minimumLevel, repeatable: value.repeatable ?? defaultAdvantage?.repeatable ?? false, weaponChoice: value.weaponChoice ?? defaultAdvantage?.weaponChoice ?? false, deityChoice: value.deityChoice ?? defaultAdvantage?.deityChoice ?? false, recipeChoice: value.recipeChoice ?? defaultAdvantage?.recipeChoice ?? false, recipeCount: value.recipeCount ?? defaultAdvantage?.recipeCount ?? 1, evolutionOnly: value.evolutionOnly ?? defaultAdvantage?.evolutionOnly ?? false };
+    return { id: value.id, title: value.title ?? value.label ?? '', category: value.category ?? 'heroic', description: value.description ?? '', benefits: value.benefits ?? defaultAdvantage?.benefits ?? [], drawbacks: value.drawbacks ?? defaultAdvantage?.drawbacks ?? [], attributeBonuses: value.attributeBonuses ?? defaultAdvantage?.attributeBonuses ?? {}, attributeMinimums: value.attributeMinimums ?? defaultAdvantage?.attributeMinimums ?? {}, skillBonuses: value.skillBonuses ?? defaultAdvantage?.skillBonuses ?? {}, contextualSkillBonuses: value.contextualSkillBonuses ?? defaultAdvantage?.contextualSkillBonuses ?? {}, combatBonuses: value.combatBonuses ?? defaultAdvantage?.combatBonuses ?? {}, damageReduction: value.damageReduction ?? defaultAdvantage?.damageReduction ?? 0, conditionAttribute: value.conditionAttribute ?? null, conditionMinimum: value.conditionMinimum ?? null, conditionOrigin: value.conditionOrigin ?? defaultAdvantage?.conditionOrigin ?? null, conditionSkillId: value.conditionSkillId ?? defaultAdvantage?.conditionSkillId ?? null, conditionSkillMinimum: value.conditionSkillMinimum ?? defaultAdvantage?.conditionSkillMinimum ?? null, conditionDescription: value.conditionDescription ?? defaultAdvantage?.conditionDescription, excludedAdvantageIds: value.excludedAdvantageIds ?? defaultAdvantage?.excludedAdvantageIds ?? [], prerequisiteId: value.prerequisiteId ?? null, minimumLevel: value.minimumLevel === undefined ? defaultAdvantage?.minimumLevel ?? null : value.minimumLevel, repeatable: value.repeatable ?? defaultAdvantage?.repeatable ?? false, weaponChoice: value.weaponChoice ?? defaultAdvantage?.weaponChoice ?? false, deityChoice: value.deityChoice ?? defaultAdvantage?.deityChoice ?? false, recipeChoice: value.recipeChoice ?? defaultAdvantage?.recipeChoice ?? false, recipeCount: value.recipeCount ?? defaultAdvantage?.recipeCount ?? 1, evolutionOnly: value.evolutionOnly ?? defaultAdvantage?.evolutionOnly ?? false };
   }
 
   private isOrigin(value: unknown): value is CharacterOrigin { return ['human', 'darshan', 'troll', 'eckmul', 'souardie', 'region-primitive-reculee'].includes(value as string); }

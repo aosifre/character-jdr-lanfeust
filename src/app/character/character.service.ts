@@ -28,8 +28,8 @@ export class CharacterService {
           }
           this.characters.set(parsedCharacters.map((character) => this.normalizeCharacter(character)));
           this.saveToStorage();
-        } catch {
-          localStorage.removeItem(this.storageKey);
+        } catch (error) {
+          console.error('Impossible de charger les personnages sauvegardés ; les données ont été conservées.', error);
         }
       }
     }
@@ -261,7 +261,13 @@ export class CharacterService {
   }
 
   private isOrigin(value: unknown): value is CharacterOrigin {
-    return  value === 'darshan' || value === 'eckmul' || value === 'souardie' || value === 'region-primitive-reculee';
+    return value === 'darshan'
+      || value === 'eckmul'
+      || value === 'souardie'
+      || value === 'region-primitive-reculee'
+      || value === 'baronies'
+      || value === 'barronies'
+      || value === 'other';
   }
 
   private normalizeCharacter(value: Character): Character {

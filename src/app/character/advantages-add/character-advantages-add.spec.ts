@@ -107,6 +107,15 @@ describe('CharacterAdvantagesAddPage', () => {
     conditionMinimum: null,
     prerequisiteId: null,
   };
+  const turfAdvantage = {
+    id: 'turf-attitre',
+    title: 'Turf attitré',
+    category: 'origin' as const,
+    description: '',
+    conditionAttribute: null,
+    conditionMinimum: null,
+    prerequisiteId: null,
+  };
   let character: Character;
   let setAdvantages: ReturnType<typeof vi.fn>;
   let page: CharacterAdvantagesAddPage;
@@ -140,7 +149,7 @@ describe('CharacterAdvantagesAddPage', () => {
         { provide: Router, useValue: { navigate: vi.fn() } },
         { provide: CharacterService, useValue: { findById: () => character, setAdvantages } },
         { provide: AdvantageService, useValue: {
-          advantageList: signal([repeatableAdvantage, specializationAdvantage, weaponChoiceAdvantage, souardAdvantage, deityChoiceAdvantage, shamanAdvantage, newRecipeAdvantage, magicPowerAdvantage]),
+          advantageList: signal([repeatableAdvantage, specializationAdvantage, weaponChoiceAdvantage, souardAdvantage, deityChoiceAdvantage, shamanAdvantage, newRecipeAdvantage, magicPowerAdvantage, turfAdvantage]),
           effectiveAttributes: (attributes: Character['attributes']) => attributes,
           skillBonus: () => 0,
         } },
@@ -172,6 +181,52 @@ describe('CharacterAdvantagesAddPage', () => {
     expect(setAdvantages).toHaveBeenCalledWith(character.id, [
       { advantageId: repeatableAdvantage.id },
       { advantageId: repeatableAdvantage.id },
+    ]);
+  });
+
+  it('requires and saves the chosen region for Turf attitré during level-up', () => {
+    const internalPage = page as unknown as {
+      toggle(id: string): void;
+      setRegionChoice(id: string, event: Event): void;
+      save(): void;
+      canSave: boolean;
+    };
+
+    internalPage.toggle(turfAdvantage.id);
+    expect(internalPage.canSave).toBe(false);
+
+    internalPage.setRegionChoice(turfAdvantage.id, { target: { value: 'Eckmül' } } as unknown as Event);
+    expect(internalPage.canSave).toBe(true);
+
+    internalPage.save();
+
+    expect(setAdvantages).toHaveBeenCalledWith(character.id, [
+      { advantageId: repeatableAdvantage.id },
+      { advantageId: turfAdvantage.id, chosenRegion: 'Eckmül' },
+    ]);
+  });
+
+  it('requires and saves the chosen region for Turf attitré during character creation', () => {
+    const fixture = TestBed.createComponent(CharacterAdvantagesPage);
+    fixture.detectChanges();
+    const internalPage = fixture.componentInstance as unknown as {
+      toggle(id: string): void;
+      setRegionChoice(id: string, event: Event): void;
+      save(): void;
+      canSave: boolean;
+    };
+
+    internalPage.toggle(turfAdvantage.id);
+    expect(internalPage.canSave).toBe(false);
+
+    internalPage.setRegionChoice(turfAdvantage.id, { target: { value: 'Eckmül' } } as unknown as Event);
+    expect(internalPage.canSave).toBe(true);
+
+    internalPage.save();
+
+    expect(setAdvantages).toHaveBeenCalledWith(character.id, [
+      { advantageId: repeatableAdvantage.id },
+      { advantageId: turfAdvantage.id, chosenRegion: 'Eckmül' },
     ]);
   });
 

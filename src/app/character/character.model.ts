@@ -10,7 +10,7 @@ export interface CharacterAttributes {
 }
 
 export type CombatBonus = 'attack' | 'defense' | 'save' | null;
-export type CharacterOrigin = 'darshan' | 'eckmul' | 'souardie' | 'region-primitive-reculee' | 'barronies' | 'other';
+export type CharacterOrigin = 'darshan' | 'eckmul' | 'souardie' | 'region-primitive-reculee' | 'baronies' | 'barronies' | 'other';
 
 export interface CharacterOtherScores {
   attack: number;
@@ -74,6 +74,7 @@ export interface CharacterSkill {
 
 export interface CharacterAdvantage {
   advantageId: string;
+  chosenRegion?: string;
   chosenWeapon?: string;
   specializationWeapon?: string;
   recipes?: CharacterRecipe[];

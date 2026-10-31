@@ -59,6 +59,7 @@ export interface Advantage {
   attributeBonuses?: AdvantageAttributeBonuses;
   attributeMinimums?: Partial<Record<AttributeKey, number>>;
   skillBonuses?: AdvantageSkillBonuses;
+  contextualSkillBonuses?: AdvantageSkillBonuses;
   combatBonuses?: AdvantageCombatBonuses;
   damageReduction?: number;
   conditionAttribute: AttributeKey | null;
@@ -66,6 +67,7 @@ export interface Advantage {
   conditionOrigin?: CharacterOrigin | null;
   conditionSkillId?: string | null;
   conditionSkillMinimum?: number | null;
+  conditionDescription?: string;
   prerequisiteId: string | null;
   minimumLevel?: number | null;
   repeatable?: boolean;

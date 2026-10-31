@@ -51,4 +51,15 @@ describe('AdvantageService', () => {
     expect(service.damageReduction(['troll'])).toBe(4);
     expect(service.damageReduction([])).toBe(0);
   });
+
+  it('grants Turf attitré contextual bonuses to regional skills', () => {
+    const selected = ['turf-attitre'];
+
+    expect(service.contextualSkillBonus(selected, 'renseignement', 'Renseignement')).toBe(4);
+    expect(service.contextualSkillBonus(selected, 'custom-knowledge', 'Connaissances')).toBe(4);
+    expect(service.contextualSkillBonus(selected, 'diplomatie', 'Diplomatie')).toBe(4);
+    expect(service.contextualSkillBonus(selected, 'survie', 'Survie')).toBe(4);
+    expect(service.contextualSkillBonus([], 'renseignement', 'Renseignement')).toBe(0);
+    expect(service.contextualSkillBonus(selected, 'bluff', 'Bluff')).toBe(0);
+  });
 });

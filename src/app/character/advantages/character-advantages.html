@@ -22,6 +22,12 @@
             <small>Chaque occurrence doit concerner une arme différente.</small>
           </div>
         }
+        @if (advantage.id === 'turf-attitre' && isSelected(advantage.id)) {
+          <div class="specialization-weapons">
+            <label [for]="advantage.id + '-region'">Région choisie</label>
+            <input [id]="advantage.id + '-region'" type="text" required [value]="regionChoiceFor(advantage.id)" (input)="setRegionChoice(advantage.id, $event)" />
+          </div>
+        }
         @if (advantage.deityChoice && isSelected(advantage.id)) {
           <div class="specialization-weapons">
             <label [for]="advantage.id + '-deity'">Dieu choisi</label>
