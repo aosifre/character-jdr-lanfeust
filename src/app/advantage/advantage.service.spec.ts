@@ -62,4 +62,21 @@ describe('AdvantageService', () => {
     expect(service.contextualSkillBonus([], 'renseignement', 'Renseignement')).toBe(0);
     expect(service.contextualSkillBonus(selected, 'bluff', 'Bluff')).toBe(0);
   });
+
+  it('limits Longue durée to three occurrences, including imported catalogs without the new limit', () => {
+    const imported = {
+      id: 'longue-duree',
+      title: 'Longue durée',
+      category: 'magic',
+      description: '',
+      conditionAttribute: null,
+      conditionMinimum: null,
+      prerequisiteId: null,
+      repeatable: true,
+    };
+
+    expect(service.advantageList().find((advantage) => advantage.id === 'longue-duree')?.maxRepeatable).toBe(3);
+    expect(service.importAdvantages([imported])).toBe(true);
+    expect(service.advantageList()[0].maxRepeatable).toBe(3);
+  });
 });

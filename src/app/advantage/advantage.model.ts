@@ -71,6 +71,7 @@ export interface Advantage {
   prerequisiteId: string | null;
   minimumLevel?: number | null;
   repeatable?: boolean;
+  maxRepeatable?: number;
   weaponChoice?: boolean;
   deityChoice?: boolean;
   excludedAdvantageIds?: string[];

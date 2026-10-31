@@ -87,6 +87,9 @@ export class CharacterAdvantagesAddPage {
  protected get selectedTotal(): number { return [...this.selected.values()].reduce((total, count) => total + count, 0); }
  protected get canSave(): boolean { return this.selectedTotal === this.advantageMaximum && this.hasValidChoices(); }
  protected isRepeatable(advantage: Advantage): boolean { return advantage.repeatable === true; }
+ protected canAddOccurrence(advantage: Advantage, maximum: number): boolean {
+   return this.selectedTotal < maximum && this.selectedCount(advantage.id) < (advantage.maxRepeatable ?? Number.POSITIVE_INFINITY);
+ }
  protected regionChoiceFor(advantageId: string): string { return this.regionChoices.get(advantageId) ?? ''; }
  protected setRegionChoice(advantageId: string, event: Event): void {
    this.regionChoices.set(advantageId, (event.target as HTMLInputElement).value);
@@ -241,7 +244,7 @@ export class CharacterAdvantagesAddPage {
       if (this.magicModalAdvantageId === id) this.closeMagicPowerModal();
     }
     else {
-      if (advantage && this.isAvailable(advantage) && this.selectedTotal < this.advantageMaximum) {
+      if (advantage && this.isAvailable(advantage) && this.canAddOccurrence(advantage, this.advantageMaximum)) {
         this.selected.set(id, count + 1);
         if (advantage.weaponChoice) {
           const choices = this.weaponChoices.get(id) ?? [];
