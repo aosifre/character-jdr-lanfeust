@@ -63,6 +63,15 @@ export class CharacterViewPage implements AfterViewInit {
     return this.character?.advantages.some((item) => item.advantageId === 'sage-d-eckmul') ?? false;
   }
 
+  protected get magicEmissionSurface(): number | undefined {
+    if (!this.character || !this.effectiveAttributes) return undefined;
+    return this.advantageService.emissionSurface(
+      this.character.advantages.map((item) => item.advantageId),
+      this.effectiveAttributes,
+      this.character.level,
+    );
+  }
+
   protected get effectiveAttributes(): CharacterAttributes | undefined {
     if (!this.character) return undefined;
     return this.advantageService.effectiveAttributes(

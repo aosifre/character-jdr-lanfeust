@@ -70,7 +70,7 @@ const defaultAdvantages: Advantage[] = [
   { id: 'nain', title: 'Nain', category: 'origin', description: 'Vous êtes plus difficile à toucher en combat, pour commencer : votre Défense reçoit un bonus permanent de +2. De plus, vous pouvez vous cacher beaucoup plus facilement : vous recevez un bonus de +4 à vos jets de Discrétion.', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null, skillBonuses: { discretion: 4 }, combatBonuses: { defense: 2 }},
   { id: 'pouvoir-magique', title: 'Pouvoir magique', category: 'origin', description: 'Vous êtes l\'heureux détenteur d\'un pouvoir magique. Reportez-vous aux règles de magie page 134 pour savoir ce que vous pouvez choisir comme pouvoir.', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null, conditionOrigin: 'eckmul', excludedAdvantageIds: ['sage-d-eckmul']},
   { id: 'refractaire-a-la-magie', title: 'Réfractaire à la magie', category: 'origin', description: 'Vous êtes un des très rare habitants de Troy pour qui la magie n\'est pas naturelle. Vous n\'avez aucune capacité en la matière, mais en même temps la magie a du mal à vous affecter. Vous bénéficiez d\'un bonus de +4 à tous les jets de Sauvegarde pour résister à un effet magique quel qu\'il soit.', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null, excludedAdvantageIds: ['chaman', 'chouchou-d-un-dieu','pouvoir-magique', 'sage-d-eckmul', 'troll'] },
-  { id: 'sage-d-eckmul', title: 'Sage d\'Eckmül', category: 'origin', description: 'Vous êtes un de ces individus qui ont renoncé à l\'usage de leur pouvoir magique pour permettre aux autres de se servir des leurs. Cet Atout vous donne accès aux enchantements du Conservatoire (p.144). Vous projetez également un champ de magie autour de vous (p.143).', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null, conditionOrigin: 'eckmul', excludedAdvantageIds: ['pouvoir-magique'] },
+  { id: 'sage-d-eckmul', title: 'Sage d\'Eckmül', category: 'origin', description: 'Vous êtes un de ces individus qui ont renoncé à l\'usage de leur pouvoir magique pour permettre aux autres de se servir des leurs. Cet Atout vous donne accès aux enchantements du Conservatoire (p.144). Vous projetez également un champ de magie autour de vous (p.143).', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null, conditionOrigin: 'eckmul', excludedAdvantageIds: ['pouvoir-magique'], emissionSurfaceBase: 10, emissionSurfaceAttribute: 'sagesse' },
   { id: 'troll', title: 'Troll', category: 'origin', description: "Vous êtes grand, costaud et plein de poils. Cet état de fait vous apporte pasz mal d'avantages et quelques inconvénients", conditionAttribute: null, conditionMinimum: null, prerequisiteId: null, excludedAdvantageIds: ['sage-d-eckmul', 'pouvoir-magique', 'chevalier'], attributeBonuses: { force: 2, sagesse: -1 }, attributeMinimums: { force: 1, sagesse: -1, charisme: -1 }, benefits: [
     { title: 'Cuir épais', description: 'Votre peau constitue une armure naturelle non retirable qui réduit de 4 points les dégâts reçus. Vous ne pouvez porter aucune autre armure.' },
     { title: 'Armes de brutasse', description: 'Vous pouvez manier les armes de brutasse.' },
@@ -82,13 +82,13 @@ const defaultAdvantages: Advantage[] = [
   { id: 'longue-duree', title: 'Longue durée', category: 'magic', description: "Tous les effets magiques que vous produisez ont une durée doublée. Si vous prenez plusieurs fois cet Atout, vous poussez encore plus loin les limites de l'éconnomie et vous pouvez tripler (avec un deuxième Atout), voire quadrupler la durée de vos effets. Vous ne pouvez pas prendre plus de 3 Atouts de Longue durée.", conditionAttribute: null, conditionMinimum: null, prerequisiteId: null, repeatable: true, maxRepeatable: 3 },
   { id: 'longue-portee', title: 'Longue portée', category: 'magic', description: "Voter pouvoir peut atteindre une cible deux fois plus éloignée que ceux de vos camarades. Si vous prenez une deuxième fois cet atout, votre portée est triplée. etc... Vous ne pouvez pas prendre plus de trois atouts de Longue portée.", conditionAttribute: null, conditionMinimum: null, prerequisiteId: null, repeatable: true, maxRepeatable: 3 },
   { id: 'nouvelles-recettes', title: 'Nouvelles recettes', category: 'magic', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
-  { id: 'pompe-a-energie', title: 'Pompe à énergie', category: 'magic', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
-  { id: 'pouvoir-devastateur', title: 'Pouvoir dévastateur', category: 'magic', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
-  { id: 'pouvoir-discret', title: 'Pouvoir discret', category: 'magic', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
-  { id: 'pouvoir-etendu', title: 'Pouvoir étendu', category: 'magic', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
-  { id: 'puissance-magique', title: 'Puissance magique', category: 'magic', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
-  { id: 'reserves-d-energie', title: 'Réserves d\'énergie', category: 'magic', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
-  { id: 'zone-etendue', title: 'Zone étendue', category: 'magic', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
+  { id: 'pompe-a-energie', title: 'Pompe à énergie', category: 'magic', description: "En vous concentrant très fort, vous êtes capable de puiser l'énergie ambiante pour suppléer à la votre. Cela ne fonctionne pas à tous les coups et vous avez besoin d'un peu d'aide de la part du destin, mais c'est parfois utile. Vous pouvez prélever des Krâsses pour récupérer des points d'énergie. Jetez le même nombre de dés de Krâsses et ajoutez leur résultat à votre total d'énergie.", conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
+  { id: 'pouvoir-devastateur', title: 'Pouvoir dévastateur', category: 'magic', description: "Avec les années, votre pouvoir a atteint un stade qui le rend très inquiétant - pour vos ennemis en tout cas. Si vous dépensez le double de points d'énergie, vous pouvez jeter le double de dés de dégâts quand vous activez votre pouvoir.", conditionAttribute: null, conditionMinimum: null, prerequisiteId: "pouvoir-magique", minimumLevel: 8 },
+  { id: 'pouvoir-discret', title: 'Pouvoir discret', category: 'magic', description: "Utiliser votre pouvoir sans être vu. Vous devez faire un deuxième jet de Concentration si vous souhaitez rester discret. Ceux qui vous regardent ont droit à un jet de Perception en Opposition pour vous repérer.", conditionMinimum: null, prerequisiteId: null, minimumLevel: 5 , conditionAttribute: null, conditionSkillId: 'discretion', conditionSkillMinimum: 1 },
+  { id: 'pouvoir-etendu', title: 'Pouvoir étendu', category: 'magic', description: "Vos effets magiques peuvent affecter une plus grande zone ou faire plus de victimes. Le volume, la surface ou le nombre de personnes affectées est doublé. Si vous prenez plusieurs fois cet Atout, vous pouvez étendre encore plus les effets. 2x (triplez), 3x (quadruplez). Il est impossible de prendre plus de trois fois l'Atout Pouvoir étendu.", conditionAttribute: null, conditionMinimum: null, prerequisiteId: null, repeatable: true, maxRepeatable: 3 },
+  { id: 'puissance-magique', title: 'Puissance magique', category: 'magic', description: "Quand vous faites un jet de Concentration pour activer un effet magique, ajoutez +2 au jet. Vous pouvez prendre plusieurs fois cet Atout vous gagnez +1 à vos jets par Atouts supplémentaire.", conditionAttribute: null, conditionMinimum: null, prerequisiteId: null, repeatable: true},
+  { id: 'reserves-d-energie', title: 'Réserves d\'énergie', category: 'magic', description: "Vous disposez d'une plus grande quantité d'énergie que la plupart des gens. Ajoutez 10 points à votre total maximum d'énergie. Vous pouvez prendre plusieurs atouts en Réserves d'énergie, vous gagnerez +5 points par Atout supplémentaire.", conditionAttribute: null, conditionMinimum: null, prerequisiteId: null, repeatable: true, energyPointsBonus: 10, additionalEnergyPointsBonus: 5 },
+  { id: 'zone-etendue', title: 'Zone étendue', category: 'magic', description: "Ajoutez votre niveau au rayon de votre zone de couverture. Il est maintenant de 10 km + bonus de Sagesse + niveau.", conditionAttribute: null, conditionMinimum: null, prerequisiteId: 'sage-d-eckmul', emissionSurfaceLevelBonus: true },
   { id: 'allies', title: 'Alliés', category: 'social', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
   { id: 'ames-de-chef', title: 'Ames de chef', category: 'social', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
   { id: 'chevalier-blanc', title: 'Chevalier blanc', category: 'social', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
@@ -167,6 +167,36 @@ export class AdvantageService {
     }, 0);
   }
 
+  energyPointsBonus(selectedAdvantageIds: string[]): number {
+    const occurrenceCounts = new Map<string, number>();
+    for (const id of selectedAdvantageIds) {
+      occurrenceCounts.set(id, (occurrenceCounts.get(id) ?? 0) + 1);
+    }
+    return [...occurrenceCounts].reduce((total, [id, count]) => {
+      const advantage = this.advantages().find((item) => item.id === id);
+      if (!advantage) return total;
+      return total
+        + (advantage.energyPointsBonus ?? 0)
+        + Math.max(0, count - 1) * (advantage.additionalEnergyPointsBonus ?? 0);
+    }, 0);
+  }
+
+  emissionSurface(selectedAdvantageIds: string[], attributes: CharacterAttributes, level: number): number | undefined {
+    const selectedAdvantages = selectedAdvantageIds
+      .map((id) => this.advantages().find((advantage) => advantage.id === id))
+      .filter((advantage): advantage is Advantage => advantage !== undefined);
+    const emitter = selectedAdvantages.find((advantage) => advantage.emissionSurfaceBase !== undefined);
+    if (!emitter || emitter.emissionSurfaceBase === undefined) return undefined;
+
+    const attributeBonus = emitter.emissionSurfaceAttribute
+      ? attributes[emitter.emissionSurfaceAttribute]
+      : 0;
+    const levelBonus = selectedAdvantages.some((advantage) => advantage.emissionSurfaceLevelBonus)
+      ? level
+      : 0;
+    return emitter.emissionSurfaceBase + attributeBonus + levelBonus;
+  }
+
   constructor(@Inject(PLATFORM_ID) platformId: object) {
     this.isBrowser = isPlatformBrowser(platformId);
     if (this.isBrowser) {
@@ -231,6 +261,11 @@ export class AdvantageService {
       && this.isSkillBonusRecord(advantage['skillBonuses'])
       && this.isSkillBonusRecord(advantage['contextualSkillBonuses'])
       && this.isCombatBonusRecord(advantage['combatBonuses'])
+      && (advantage['energyPointsBonus'] === undefined || this.isNumber(advantage['energyPointsBonus']))
+      && (advantage['additionalEnergyPointsBonus'] === undefined || this.isNumber(advantage['additionalEnergyPointsBonus']))
+      && (advantage['emissionSurfaceBase'] === undefined || this.isNumber(advantage['emissionSurfaceBase']))
+      && (advantage['emissionSurfaceAttribute'] === undefined || this.isAttribute(advantage['emissionSurfaceAttribute']))
+      && (advantage['emissionSurfaceLevelBonus'] === undefined || typeof advantage['emissionSurfaceLevelBonus'] === 'boolean')
       && (advantage['damageReduction'] === undefined || this.isNumber(advantage['damageReduction']))
       && (advantage['drawbacks'] === undefined || (Array.isArray(advantage['drawbacks']) && advantage['drawbacks'].every((drawback) => this.isBenefit(drawback))));
   }
@@ -267,7 +302,7 @@ export class AdvantageService {
 
   private normalize(value: Advantage & { label?: string }): Advantage {
     const defaultAdvantage = defaultAdvantages.find((advantage) => advantage.id === value.id);
-    return { id: value.id, title: value.title ?? value.label ?? '', category: value.category ?? 'heroic', description: value.description ?? '', benefits: value.benefits ?? defaultAdvantage?.benefits ?? [], drawbacks: value.drawbacks ?? defaultAdvantage?.drawbacks ?? [], attributeBonuses: value.attributeBonuses ?? defaultAdvantage?.attributeBonuses ?? {}, attributeMinimums: value.attributeMinimums ?? defaultAdvantage?.attributeMinimums ?? {}, skillBonuses: value.skillBonuses ?? defaultAdvantage?.skillBonuses ?? {}, contextualSkillBonuses: value.contextualSkillBonuses ?? defaultAdvantage?.contextualSkillBonuses ?? {}, combatBonuses: value.combatBonuses ?? defaultAdvantage?.combatBonuses ?? {}, damageReduction: value.damageReduction ?? defaultAdvantage?.damageReduction ?? 0, conditionAttribute: value.conditionAttribute ?? null, conditionMinimum: value.conditionMinimum ?? null, conditionOrigin: value.conditionOrigin ?? defaultAdvantage?.conditionOrigin ?? null, conditionSkillId: value.conditionSkillId ?? defaultAdvantage?.conditionSkillId ?? null, conditionSkillMinimum: value.conditionSkillMinimum ?? defaultAdvantage?.conditionSkillMinimum ?? null, conditionDescription: value.conditionDescription ?? defaultAdvantage?.conditionDescription, excludedAdvantageIds: value.excludedAdvantageIds ?? defaultAdvantage?.excludedAdvantageIds ?? [], prerequisiteId: value.prerequisiteId ?? null, minimumLevel: value.minimumLevel === undefined ? defaultAdvantage?.minimumLevel ?? null : value.minimumLevel, repeatable: value.repeatable ?? defaultAdvantage?.repeatable ?? false, maxRepeatable: value.maxRepeatable ?? defaultAdvantage?.maxRepeatable, weaponChoice: value.weaponChoice ?? defaultAdvantage?.weaponChoice ?? false, deityChoice: value.deityChoice ?? defaultAdvantage?.deityChoice ?? false, recipeChoice: value.recipeChoice ?? defaultAdvantage?.recipeChoice ?? false, recipeCount: value.recipeCount ?? defaultAdvantage?.recipeCount ?? 1, evolutionOnly: value.evolutionOnly ?? defaultAdvantage?.evolutionOnly ?? false };
+    return { id: value.id, title: value.title ?? value.label ?? '', category: value.category ?? 'heroic', description: value.description ?? '', benefits: value.benefits ?? defaultAdvantage?.benefits ?? [], drawbacks: value.drawbacks ?? defaultAdvantage?.drawbacks ?? [], attributeBonuses: value.attributeBonuses ?? defaultAdvantage?.attributeBonuses ?? {}, attributeMinimums: value.attributeMinimums ?? defaultAdvantage?.attributeMinimums ?? {}, skillBonuses: value.skillBonuses ?? defaultAdvantage?.skillBonuses ?? {}, contextualSkillBonuses: value.contextualSkillBonuses ?? defaultAdvantage?.contextualSkillBonuses ?? {}, combatBonuses: value.combatBonuses ?? defaultAdvantage?.combatBonuses ?? {}, energyPointsBonus: value.energyPointsBonus ?? defaultAdvantage?.energyPointsBonus, additionalEnergyPointsBonus: value.additionalEnergyPointsBonus ?? defaultAdvantage?.additionalEnergyPointsBonus, emissionSurfaceBase: value.emissionSurfaceBase ?? defaultAdvantage?.emissionSurfaceBase, emissionSurfaceAttribute: value.emissionSurfaceAttribute ?? defaultAdvantage?.emissionSurfaceAttribute, emissionSurfaceLevelBonus: value.emissionSurfaceLevelBonus ?? defaultAdvantage?.emissionSurfaceLevelBonus, damageReduction: value.damageReduction ?? defaultAdvantage?.damageReduction ?? 0, conditionAttribute: value.conditionAttribute ?? null, conditionMinimum: value.conditionMinimum ?? null, conditionOrigin: value.conditionOrigin ?? defaultAdvantage?.conditionOrigin ?? null, conditionSkillId: value.conditionSkillId ?? defaultAdvantage?.conditionSkillId ?? null, conditionSkillMinimum: value.conditionSkillMinimum ?? defaultAdvantage?.conditionSkillMinimum ?? null, conditionDescription: value.conditionDescription ?? defaultAdvantage?.conditionDescription, excludedAdvantageIds: value.excludedAdvantageIds ?? defaultAdvantage?.excludedAdvantageIds ?? [], prerequisiteId: value.prerequisiteId ?? null, minimumLevel: value.minimumLevel === undefined ? defaultAdvantage?.minimumLevel ?? null : value.minimumLevel, repeatable: value.repeatable ?? defaultAdvantage?.repeatable ?? false, maxRepeatable: value.maxRepeatable ?? defaultAdvantage?.maxRepeatable, weaponChoice: value.weaponChoice ?? defaultAdvantage?.weaponChoice ?? false, deityChoice: value.deityChoice ?? defaultAdvantage?.deityChoice ?? false, recipeChoice: value.recipeChoice ?? defaultAdvantage?.recipeChoice ?? false, recipeCount: value.recipeCount ?? defaultAdvantage?.recipeCount ?? 1, evolutionOnly: value.evolutionOnly ?? defaultAdvantage?.evolutionOnly ?? false };
   }
 
   private isOrigin(value: unknown): value is CharacterOrigin { return ['human', 'darshan', 'troll', 'eckmul', 'souardie', 'region-primitive-reculee'].includes(value as string); }

@@ -53,6 +53,7 @@
     @if (hasSageOfEckmul) {
       <section class="panel major-enchantments-panel" aria-labelledby="major-enchantments-title">
         <div class="section-heading"><div><p class="eyebrow">Sage d’Eckmül</p><h2 id="major-enchantments-title">Les huit enchantements majeurs</h2></div></div>
+        <p class="enchantment-note">Rayon du champ de magie : {{ magicEmissionSurface }} km.</p>
         <p class="enchantment-note">Les détails de ces enchantements pourront être renseignés dans les fiches ci-dessous.</p>
         <div class="enchantment-grid">
           @for (enchantment of majorEnchantments; track enchantment.title) {

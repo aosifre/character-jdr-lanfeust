@@ -12,10 +12,6 @@ describe('CharacterService', () => {
       providers: [
         { provide: PLATFORM_ID, useValue: 'server' },
         { provide: EquipmentService, useValue: { combatBonuses: () => ({ attack: 0, defense: 0 }) } },
-        { provide: AdvantageService, useValue: {
-          effectiveAttributes: (attributes: object) => attributes,
-          combatScoreBonus: () => 0,
-        } },
       ],
     });
     service = TestBed.inject(CharacterService);
@@ -31,5 +27,25 @@ describe('CharacterService', () => {
 
     expect(service.importCharacters(characters)).toBe(true);
     expect(service.characterList().map((character) => character.origin)).toEqual(characters.map((character) => character.origin));
+  });
+
+  it('includes Réserves d’énergie occurrences in maximum energy during recalculation', () => {
+    const attributes = { force: 0, dexterite: 0, constitution: 0, sagesse: 0, intelligence: 0, charisme: 0 };
+    const scores = {
+      attack: 0,
+      defense: 0,
+      save: 0,
+      hitPoints: 0,
+      energyPoints: 0,
+      combatBonus: null,
+      combatBonusPoints: { attack: 0, defense: 0, save: 0 },
+    } as const;
+    const energyFor = (advantageIds: string[]) =>
+      service.recalculateOtherScores(attributes, 0, scores, [], advantageIds).energyPoints;
+
+    expect(energyFor([])).toBe(5);
+    expect(energyFor(['reserves-d-energie'])).toBe(15);
+    expect(energyFor(['reserves-d-energie', 'reserves-d-energie'])).toBe(20);
+    expect(energyFor(['reserves-d-energie', 'reserves-d-energie', 'reserves-d-energie'])).toBe(25);
   });
 });

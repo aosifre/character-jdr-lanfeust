@@ -119,7 +119,7 @@ export class CharacterService {
       defense: effectiveAttributes.dexterite + effectiveAttributes.sagesse + points.defense + equipmentBonuses.defense + this.advantageService.combatScoreBonus(advantageIds, 'defense'),
       save: effectiveAttributes.constitution + effectiveAttributes.charisme + points.save + this.advantageService.combatScoreBonus(advantageIds, 'save'),
       hitPoints: 10 + effectiveAttributes.constitution + (levelUps * (5 + effectiveAttributes.constitution)),
-      energyPoints: 5 + effectiveAttributes.sagesse + (levelUps * (1 + effectiveAttributes.sagesse)),
+      energyPoints: 5 + effectiveAttributes.sagesse + (levelUps * (1 + effectiveAttributes.sagesse)) + this.advantageService.energyPointsBonus(advantageIds),
     };
   }
 

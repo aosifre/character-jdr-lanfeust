@@ -79,4 +79,31 @@ describe('AdvantageService', () => {
     expect(service.importAdvantages([imported])).toBe(true);
     expect(service.advantageList()[0].maxRepeatable).toBe(3);
   });
+
+  it('adds 10 energy points for the first Réserves d’énergie and 5 for each additional one', () => {
+    const reserves = service.advantageList().find((advantage) => advantage.id === 'reserves-d-energie');
+
+    expect(reserves?.repeatable).toBe(true);
+    expect(reserves?.energyPointsBonus).toBe(10);
+    expect(reserves?.additionalEnergyPointsBonus).toBe(5);
+    expect(service.energyPointsBonus([])).toBe(0);
+    expect(service.energyPointsBonus(['reserves-d-energie'])).toBe(10);
+    expect(service.energyPointsBonus(['reserves-d-energie', 'reserves-d-energie'])).toBe(15);
+    expect(service.energyPointsBonus(['reserves-d-energie', 'reserves-d-energie', 'reserves-d-energie'])).toBe(20);
+  });
+
+  it('calculates the Sage d’Eckmül emission radius with Wisdom and the Zone étendue level bonus', () => {
+    const wisdom = { force: 0, dexterite: 0, constitution: 0, sagesse: 3, intelligence: 0, charisme: 0 };
+    const sageAdvantages = ['sage-d-eckmul'];
+
+    expect(service.emissionSurface([], wisdom, 5)).toBeUndefined();
+    expect(service.emissionSurface(sageAdvantages, wisdom, 5)).toBe(13);
+    expect(service.emissionSurface([...sageAdvantages, 'zone-etendue'], wisdom, 5)).toBe(18);
+
+    const sage = service.advantageList().find((advantage) => advantage.id === 'sage-d-eckmul');
+    const zone = service.advantageList().find((advantage) => advantage.id === 'zone-etendue');
+    expect(sage?.emissionSurfaceBase).toBe(10);
+    expect(sage?.emissionSurfaceAttribute).toBe('sagesse');
+    expect(zone?.emissionSurfaceLevelBonus).toBe(true);
+  });
 });

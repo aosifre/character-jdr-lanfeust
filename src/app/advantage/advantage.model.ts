@@ -61,6 +61,11 @@ export interface Advantage {
   skillBonuses?: AdvantageSkillBonuses;
   contextualSkillBonuses?: AdvantageSkillBonuses;
   combatBonuses?: AdvantageCombatBonuses;
+  energyPointsBonus?: number;
+  additionalEnergyPointsBonus?: number;
+  emissionSurfaceBase?: number;
+  emissionSurfaceAttribute?: AttributeKey;
+  emissionSurfaceLevelBonus?: boolean;
   damageReduction?: number;
   conditionAttribute: AttributeKey | null;
   conditionMinimum: number | null;
