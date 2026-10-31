@@ -55,10 +55,12 @@ export interface Advantage {
   category: AdvantageCategory;
   description: string;
   benefits?: AdvantageBenefit[];
+  drawbacks?: AdvantageBenefit[];
   attributeBonuses?: AdvantageAttributeBonuses;
   attributeMinimums?: Partial<Record<AttributeKey, number>>;
   skillBonuses?: AdvantageSkillBonuses;
   combatBonuses?: AdvantageCombatBonuses;
+  damageReduction?: number;
   conditionAttribute: AttributeKey | null;
   conditionMinimum: number | null;
   conditionOrigin?: CharacterOrigin | null;

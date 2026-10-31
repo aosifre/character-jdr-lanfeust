@@ -129,7 +129,7 @@ export class CharacterViewPage implements AfterViewInit {
       .filter((item): item is Equipment => item !== undefined) ?? [];
   }
 
-  protected get selectedAdvantageSummaries(): { id: string; title: string; description: string; count: number; weapons: string; deity?: { name: string; circumstances: string; helpingHand: string }; recipes: CharacterRecipe[]; magicPowerChoice?: MagicPowerChoice }[] {
+  protected get selectedAdvantageSummaries(): { id: string; title: string; description: string; benefits: { title: string; description: string }[]; drawbacks: { title: string; description: string }[]; count: number; weapons: string; deity?: { name: string; circumstances: string; helpingHand: string }; recipes: CharacterRecipe[]; magicPowerChoice?: MagicPowerChoice }[] {
     const selections = new Map<string, { count: number; weapons: string[]; deity?: { name: string; circumstances: string; helpingHand: string }; recipes: CharacterRecipe[]; magicPowerChoice?: MagicPowerChoice }>();
     for (const selected of this.character?.advantages ?? []) {
       const summary = selections.get(selected.advantageId) ?? { count: 0, weapons: [], recipes: [] };
@@ -144,9 +144,15 @@ export class CharacterViewPage implements AfterViewInit {
     return [...selections].flatMap(([id, summary]) => {
       const advantage = this.advantages().find((item) => item.id === id);
       return advantage
-        ? [{ id, title: advantage.title, description: advantage.description || 'Aucune description.', count: summary.count, weapons: summary.weapons.join(', '), deity: summary.deity, recipes: summary.recipes, magicPowerChoice: summary.magicPowerChoice }]
+        ? [{ id, title: advantage.title, description: advantage.description || 'Aucune description.', benefits: advantage.benefits ?? [], drawbacks: advantage.drawbacks ?? [], count: summary.count, weapons: summary.weapons.join(', '), deity: summary.deity, recipes: summary.recipes, magicPowerChoice: summary.magicPowerChoice }]
         : [];
     });
+  }
+
+  protected get naturalArmorReduction(): number {
+    return this.advantageService.damageReduction(
+      this.character?.advantages.map((item) => item.advantageId) ?? [],
+    );
   }
 
   protected get carriedWeight(): number {

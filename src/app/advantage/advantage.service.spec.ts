@@ -42,4 +42,13 @@ describe('AdvantageService', () => {
     expect(service.combatScoreBonus([], 'defense')).toBe(0);
     expect(service.combatScoreBonus(['nain'], 'attack')).toBe(0);
   });
+
+  it('provides the Troll natural armor and water drawback', () => {
+    const troll = service.advantageList().find((advantage) => advantage.id === 'troll');
+
+    expect(troll?.benefits?.map(({ title }) => title)).toEqual(['Cuir épais', 'Armes de brutasse']);
+    expect(troll?.drawbacks?.[0].title).toBe('Peur de l’eau');
+    expect(service.damageReduction(['troll'])).toBe(4);
+    expect(service.damageReduction([])).toBe(0);
+  });
 });

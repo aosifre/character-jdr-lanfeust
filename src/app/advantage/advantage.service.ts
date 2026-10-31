@@ -71,7 +71,12 @@ const defaultAdvantages: Advantage[] = [
   { id: 'pouvoir-magique', title: 'Pouvoir magique', category: 'origin', description: 'Vous êtes l\'heureux détenteur d\'un pouvoir magique. Reportez-vous aux règles de magie page 134 pour savoir ce que vous pouvez choisir comme pouvoir.', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null, conditionOrigin: 'eckmul', excludedAdvantageIds: ['sage-d-eckmul']},
   { id: 'refractaire-a-la-magie', title: 'Réfractaire à la magie', category: 'origin', description: 'Vous êtes un des très rare habitants de Troy pour qui la magie n\'est pas naturelle. Vous n\'avez aucune capacité en la matière, mais en même temps la magie a du mal à vous affecter. Vous bénéficiez d\'un bonus de +4 à tous les jets de Sauvegarde pour résister à un effet magique quel qu\'il soit.', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null, excludedAdvantageIds: ['chaman', 'chouchou-d-un-dieu','pouvoir-magique', 'sage-d-eckmul', 'troll'] },
   { id: 'sage-d-eckmul', title: 'Sage d\'Eckmül', category: 'origin', description: 'Vous êtes un de ces individus qui ont renoncé à l\'usage de leur pouvoir magique pour permettre aux autres de se servir des leurs. Cet Atout vous donne accès aux enchantements du Conservatoire (p.144). Vous projetez également un champ de magie autour de vous (p.143).', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null, conditionOrigin: 'eckmul', excludedAdvantageIds: ['pouvoir-magique'] },
-  { id: 'troll', title: 'Troll', category: 'origin', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
+  { id: 'troll', title: 'Troll', category: 'origin', description: "Vous êtes grand, costaud et plein de poils. Cet état de fait vous apporte pasz mal d'avantages et quelques inconvénients", conditionAttribute: null, conditionMinimum: null, prerequisiteId: null, excludedAdvantageIds: ['sage-d-eckmul', 'pouvoir-magique', 'chevalier'], attributeBonuses: { force: 2, sagesse: -1 }, attributeMinimums: { force: 1, sagesse: -1, charisme: -1 }, benefits: [
+    { title: 'Cuir épais', description: 'Votre peau constitue une armure naturelle non retirable qui réduit de 4 points les dégâts reçus. Vous ne pouvez porter aucune autre armure.' },
+    { title: 'Armes de brutasse', description: 'Vous pouvez manier les armes de brutasse.' },
+  ], drawbacks: [
+    { title: 'Peur de l’eau', description: 'Face à l’eau, vous devez réussir un jet de Sauvegarde dont la difficulté varie de 10 à 30 selon la quantité d’eau.' },
+  ], damageReduction: 4 },
   { id: 'turf-attitre', title: 'Turf attitré', category: 'origin', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
   { id: 'robuste', title: 'Robuste', category: 'combat', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
   { id: 'longue-duree', title: 'Longue durée', category: 'magic', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
@@ -144,6 +149,13 @@ export class AdvantageService {
     }, 0);
   }
 
+  damageReduction(selectedAdvantageIds: string[]): number {
+    return selectedAdvantageIds.reduce((total, id) => {
+      const advantage = this.advantages().find((item) => item.id === id);
+      return total + (advantage?.damageReduction ?? 0);
+    }, 0);
+  }
+
   constructor(@Inject(PLATFORM_ID) platformId: object) {
     this.isBrowser = isPlatformBrowser(platformId);
     if (this.isBrowser) {
@@ -204,7 +216,9 @@ export class AdvantageService {
       && this.isAttributeBonusRecord(advantage['attributeBonuses'])
       && this.isAttributeBonusRecord(advantage['attributeMinimums'])
       && this.isSkillBonusRecord(advantage['skillBonuses'])
-      && this.isCombatBonusRecord(advantage['combatBonuses']);
+      && this.isCombatBonusRecord(advantage['combatBonuses'])
+      && (advantage['damageReduction'] === undefined || this.isNumber(advantage['damageReduction']))
+      && (advantage['drawbacks'] === undefined || (Array.isArray(advantage['drawbacks']) && advantage['drawbacks'].every((drawback) => this.isBenefit(drawback))));
   }
 
   private isAttributeBonusRecord(value: unknown): boolean {
@@ -239,7 +253,7 @@ export class AdvantageService {
 
   private normalize(value: Advantage & { label?: string }): Advantage {
     const defaultAdvantage = defaultAdvantages.find((advantage) => advantage.id === value.id);
-    return { id: value.id, title: value.title ?? value.label ?? '', category: value.category ?? 'heroic', description: value.description ?? '', benefits: value.benefits ?? defaultAdvantage?.benefits ?? [], attributeBonuses: value.attributeBonuses ?? defaultAdvantage?.attributeBonuses ?? {}, attributeMinimums: value.attributeMinimums ?? defaultAdvantage?.attributeMinimums ?? {}, skillBonuses: value.skillBonuses ?? defaultAdvantage?.skillBonuses ?? {}, combatBonuses: value.combatBonuses ?? defaultAdvantage?.combatBonuses ?? {}, conditionAttribute: value.conditionAttribute ?? null, conditionMinimum: value.conditionMinimum ?? null, conditionOrigin: value.conditionOrigin ?? defaultAdvantage?.conditionOrigin ?? null, conditionSkillId: value.conditionSkillId ?? defaultAdvantage?.conditionSkillId ?? null, conditionSkillMinimum: value.conditionSkillMinimum ?? defaultAdvantage?.conditionSkillMinimum ?? null, excludedAdvantageIds: value.excludedAdvantageIds ?? defaultAdvantage?.excludedAdvantageIds ?? [], prerequisiteId: value.prerequisiteId ?? null, minimumLevel: value.minimumLevel === undefined ? defaultAdvantage?.minimumLevel ?? null : value.minimumLevel, repeatable: value.repeatable ?? defaultAdvantage?.repeatable ?? false, weaponChoice: value.weaponChoice ?? defaultAdvantage?.weaponChoice ?? false, deityChoice: value.deityChoice ?? defaultAdvantage?.deityChoice ?? false, recipeChoice: value.recipeChoice ?? defaultAdvantage?.recipeChoice ?? false, recipeCount: value.recipeCount ?? defaultAdvantage?.recipeCount ?? 1, evolutionOnly: value.evolutionOnly ?? defaultAdvantage?.evolutionOnly ?? false };
+    return { id: value.id, title: value.title ?? value.label ?? '', category: value.category ?? 'heroic', description: value.description ?? '', benefits: value.benefits ?? defaultAdvantage?.benefits ?? [], drawbacks: value.drawbacks ?? defaultAdvantage?.drawbacks ?? [], attributeBonuses: value.attributeBonuses ?? defaultAdvantage?.attributeBonuses ?? {}, attributeMinimums: value.attributeMinimums ?? defaultAdvantage?.attributeMinimums ?? {}, skillBonuses: value.skillBonuses ?? defaultAdvantage?.skillBonuses ?? {}, combatBonuses: value.combatBonuses ?? defaultAdvantage?.combatBonuses ?? {}, damageReduction: value.damageReduction ?? defaultAdvantage?.damageReduction ?? 0, conditionAttribute: value.conditionAttribute ?? null, conditionMinimum: value.conditionMinimum ?? null, conditionOrigin: value.conditionOrigin ?? defaultAdvantage?.conditionOrigin ?? null, conditionSkillId: value.conditionSkillId ?? defaultAdvantage?.conditionSkillId ?? null, conditionSkillMinimum: value.conditionSkillMinimum ?? defaultAdvantage?.conditionSkillMinimum ?? null, excludedAdvantageIds: value.excludedAdvantageIds ?? defaultAdvantage?.excludedAdvantageIds ?? [], prerequisiteId: value.prerequisiteId ?? null, minimumLevel: value.minimumLevel === undefined ? defaultAdvantage?.minimumLevel ?? null : value.minimumLevel, repeatable: value.repeatable ?? defaultAdvantage?.repeatable ?? false, weaponChoice: value.weaponChoice ?? defaultAdvantage?.weaponChoice ?? false, deityChoice: value.deityChoice ?? defaultAdvantage?.deityChoice ?? false, recipeChoice: value.recipeChoice ?? defaultAdvantage?.recipeChoice ?? false, recipeCount: value.recipeCount ?? defaultAdvantage?.recipeCount ?? 1, evolutionOnly: value.evolutionOnly ?? defaultAdvantage?.evolutionOnly ?? false };
   }
 
   private isOrigin(value: unknown): value is CharacterOrigin { return ['human', 'darshan', 'troll', 'eckmul', 'souardie', 'region-primitive-reculee'].includes(value as string); }

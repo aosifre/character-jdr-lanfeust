@@ -10,6 +10,7 @@
   <div class="shop-layout">
   <section id="inventory" class="active-equipment" aria-label="Équipements du personnage">
     <div class="section-heading"><div><p class="eyebrow">Inventaire du personnage</p><h2>Équipements possédés <span class="cart-count">{{ cart.size }}</span></h2></div></div>
+    @if (hasTroll) { <p class="equipment-warning">Le Troll ne peut pas porter d’armure. Son cuir épais fournit une armure naturelle non retirable.</p> }
 
     <div class="cart-tabs" role="tablist" aria-label="Filtrer les équipements par catégorie">
       @for (category of cartCategories; track category.id) {
@@ -60,6 +61,7 @@
               <button type="button" class="button button-small button-outline" [disabled]="!isEquipped(item.id) && !canEquip(item)" (click)="toggleEquipped(item)" [title]="isEquipped(item.id) ? 'Déséquiper' : 'Équiper'">
                 <span class="button-icon" aria-hidden="true">{{ isEquipped(item.id) ? '↶' : '⚔' }}</span>{{ isEquipped(item.id) ? 'Déséquiper' : 'Équiper' }}
               </button>
+              @if (item.type === 'armor' && hasTroll) { <small>Impossible à équiper avec l’atout Troll.</small> }
             </div>
           </article>
         }

@@ -165,11 +165,12 @@ export class CharacterService {
       character.id === id ? {
         ...character,
         advantages,
+        equipment: this.withoutArmorWhenTroll(character.equipment, advantages),
         otherScores: this.recalculateOtherScores(
           character.attributes,
           character.level,
           character.otherScores,
-          character.equipment.filter((item) => item.equipped).map((item) => item.equipmentId),
+          this.withoutArmorWhenTroll(character.equipment, advantages).filter((item) => item.equipped).map((item) => item.equipmentId),
           advantages.map((item) => item.advantageId),
         ),
       } : character,
@@ -186,9 +187,27 @@ export class CharacterService {
 
   setEquipment(id: string, equipment: CharacterEquipment[]): void {
     this.characters.update((characters) => characters.map((character) =>
-      character.id === id ? { ...character, equipment, otherScores: this.recalculateOtherScores(character.attributes, character.level, character.otherScores, equipment.filter((item) => item.equipped).map((item) => item.equipmentId), character.advantages.map((item) => item.advantageId)) } : character,
+      character.id === id ? {
+        ...character,
+        equipment: this.withoutArmorWhenTroll(equipment, character.advantages),
+        otherScores: this.recalculateOtherScores(
+          character.attributes,
+          character.level,
+          character.otherScores,
+          this.withoutArmorWhenTroll(equipment, character.advantages).filter((item) => item.equipped).map((item) => item.equipmentId),
+          character.advantages.map((item) => item.advantageId),
+        ),
+      } : character,
     ));
     this.saveToStorage();
+  }
+
+  private withoutArmorWhenTroll(equipment: CharacterEquipment[], advantages: CharacterAdvantage[]): CharacterEquipment[] {
+    if (!advantages.some((item) => item.advantageId === 'troll')) return equipment;
+    const armorIds = new Set(this.equipmentService.equipmentList().filter((item) => item.type === 'armor').map((item) => item.id));
+    return equipment.map((item) =>
+      armorIds.has(item.equipmentId) ? { ...item, equipped: false } : item,
+    );
   }
 
   setExperience(id: string, experience: number): { level: number; experience: number; hitPoints: number; energyPoints: number } {

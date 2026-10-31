@@ -8,6 +8,7 @@
 .advantage-card .advantage-description strong { color: var(--ink); font-size: inherit; }
 .advantage-card .advantage-benefit { color: var(--ink-soft); font-size: .85rem; line-height: 1.5; text-align: left; width: 100%; }
 .advantage-card .advantage-benefit strong { color: var(--ink); font-size: inherit; margin-right: .25rem; }
+.advantage-card .advantage-drawback { color: var(--danger); font-size: .85rem; line-height: 1.5; text-align: left; width: 100%; }
 .advantage-card.locked { cursor: not-allowed; opacity: .48; position: relative; }
 .advantage-card.locked:hover { border-color: #aebbb8; }
 .lock-icon { align-items: center; background: var(--paper); border: 1px solid var(--line); border-radius: 50%; color: var(--ink); display: flex; height: 2.5rem; justify-content: center; opacity: .72; position: absolute; right: .75rem; top: .75rem; width: 2.5rem; }

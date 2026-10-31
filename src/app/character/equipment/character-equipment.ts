@@ -5,6 +5,7 @@ import { CharacterEquipment } from '../character.model';
 import { CharacterService } from '../character.service';
 import { equipmentIcon, Equipment, EquipmentType } from '../../equipment/equipment.model';
 import { EquipmentService } from '../../equipment/equipment.service';
+import { AdvantageService } from '../../advantage/advantage.service';
 
 @Component({
   imports: [RouterLink, ReactiveFormsModule],
@@ -15,6 +16,7 @@ import { EquipmentService } from '../../equipment/equipment.service';
 export class CharacterEquipmentPage {
   private readonly characterService = inject(CharacterService);
   private readonly equipmentService = inject(EquipmentService);
+  private readonly advantageService = inject(AdvantageService);
   private readonly route = inject(ActivatedRoute);
 
   protected readonly characterId = this.route.snapshot.paramMap.get('id');
@@ -188,11 +190,16 @@ export class CharacterEquipmentPage {
 
   protected canEquip(item: Equipment): boolean {
     if (this.isEquipped(item.id)) return true;
+    if (item.type === 'armor' && this.hasTroll) return false;
     if (item.type === 'other') return true;
     const equippedCount = this.equipment()
       .filter((equipment) => equipment.type === item.type && this.isEquipped(equipment.id))
       .length;
     return equippedCount < (item.type === 'weapon' ? 2 : 1);
+  }
+
+  protected get hasTroll(): boolean {
+    return this.character?.advantages.some((item) => item.advantageId === 'troll') ?? false;
   }
 
   protected equipmentLimitLabel(type: EquipmentType): string {
@@ -307,7 +314,7 @@ export class CharacterEquipmentPage {
   }
 
   protected get combatBonuses(): { attack: number; defense: number; damageReduction: number } {
-    return this.equipment()
+    const equipmentBonuses = this.equipment()
       .filter((item) => this.isEquipped(item.id))
       .reduce(
         (total, item) => ({
@@ -317,6 +324,12 @@ export class CharacterEquipmentPage {
         }),
         { attack: 0, defense: 0, damageReduction: 0 },
       );
+    return {
+      ...equipmentBonuses,
+      damageReduction: equipmentBonuses.damageReduction + this.advantageService.damageReduction(
+        this.character?.advantages.map((item) => item.advantageId) ?? [],
+      ),
+    };
   }
 
   protected get cartItems(): Equipment[] {
