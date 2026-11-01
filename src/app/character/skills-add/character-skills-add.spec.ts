@@ -182,6 +182,7 @@ describe('CharacterSkillsAddPage', () => {
 
   it('allows a companion to choose unlimited degrees and multiple new skills', () => {
     testCharacter.ownerCharacterId = 'hero-1';
+    testCharacter.animalLevelCap = 5;
     const fixture = TestBed.createComponent(CharacterSkillsAddPage);
     fixture.detectChanges();
     const internalPage = fixture.componentInstance as unknown as {

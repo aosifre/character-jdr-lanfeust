@@ -255,6 +255,7 @@ describe('CharacterAdvantagesAddPage', () => {
 
   it('does not apply the global advantage limit to a companion', () => {
     character.ownerCharacterId = 'hero-owner';
+    character.animalLevelCap = 5;
     character.advantages = [];
     availableAdvantages.set({ availableAdvantages: 1 });
     const fixture = TestBed.createComponent(CharacterAdvantagesPage);

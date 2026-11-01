@@ -38,9 +38,11 @@ export class CharacterCompanionSetupPage {
     { key: 'charisme', label: 'CHA' },
   ];
 
-  protected get maximumLevel(): number { return this.character?.animalLevelCap ?? 0; }
+  protected get maximumLevel(): number | undefined { return this.character?.animalLevelCap; }
   protected get canContinueLevel(): boolean {
-    return Number.isInteger(this.selectedLevel) && this.selectedLevel >= 1 && this.selectedLevel <= this.maximumLevel;
+    return Number.isInteger(this.selectedLevel)
+      && this.selectedLevel >= 1
+      && (this.maximumLevel === undefined || this.selectedLevel <= this.maximumLevel);
   }
   protected get canSaveSetup(): boolean {
     return this.canContinueLevel && Object.values(this.attributes).every((value) => Number.isInteger(value) && value >= 0);
@@ -53,7 +55,7 @@ export class CharacterCompanionSetupPage {
       this.character.otherScores,
       this.character.equipment.filter((item) => item.equipped).map((item) => item.equipmentId),
       this.character.advantages.map((item) => item.advantageId),
-      true,
+      this.character.animalLevelCap !== undefined,
     );
   }
 

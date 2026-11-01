@@ -11,6 +11,7 @@ export interface CharacterAttributes {
 
 export type CombatBonus = 'attack' | 'defense' | 'save' | null;
 export type CharacterOrigin = 'darshan' | 'eckmul' | 'souardie' | 'region-primitive-reculee' | 'baronies' | 'barronies' | 'other';
+export type CompanionType = 'animal' | 'devoted-servant' | 'hired-thug';
 
 export interface CharacterOtherScores {
   attack: number;
@@ -46,6 +47,7 @@ export interface Character {
   equipment: CharacterEquipment[];
   history?: CharacterSnapshot[];
   ownerCharacterId?: string;
+  companionType?: CompanionType;
   animalLevelCap?: number;
   companionDamage?: string;
 }

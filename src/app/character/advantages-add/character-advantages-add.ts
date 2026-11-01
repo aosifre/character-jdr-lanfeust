@@ -49,7 +49,7 @@ export class CharacterAdvantagesAddPage {
       if (!this.characterId || !this.character) return;
 
       this.advantageMaximum = this.hasSelectionLimit ? this.character.advantages.length + 1 : Number.POSITIVE_INFINITY;
-     const companionName = this.characterService.companionsFor(this.characterId)[0]?.firstName;
+     const companionName = this.characterService.companionsFor(this.characterId).find((item) => item.animalLevelCap !== undefined)?.firstName;
      for (const selectedAdvantage of this.character.advantages) {
        const { advantageId } = selectedAdvantage;
        this.selected.set(advantageId, (this.selected.get(advantageId) ?? 0) + 1);

@@ -321,7 +321,7 @@ export class CharacterAdvantagesPage {
       this.router.navigate(['/characters', this.characterId, 'companion-setup'], { queryParams: { step: 4 } });
       return;
     }
-    const companion = this.characterService.companionsFor(this.characterId)[0];
+    const companion = this.characterService.companionsFor(this.characterId).find((item) => item.animalLevelCap !== undefined);
     if (companion) {
       this.router.navigate(['/characters', companion.id, 'companion-setup'], { queryParams: { returnTo: 'flaws' } });
       return;

@@ -92,7 +92,7 @@ export class CharacterCharacteristicsAddPage {
       this.character.otherScores,
       this.character.equipment.filter((item) => item.equipped).map((item) => item.equipmentId),
       this.character.advantages.map((item) => item.advantageId),
-      !!this.character.ownerCharacterId,
+      this.character.animalLevelCap !== undefined,
     );
   }
 

@@ -9,14 +9,6 @@
 .header-stats { display: grid; gap: .25rem; min-width: 150px; padding: 1rem 1.25rem; border-left: 4px solid #d0643b; background: #f1e9dc; }
 .header-stats strong { font-size: 1.25rem; }
 .header-stats span { color: #65736d; }
-.companion-cards { display: grid; gap: .75rem; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
-.companion-cards article { background: var(--paper-light); border: 1px solid var(--line); color: var(--ink); display: grid; gap: .75rem; padding: 1rem; }
-.companion-card-heading, .companion-actions { display: flex; flex-wrap: wrap; gap: .75rem; justify-content: space-between; }
-.companion-info-group { border-top: 1px solid var(--line); display: grid; gap: .5rem; padding-top: .75rem; }
-.companion-info-group h4 { color: var(--copper); margin: 0; }
-.companion-attributes, .companion-scores { display: grid; gap: .5rem; grid-template-columns: repeat(auto-fit, minmax(85px, 1fr)); margin: 0; }
-.companion-list { display: grid; gap: .35rem; list-style: none; margin: 0; padding: 0; }
-.companion-list li { background: var(--paper); color: var(--ink); display: flex; flex-wrap: wrap; justify-content: space-between; padding: .5rem; }
 .companion-edit-links { display: flex; flex-wrap: wrap; gap: .75rem 1.25rem; margin-bottom: 1rem; }
 .section-nav { position: sticky; top: 0; z-index: 2; display: flex; gap: .25rem; overflow-x: auto; margin: 1rem 0; padding: .5rem; background: var(--paper-dark); border: 1px solid var(--line); }
 .section-nav a { flex: 0 0 auto; padding: .65rem .8rem; color: var(--ink); font-size: .9rem; font-weight: 700; text-decoration: none; }

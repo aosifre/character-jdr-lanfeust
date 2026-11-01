@@ -72,6 +72,81 @@ describe('CharacterService', () => {
     expect(service.setExperience(companion.id, 1200)).toMatchObject({ level: 10, experience: 1000 });
   });
 
+  it('creates a level-one devoted servant for a hero with the corresponding advantage', () => {
+    const hero = service.add('Test', 'Hero', '', 'other');
+    expect(hero).toBeDefined();
+    if (!hero) return;
+
+    service.setAdvantages(hero.id, [{ advantageId: 'devoue-serviteur' }]);
+    expect(service.createCompanionForHero(hero.id, '  Basile  ', 'devoted-servant')).toMatchObject({
+      firstName: 'Basile',
+      level: 1,
+      experience: 100,
+      ownerCharacterId: hero.id,
+      companionType: 'devoted-servant',
+      animalLevelCap: undefined,
+      otherScores: { hitPoints: 15 },
+    });
+    expect(service.createCompanionForHero(hero.id, 'Un autre', 'devoted-servant')).toBeUndefined();
+  });
+
+  it('does not create a companion without either qualifying advantage', () => {
+    const hero = service.add('Test', 'Hero', '', 'other');
+    expect(hero).toBeDefined();
+    if (!hero) return;
+
+    expect(service.createCompanionForHero(hero.id, 'Basile', 'devoted-servant')).toBeUndefined();
+  });
+
+  it('allows one hired thug per point of effective Charisma with Gros bras à la pelle', () => {
+    const hero = service.add('Test', 'Hero', '', 'other');
+    expect(hero).toBeDefined();
+    if (!hero) return;
+
+    service.setAttributes(hero.id, { ...hero.attributes, charisme: 3 });
+    service.setAdvantages(hero.id, [{ advantageId: 'gros-bras-a-la-pelle' }]);
+    expect(service.canCreateCompanionForHero(hero.id, 'hired-thug')).toBe(true);
+
+    for (const name of ['Basile', 'Boris', 'Bérangère']) {
+      expect(service.createCompanionForHero(hero.id, name, 'hired-thug')).toMatchObject({
+        firstName: name,
+        level: 1,
+        ownerCharacterId: hero.id,
+        companionType: 'hired-thug',
+        animalLevelCap: undefined,
+      });
+    }
+
+    expect(service.canCreateCompanionForHero(hero.id, 'hired-thug')).toBe(false);
+    expect(service.createCompanionForHero(hero.id, 'Brutus', 'hired-thug')).toBeUndefined();
+    expect(service.companionsFor(hero.id)).toHaveLength(3);
+  });
+
+  it('updates a non-animal companion through the full setup without applying animal score rules', () => {
+    const hero = service.add('Test', 'Hero', '', 'other');
+    expect(hero).toBeDefined();
+    if (!hero) return;
+
+    service.setAdvantages(hero.id, [{ advantageId: 'devoue-serviteur' }]);
+    const companion = service.createCompanionForHero(hero.id, 'Basile', 'devoted-servant');
+    expect(companion).toBeDefined();
+    if (!companion) return;
+
+    const attributes = { force: 1, dexterite: 2, constitution: 2, sagesse: 1, intelligence: 3, charisme: 1 };
+    expect(service.updateCompanionSetup(companion.id, 2, attributes, '1d6')).toBe(true);
+    expect(service.findById(companion.id)).toMatchObject({
+      level: 2,
+      attributes,
+      companionDamage: '1d6',
+      otherScores: {
+        attack: 4,
+        defense: 3,
+        save: 3,
+        hitPoints: 26,
+      },
+    });
+  });
+
   it('calculates companion scores from its freely assigned attributes and level', () => {
     const hero = service.add('Test', 'Hero', '', 'other');
     expect(hero).toBeDefined();

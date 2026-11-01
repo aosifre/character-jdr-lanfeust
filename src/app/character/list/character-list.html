@@ -9,38 +9,82 @@
     <a class="button button-outline" routerLink="/settings">Paramètres</a>
   </header>
 
-  @if (characters().length === 0) {
-    <section class="empty-state" aria-live="polite">
-      <div class="empty-mark" aria-hidden="true">✦</div>
-      <h2>Votre journal est encore vierge</h2>
-      <p>Créez le premier personnage de cette aventure.</p>
-      <a class="button button-secondary" routerLink="/characters/new">Créer un personnage</a>
-    </section>
-  } @else {
-    <section class="character-table" aria-label="Liste des personnages">
+  <section class="list-section" aria-label="Liste des héros">
+    <h2 class="list-section-title">Héros</h2>
+    @if (characters().length === 0) {
+      <div class="empty-state" aria-live="polite">
+        <div class="empty-mark" aria-hidden="true">✦</div>
+        <h2>Votre journal est encore vierge</h2>
+        <p>Créez le premier personnage de cette aventure.</p>
+        <a class="button button-secondary" routerLink="/characters/new">Créer un personnage</a>
+      </div>
+    } @else {
+      <div class="character-table">
       <div class="table-heading" aria-hidden="true"><span>Prénom</span><span>Nom</span><span>Niveau / XP</span><span>Actions</span></div>
       @for (character of characters(); track character.id) {
         <article class="character-row">
           <div class="character-identity">
             @if (character.portrait) { <img class="character-avatar" [src]="character.portrait" alt="Portrait" /> }
-            <strong>{{ character.firstName }}</strong>
+            <div class="identity-copy">
+              <strong>{{ character.firstName }}</strong>
+              @if (companionNamesFor(character.id).length > 0) {
+                <small>Compagnons : @for (name of companionNamesFor(character.id); track $index) { @if (!$first) {, }{{ name }} }</small>
+              }
+            </div>
           </div>
           <span>{{ character.lastName }}</span>
           <span class="character-stats">Niv. {{ character.level }} · {{ character.experience }} XP</span>
           <div class="row-actions">
+            @if (availableCompanionTypesFor(character.id); as companionTypes) {
+            @if (companionTypes.length > 0) {
+              <form class="create-companion-form" (submit)="$event.preventDefault(); createCompanion(character.id)">
+                <select [attr.aria-label]="'Type de compagnon de ' + character.firstName" [value]="selectedCompanionType(character.id)" (change)="setCompanionType(character.id, $event)">
+                  @for (type of companionTypes; track type.value) { <option [value]="type.value">{{ type.label }}</option> }
+                </select>
+                <input type="text" required maxlength="80" [attr.aria-label]="'Nom du compagnon de ' + character.firstName" placeholder="Nom du compagnon" [value]="companionNameFor(character.id)" (input)="setCompanionName(character.id, $event)" />
+                <button class="create-companion-link" type="submit">Créer</button>
+                @if (hasCreationError(character.id)) { <small class="create-companion-error" role="alert">Vérifiez l’atout et le nom du compagnon.</small> }
+              </form>
+            }
+            }
             <a class="action-icon edit-action" [routerLink]="['/characters', character.id, 'edit']" aria-label="Modifier le personnage" title="Modifier">✎</a>
             <a class="action-icon history-action" [routerLink]="['/characters', character.id, 'history']" aria-label="Créer une copie depuis un niveau sauvegardé" title="Versions sauvegardées">⟳</a>
             <a class="action-icon equipment-action" [routerLink]="['/characters', character.id, 'equipment']" aria-label="Gérer les équipements" title="Équipements">⚔</a>
-            <!-- Action button for viewing -->
             <a class="action-icon view-action" [routerLink]="['/characters', character.id]" aria-label="Voir le personnage" title="Voir">👁</a>
-            <!-- Action button for upgrading experience -->
             <a class="action-icon level-action" [routerLink]="['/characters', character.id, 'level']" aria-label="Augmenter l'expérience" title="Augmenter l'expérience">⬆</a>
-            <!-- Action button for deletion -->
             <button class="action-icon delete-action" type="button" aria-label="Supprimer le personnage" title="Supprimer" (click)="removeCharacter(character.id, character.firstName, character.lastName)">🗑</button>
           </div>
         </article>
       }
-    </section>
-  }
+      </div>
+    }
+  </section>
 
+  <section class="list-section companion-section" aria-label="Liste des compagnons">
+    <h2 class="list-section-title">Compagnons</h2>
+    @if (companions().length > 0) {
+      <div class="character-table">
+        <div class="table-heading" aria-hidden="true"><span>Nom</span><span>Héros lié</span><span>Niveau / XP</span><span>Actions</span></div>
+        @for (companion of companions(); track companion.id) {
+          <article class="character-row companion-row">
+            <div class="character-identity">
+              @if (companion.portrait) { <img class="character-avatar" [src]="companion.portrait" alt="Portrait" /> }
+              <div class="identity-copy"><strong>{{ companion.firstName }}</strong><small>{{ companionTypeLabel(companion) }}</small></div>
+            </div>
+            <span>{{ ownerName(companion.ownerCharacterId) }}</span>
+            <span class="character-stats">Niv. {{ companion.level }}@if (companion.animalLevelCap !== undefined) { / {{ companion.animalLevelCap }} } · {{ companion.experience }} XP</span>
+            <div class="row-actions">
+              <a class="action-icon view-action" [routerLink]="['/characters', companion.id]" [attr.aria-label]="'Voir la fiche de ' + companion.firstName" title="Voir la fiche">👁</a>
+              <a class="action-icon edit-action" [routerLink]="['/characters', companion.id, 'companion-setup']" [attr.aria-label]="'Configurer la fiche complète de ' + companion.firstName" title="Configurer la fiche complète">✎</a>
+              @if (companion.animalLevelCap === undefined) {
+                <a class="action-icon level-action" [routerLink]="['/characters', companion.id, 'level']" aria-label="Augmenter l'expérience du serviteur" title="Expérience">⬆</a>
+              }
+            </div>
+          </article>
+        }
+      </div>
+    } @else {
+      <p class="companion-empty">Aucun compagnon pour le moment. Un héros ayant un atout de compagnon peut en créer depuis sa ligne.</p>
+    }
+  </section>
 </main>

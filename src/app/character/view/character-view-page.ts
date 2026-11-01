@@ -8,7 +8,7 @@ import { SkillService } from '../../skill/skill.service';
 import { FlawService } from '../../flaw/flaw.service';
 import { Skill } from '../../skill/skill.model';
 import { equipmentIcon, Equipment } from '../../equipment/equipment.model';
-import { Character, CharacterMoney, CharacterRecipe } from '../character.model';
+import { CharacterMoney, CharacterRecipe } from '../character.model';
 import { MagicPowerChoice } from '../magic-power.model';
 import { CharacterAttributes } from '../character.model';
 import { AdvantageDescriptionPipe } from '../../advantage/advantage-description.pipe';
@@ -30,11 +30,6 @@ export class CharacterViewPage implements AfterViewInit {
 
   protected get characterId(): string | null { return this.route.snapshot.paramMap.get('id'); }
   protected get character() { return this.characterId ? this.characterService.findById(this.characterId) : undefined; }
-  protected companionsFor(characterId: string) { return this.characterService.companionsFor(characterId); }
-  protected ownerName(characterId: string): string {
-    const owner = this.characterService.findById(characterId);
-    return owner ? `${owner.firstName} ${owner.lastName}`.trim() : 'personnage';
-  }
   protected readonly skills = this.skillService.skillList;
   protected readonly advantages = this.advantageService.advantageList;
   protected readonly flaws = this.flawService.flawList;
@@ -87,48 +82,6 @@ export class CharacterViewPage implements AfterViewInit {
 
   protected getSkill(skillId: string): Skill | undefined {
     return this.skills().find((skill) => skill.id === skillId);
-  }
-
-  protected companionSkillName(skillId: string): string {
-    return this.getSkill(skillId)?.label ?? 'Compétence inconnue';
-  }
-
-  protected companionSkillTotal(companion: Character, skillId: string): number {
-    const skill = this.getSkill(skillId);
-    if (!skill) return 0;
-    const selectedSkill = companion.skills.find((item) => item.skillId === skillId);
-    const equipmentIds = companion.equipment.filter((item) => item.equipped).map((item) => item.equipmentId);
-    const advantageIds = companion.advantages.map((item) => item.advantageId);
-    return companion.attributes[skill.attributeOne]
-      + companion.attributes[skill.attributeTwo]
-      + (selectedSkill?.degree ?? 0)
-      + this.equipmentService.skillBonus(skillId, equipmentIds)
-      + this.advantageService.skillBonus(advantageIds, skillId);
-  }
-
-  protected companionAdvantage(advantageId: string) {
-    return this.advantages().find((advantage) => advantage.id === advantageId);
-  }
-
-  protected companionFlawName(flawId: string): string {
-    return this.flaws().find((flaw) => flaw.id === flawId)?.title ?? 'Travers inconnu';
-  }
-
-  protected companionFlawDescription(flawId: string): string {
-    return this.flaws().find((flaw) => flaw.id === flawId)?.description ?? '';
-  }
-
-  protected companionEquipment(companion: Character): Equipment[] {
-    const equipmentIds = new Set(companion.equipment.map((item) => item.equipmentId));
-    return this.equipment().filter((item) => equipmentIds.has(item.id));
-  }
-
-  protected companionEquipmentQuantity(companion: Character, equipmentId: string): number {
-    return companion.equipment.find((item) => item.equipmentId === equipmentId)?.quantity ?? 1;
-  }
-
-  protected companionIsEquipped(companion: Character, equipmentId: string): boolean {
-    return companion.equipment.some((item) => item.equipmentId === equipmentId && item.equipped);
   }
 
   protected getSkillName(skillId: string): string {

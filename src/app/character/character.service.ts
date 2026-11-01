@@ -1,6 +1,6 @@
 import { isPlatformBrowser } from '@angular/common';
 import { Inject, Injectable, PLATFORM_ID, inject, signal } from '@angular/core';
-import { Character, CharacterAdvantage, CharacterAttributes, CharacterEquipment, CharacterFlaw, CharacterMoney, CharacterOrigin, CharacterOtherScores, CharacterSkill, CharacterSnapshot, CombatBonus } from './character.model';
+import { Character, CharacterAdvantage, CharacterAttributes, CharacterEquipment, CharacterFlaw, CharacterMoney, CharacterOrigin, CharacterOtherScores, CharacterSkill, CharacterSnapshot, CompanionType, CombatBonus } from './character.model';
 import { EquipmentService } from '../equipment/equipment.service';
 import { AdvantageService } from '../advantage/advantage.service';
 
@@ -114,7 +114,7 @@ export class CharacterService {
 
   setAttributes(id: string, attributes: CharacterAttributes): void {
     this.characters.update((characters) => characters.map((character) =>
-      character.id === id ? { ...character, attributes, otherScores: this.recalculateOtherScores(attributes, character.level, character.otherScores, character.equipment.filter((item) => item.equipped).map((item) => item.equipmentId), character.advantages.map((item) => item.advantageId), !!character.ownerCharacterId) } : character,
+      character.id === id ? { ...character, attributes, otherScores: this.recalculateOtherScores(attributes, character.level, character.otherScores, character.equipment.filter((item) => item.equipped).map((item) => item.equipmentId), character.advantages.map((item) => item.advantageId), character.animalLevelCap !== undefined) } : character,
     ));
     this.saveToStorage();
   }
@@ -142,7 +142,7 @@ export class CharacterService {
       character.id === id
         ? {
           ...character,
-          otherScores: character.ownerCharacterId
+          otherScores: character.animalLevelCap !== undefined
             ? this.recalculateOtherScores(character.attributes, character.level, otherScores, [], character.advantages.map((item) => item.advantageId), true)
             : otherScores,
         }
@@ -153,12 +153,14 @@ export class CharacterService {
 
   updateCompanionSetup(id: string, level: number, attributes: CharacterAttributes, damage: string): boolean {
     const companion = this.findById(id);
+    const animalLevelCap = companion?.animalLevelCap;
     if (!companion?.ownerCharacterId
       || !Number.isInteger(level)
       || level < 1
-      || level > (companion.animalLevelCap ?? 0)
+      || (animalLevelCap !== undefined && level > animalLevelCap)
       || Object.values(attributes).some((value) => !Number.isInteger(value) || value < 0)) return false;
 
+    const isAnimal = animalLevelCap !== undefined;
     const previousCharacters = this.characters();
     const experience = level * 100;
     const otherScores = this.recalculateOtherScores(
@@ -167,7 +169,7 @@ export class CharacterService {
       companion.otherScores,
       companion.equipment.filter((item) => item.equipped).map((item) => item.equipmentId),
       companion.advantages.map((item) => item.advantageId),
-      true,
+      isAnimal,
     );
     const history = level > companion.level
       ? [...(companion.history ?? []), this.createSnapshot(companion)]
@@ -192,7 +194,7 @@ export class CharacterService {
       const otherScores = this.recalculateOtherScores(character.attributes, character.level, {
         ...character.otherScores,
         combatBonusPoints,
-      }, character.equipment.filter((item) => item.equipped).map((item) => item.equipmentId), character.advantages.map((item) => item.advantageId), !!character.ownerCharacterId);
+      }, character.equipment.filter((item) => item.equipped).map((item) => item.equipmentId), character.advantages.map((item) => item.advantageId), character.animalLevelCap !== undefined);
       return { ...character, otherScores };
     }));
     this.saveToStorage();
@@ -220,7 +222,7 @@ export class CharacterService {
     const animalSelections = animalAdvantageId
       ? advantages.filter((advantage) => advantage.advantageId === animalAdvantageId)
       : [];
-    const existingCompanion = this.characters().find((item) => item.ownerCharacterId === id);
+    const existingCompanion = this.companionsFor(id).find((item) => item.companionType === 'animal' || item.animalLevelCap !== undefined);
     let companion: Character | undefined;
     let selectedAdvantages = advantages;
 
@@ -230,7 +232,7 @@ export class CharacterService {
       const animalId = existingCompanion?.id ?? crypto.randomUUID();
       const animalLevelCap = animalSelections.length * 5;
       companion = existingCompanion
-        ? { ...existingCompanion, firstName: animalName, animalLevelCap }
+        ? { ...existingCompanion, firstName: animalName, animalLevelCap, companionType: 'animal' }
         : {
           id: animalId,
           firstName: animalName,
@@ -248,6 +250,7 @@ export class CharacterService {
           equipment: [],
           history: [],
           ownerCharacterId: id,
+          companionType: 'animal',
           animalLevelCap,
         };
       const experience = Math.min(companion.experience, animalLevelCap * 100);
@@ -286,12 +289,12 @@ export class CharacterService {
               item.otherScores,
               equipment.filter((entry) => entry.equipped).map((entry) => entry.equipmentId),
               selectedAdvantages.map((entry) => entry.advantageId),
-              !!item.ownerCharacterId,
+              item.animalLevelCap !== undefined,
             ),
           };
         }
         return item;
-      }).filter((item) => item.ownerCharacterId !== id || animalSelections.length > 0);
+      }).filter((item) => item.ownerCharacterId !== id || (item.companionType !== 'animal' && item.animalLevelCap === undefined) || animalSelections.length > 0);
       return companion && !updatedCharacters.some((item) => item.id === companion?.id)
         ? [...updatedCharacters, companion]
         : updatedCharacters.map((item) => item.id === companion?.id ? companion : item);
@@ -301,6 +304,83 @@ export class CharacterService {
 
   companionsFor(characterId: string): Character[] {
     return this.characters().filter((character) => character.ownerCharacterId === characterId);
+  }
+
+  canCreateCompanionForHero(ownerCharacterId: string, type: CompanionType): boolean {
+    const owner = this.findById(ownerCharacterId);
+    if (!owner || owner.ownerCharacterId) return false;
+    const companions = this.companionsFor(ownerCharacterId);
+    if (type !== 'hired-thug' && companions.some((companion) =>
+      companion.companionType === type || (type === 'animal' && companion.animalLevelCap !== undefined),
+    )) return false;
+
+    const animalAdvantageId = this.advantageService.advantageList().find((advantage) => advantage.animalChoice)?.id;
+    if (type === 'animal') {
+      return !!animalAdvantageId && owner.advantages.some((advantage) => advantage.advantageId === animalAdvantageId);
+    }
+    if (type === 'devoted-servant') {
+      return owner.advantages.some((advantage) => advantage.advantageId === 'devoue-serviteur');
+    }
+    if (!owner.advantages.some((advantage) => advantage.advantageId === 'gros-bras-a-la-pelle')) return false;
+    const maximumHiredThugs = Math.max(0, this.advantageService.effectiveAttributes(
+      owner.attributes,
+      owner.advantages.map((advantage) => advantage.advantageId),
+    ).charisme);
+    return companions.filter((companion) => companion.companionType === 'hired-thug').length < maximumHiredThugs;
+  }
+
+  createCompanionForHero(ownerCharacterId: string, name: string, type: CompanionType): Character | undefined {
+    const owner = this.findById(ownerCharacterId);
+    const companionName = name.trim();
+    if (!companionName || !this.canCreateCompanionForHero(ownerCharacterId, type) || !owner) return undefined;
+
+    const isAnimal = type === 'animal';
+    const animalAdvantageId = isAnimal
+      ? this.advantageService.advantageList().find((advantage) => advantage.animalChoice)?.id
+      : undefined;
+    const animalCount = animalAdvantageId
+      ? owner.advantages.filter((advantage) => advantage.advantageId === animalAdvantageId).length
+      : 0;
+    const level = isAnimal ? 0 : 1;
+    const animalLevelCap = isAnimal ? animalCount * 5 : undefined;
+    const attributes = this.emptyAttributes();
+    const otherScores = this.recalculateOtherScores(attributes, level, this.emptyOtherScores(), [], [], isAnimal);
+    const companion: Character = {
+      id: crypto.randomUUID(),
+      firstName: companionName,
+      lastName: '',
+      description: '',
+      origin: 'other',
+      level,
+      experience: level * 100,
+      attributes,
+      otherScores,
+      money: this.emptyMoney(),
+      skills: [],
+      advantages: [],
+      flaws: [],
+      equipment: [],
+      history: [],
+      ownerCharacterId,
+      companionType: type,
+      animalLevelCap,
+    };
+
+    const previousCharacters = this.characters();
+    const updatedOwnerAdvantages = isAnimal && animalAdvantageId
+      ? owner.advantages.map((advantage) => advantage.advantageId === animalAdvantageId && !advantage.animalId
+        ? { ...advantage, animalName: companionName, animalId: companion.id }
+        : advantage)
+      : owner.advantages;
+    this.characters.update((characters) => [
+      ...characters.map((character) => character.id === ownerCharacterId
+        ? { ...character, advantages: updatedOwnerAdvantages }
+        : character),
+      companion,
+    ]);
+    if (this.saveToStorage()) return companion;
+    this.characters.set(previousCharacters);
+    return undefined;
   }
 
   setFlaws(id: string, flaws: CharacterFlaw[]): void {
@@ -321,7 +401,7 @@ export class CharacterService {
           character.otherScores,
           this.withoutArmorWhenTroll(equipment, character.advantages).filter((item) => item.equipped).map((item) => item.equipmentId),
           character.advantages.map((item) => item.advantageId),
-          !!character.ownerCharacterId,
+          character.animalLevelCap !== undefined,
         ),
       } : character,
     ));
@@ -344,7 +424,7 @@ export class CharacterService {
       : character.animalLevelCap * 100;
     const cappedExperience = Math.min(Math.max(0, Math.floor(experience)), maximumExperience);
     const level = Math.floor(cappedExperience / 100);
-    const scores = character ? this.recalculateOtherScores(character.attributes, level, character.otherScores, character.equipment.filter((item) => item.equipped).map((item) => item.equipmentId), character.advantages.map((item) => item.advantageId), !!character.ownerCharacterId) : undefined;
+    const scores = character ? this.recalculateOtherScores(character.attributes, level, character.otherScores, character.equipment.filter((item) => item.equipped).map((item) => item.equipmentId), character.advantages.map((item) => item.advantageId), character.animalLevelCap !== undefined) : undefined;
 
     this.characters.update((characters) => characters.map((character) => {
       if (character.id !== id || !scores) return character;
@@ -399,6 +479,10 @@ export class CharacterService {
       || value === 'other';
   }
 
+  private isCompanionType(value: unknown): value is CompanionType {
+    return value === 'animal' || value === 'devoted-servant' || value === 'hired-thug';
+  }
+
   private normalizeCharacter(value: Character): Character {
     const animalLevelCap = Number.isInteger(value.animalLevelCap) && (value.animalLevelCap ?? 0) > 0
       ? value.animalLevelCap
@@ -427,13 +511,18 @@ export class CharacterService {
       experience,
       level,
       attributes,
-      otherScores: this.recalculateOtherScores(attributes, level, otherScores, equipment.filter((item) => item.equipped).map((item) => item.equipmentId), advantages.map((item) => item.advantageId), !!ownerCharacterId),
+      otherScores: this.recalculateOtherScores(attributes, level, otherScores, equipment.filter((item) => item.equipped).map((item) => item.equipmentId), advantages.map((item) => item.advantageId), animalLevelCap !== undefined),
       money: this.isMoney(value.money) ? value.money : this.emptyMoney(),
       skills: Array.isArray(value.skills) ? value.skills : [],
       advantages,
       flaws: Array.isArray(value.flaws) ? value.flaws : [],
       equipment,
       ownerCharacterId,
+      companionType: this.isCompanionType(value.companionType)
+        ? value.companionType
+        : ownerCharacterId
+          ? animalLevelCap !== undefined ? 'animal' : 'devoted-servant'
+          : undefined,
       animalLevelCap,
       companionDamage: typeof value.companionDamage === 'string' ? value.companionDamage : '',
       history: Array.isArray(value.history)

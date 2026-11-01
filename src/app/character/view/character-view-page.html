@@ -1,7 +1,7 @@
 @if (character; as currentCharacter) {
   <main class="view-shell">
-    @if (currentCharacter.ownerCharacterId; as ownerCharacterId) {
-      <a class="back-link" [routerLink]="['/characters', ownerCharacterId]">← Retour à {{ ownerName(ownerCharacterId) }}</a>
+    @if (currentCharacter.ownerCharacterId) {
+      <a class="back-link" routerLink="/characters">← Retour à la liste des héros</a>
     } @else {
       <a class="back-link" routerLink="/characters">← Retour aux personnages</a>
     }
@@ -20,7 +20,7 @@
     </header>
 
     <nav class="section-nav" aria-label="Sections de la fiche">
-      <a href="#attributes" [class.active]="activeSection() === 'attributes'" [attr.aria-current]="activeSection() === 'attributes' ? 'location' : null" (click)="goToSection($event, 'attributes')">Caractéristiques</a><a href="#scores" [class.active]="activeSection() === 'scores'" [attr.aria-current]="activeSection() === 'scores' ? 'location' : null" (click)="goToSection($event, 'scores')">Scores</a><a href="#skills" [class.active]="activeSection() === 'skills'" [attr.aria-current]="activeSection() === 'skills' ? 'location' : null" (click)="goToSection($event, 'skills')">Compétences</a><a href="#advantages" [class.active]="activeSection() === 'advantages'" [attr.aria-current]="activeSection() === 'advantages' ? 'location' : null" (click)="goToSection($event, 'advantages')">Atouts</a><a href="#flaws" [class.active]="activeSection() === 'flaws'" [attr.aria-current]="activeSection() === 'flaws' ? 'location' : null" (click)="goToSection($event, 'flaws')">Travers</a><a href="#equipment" [class.active]="activeSection() === 'equipment'" [attr.aria-current]="activeSection() === 'equipment' ? 'location' : null" (click)="goToSection($event, 'equipment')">Équipement</a><a href="#encumbrance" [class.active]="activeSection() === 'encumbrance'" [attr.aria-current]="activeSection() === 'encumbrance' ? 'location' : null" (click)="goToSection($event, 'encumbrance')">Encombrement</a>@if (currentCharacter.ownerCharacterId || companionsFor(currentCharacter.id).length > 0) { <a href="#companion" [class.active]="activeSection() === 'companion'" [attr.aria-current]="activeSection() === 'companion' ? 'location' : null" (click)="goToSection($event, 'companion')">Compagnon</a> }
+      <a href="#attributes" [class.active]="activeSection() === 'attributes'" [attr.aria-current]="activeSection() === 'attributes' ? 'location' : null" (click)="goToSection($event, 'attributes')">Caractéristiques</a><a href="#scores" [class.active]="activeSection() === 'scores'" [attr.aria-current]="activeSection() === 'scores' ? 'location' : null" (click)="goToSection($event, 'scores')">Scores</a><a href="#skills" [class.active]="activeSection() === 'skills'" [attr.aria-current]="activeSection() === 'skills' ? 'location' : null" (click)="goToSection($event, 'skills')">Compétences</a><a href="#advantages" [class.active]="activeSection() === 'advantages'" [attr.aria-current]="activeSection() === 'advantages' ? 'location' : null" (click)="goToSection($event, 'advantages')">Atouts</a><a href="#flaws" [class.active]="activeSection() === 'flaws'" [attr.aria-current]="activeSection() === 'flaws' ? 'location' : null" (click)="goToSection($event, 'flaws')">Travers</a><a href="#equipment" [class.active]="activeSection() === 'equipment'" [attr.aria-current]="activeSection() === 'equipment' ? 'location' : null" (click)="goToSection($event, 'equipment')">Équipement</a><a href="#encumbrance" [class.active]="activeSection() === 'encumbrance'" [attr.aria-current]="activeSection() === 'encumbrance' ? 'location' : null" (click)="goToSection($event, 'encumbrance')">Encombrement</a>@if (currentCharacter.ownerCharacterId) { <a href="#companion" [class.active]="activeSection() === 'companion'" [attr.aria-current]="activeSection() === 'companion' ? 'location' : null" (click)="goToSection($event, 'companion')">Compagnon</a> }
     </nav>
 
     <section id="attributes" class="panel">
@@ -106,113 +106,24 @@
 
     @if (currentCharacter.ownerCharacterId; as ownerCharacterId) {
       <section id="companion" class="panel companion-editor" aria-label="Édition du compagnon">
-        <div class="section-heading"><div><p class="eyebrow">Compagnon animal</p><h2>Modifier les données de {{ currentCharacter.firstName }}</h2></div></div>
+        <div class="section-heading"><div><p class="eyebrow">Compagnon</p><h2>Modifier les données de {{ currentCharacter.firstName }}</h2></div></div>
         <div class="companion-edit-links">
-          <a class="text-link" [routerLink]="['/characters', currentCharacter.id, 'companion-setup']">Créer / modifier le compagnon</a>
+          @if (currentCharacter.animalLevelCap !== undefined) {
+            <a class="text-link" [routerLink]="['/characters', currentCharacter.id, 'companion-setup']">Configurer le compagnon animal</a>
+          } @else {
+            <a class="text-link" [routerLink]="['/characters', currentCharacter.id, 'characteristics', 'add']">Caractéristiques</a>
+            <a class="text-link" [routerLink]="['/characters', currentCharacter.id, 'otherscores']">Scores</a>
+          }
           <a class="text-link" [routerLink]="['/characters', currentCharacter.id, 'skills']">Compétences</a>
           <a class="text-link" [routerLink]="['/characters', currentCharacter.id, 'advantages']">Atouts</a>
           <a class="text-link" [routerLink]="['/characters', currentCharacter.id, 'flaws']">Travers</a>
           <a class="text-link" [routerLink]="['/characters', currentCharacter.id, 'equipment']">Équipement</a>
           <a class="text-link" [routerLink]="['/characters', currentCharacter.id, 'level']">Expérience</a>
         </div>
-        <a class="back-link" [routerLink]="['/characters', ownerCharacterId]">← Retour à {{ ownerName(ownerCharacterId) }}</a>
+        <a class="back-link" routerLink="/characters">← Retour à la liste des héros</a>
       </section>
     }
 
-    @if (!currentCharacter.ownerCharacterId && companionsFor(currentCharacter.id).length > 0) {
-      <section id="companion" class="panel companion-panel" aria-label="Compagnon animal">
-        <div class="section-heading"><div><p class="eyebrow">Compagnon animal</p><h2>Votre compagnon</h2></div></div>
-        <div class="companion-cards">
-          @for (companion of companionsFor(currentCharacter.id); track companion.id) {
-            <article class="companion-card">
-              <header class="companion-card-heading">
-                <div><h3>{{ companion.firstName }}</h3><span>Niveau {{ companion.level }} / {{ companion.animalLevelCap }} · {{ companion.experience }} XP</span></div>
-                <div class="companion-actions">
-                  <a class="button button-primary" [routerLink]="['/characters', companion.id]">Fiche complète</a>
-                  <a class="text-link" [routerLink]="['/characters', companion.id, 'companion-setup']">Configurer</a>
-                </div>
-              </header>
-
-              <section class="companion-info-group">
-                <h4>Caractéristiques</h4>
-                <dl class="companion-attributes">
-                  <div><dt>FOR</dt><dd>{{ companion.attributes.force }}</dd></div>
-                  <div><dt>DEX</dt><dd>{{ companion.attributes.dexterite }}</dd></div>
-                  <div><dt>CON</dt><dd>{{ companion.attributes.constitution }}</dd></div>
-                  <div><dt>SAG</dt><dd>{{ companion.attributes.sagesse }}</dd></div>
-                  <div><dt>INT</dt><dd>{{ companion.attributes.intelligence }}</dd></div>
-                  <div><dt>CHA</dt><dd>{{ companion.attributes.charisme }}</dd></div>
-                </dl>
-              </section>
-
-              <section class="companion-info-group">
-                <h4>Scores</h4>
-                <dl class="companion-scores">
-                  <div><dt>Points de vie</dt><dd>{{ companion.otherScores.hitPoints }}</dd></div>
-                  <div><dt>Attaque</dt><dd>{{ companion.otherScores.attack }}</dd></div>
-                  <div><dt>Défense</dt><dd>{{ companion.otherScores.defense }}</dd></div>
-                  <div><dt>Sauvegarde</dt><dd>{{ companion.otherScores.save }}</dd></div>
-                  <div><dt>Énergie</dt><dd>{{ companion.otherScores.energyPoints }}</dd></div>
-                  @if (companion.companionDamage) { <div><dt>Dégâts</dt><dd>{{ companion.companionDamage }}</dd></div> }
-                </dl>
-              </section>
-
-              <section class="companion-info-group">
-                <h4>Compétences</h4>
-                @if (companion.skills.length > 0) {
-                  <ul class="companion-list">
-                    @for (selectedSkill of companion.skills; track selectedSkill.skillId) {
-                      <li><span>{{ companionSkillName(selectedSkill.skillId) }} · degré +{{ selectedSkill.degree }}</span><strong>{{ companionSkillTotal(companion, selectedSkill.skillId) }}</strong></li>
-                    }
-                  </ul>
-                } @else { <p class="companion-empty">Aucune compétence sélectionnée.</p> }
-              </section>
-
-              <section class="companion-info-group">
-                <h4>Atouts</h4>
-                @if (companion.advantages.length > 0) {
-                  <ul class="companion-list companion-detail-list">
-                    @for (selected of companion.advantages; track $index) {
-                      @if (companionAdvantage(selected.advantageId); as advantage) {
-                        <li>
-                          <div><strong>{{ advantage.title }}</strong><span class="advantage-description" [innerHTML]="advantage.description | advantageDescription"></span>
-                            @if (selected.chosenRegion) { <span>Région : {{ selected.chosenRegion }}</span> }
-                            @if (selected.chosenWeapon || selected.specializationWeapon) { <span>Arme : {{ selected.chosenWeapon || selected.specializationWeapon }}</span> }
-                            @if (selected.chosenDeity; as deity) { <span>Dieu : {{ deity.name }}</span><span>{{ deity.circumstances }}</span><span>Coup de main : {{ deity.helpingHand }}</span> }
-                            @if (selected.magicPowerChoice; as magicChoice) { <span>Pouvoir {{ magicChoice.level }} : {{ magicChoice.power.label }} · Condition : {{ magicChoice.condition.label }}</span> }
-                            @if (selected.recipes; as recipes) { @for (recipe of recipes; track $index) { <span>Recette : {{ recipe.power }} · Ingrédients : {{ recipe.ingredients }}</span> } }
-                          </div>
-                        </li>
-                      }
-                    }
-                  </ul>
-                } @else { <p class="companion-empty">Aucun atout sélectionné.</p> }
-              </section>
-
-              <section class="companion-info-group">
-                <h4>Travers</h4>
-                @if (companion.flaws.length > 0) {
-                  <ul class="companion-list">
-                    @for (flaw of companion.flaws; track flaw.flawId) { <li><div><strong>{{ companionFlawName(flaw.flawId) }}</strong><span>{{ companionFlawDescription(flaw.flawId) || 'Aucune description.' }}</span></div></li> }
-                  </ul>
-                } @else { <p class="companion-empty">Aucun travers sélectionné.</p> }
-              </section>
-
-              <section class="companion-info-group">
-                <h4>Équipement</h4>
-                @if (companionEquipment(companion).length > 0) {
-                  <ul class="companion-list">
-                    @for (item of companionEquipment(companion); track item.id) {
-                      <li><span>{{ item.label }} · quantité {{ companionEquipmentQuantity(companion, item.id) }} · {{ typeLabel(item.type) }}</span><small>{{ companionIsEquipped(companion, item.id) ? 'Équipé' : 'Non équipé' }}</small></li>
-                    }
-                  </ul>
-                } @else { <p class="companion-empty">Aucun équipement.</p> }
-              </section>
-            </article>
-          }
-        </div>
-      </section>
-    }
   </main>
 } @else {
   <main class="view-shell"><a class="back-link" routerLink="/characters">← Retour aux personnages</a><section class="empty-state"><h1>Personnage introuvable</h1><p>Cette fiche n’existe plus.</p></section></main>
