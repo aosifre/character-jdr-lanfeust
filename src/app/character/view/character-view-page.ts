@@ -270,7 +270,7 @@ export class CharacterViewPage implements AfterViewInit {
     if (!navigation) return;
 
     const activationLine = navigation.getBoundingClientRect().bottom + 16;
-    const sectionIds = ['attributes', 'scores', 'skills', 'advantages', 'flaws', 'equipment', 'encumbrance'];
+    const sectionIds = ['attributes', 'scores', 'skills', 'advantages', 'flaws', 'equipment', 'encumbrance', 'companion'];
     this.activeSection.set(sectionIds.reduce((activeId, sectionId) => {
       const section = document.getElementById(sectionId);
       return section && section.getBoundingClientRect().top <= activationLine ? sectionId : activeId;

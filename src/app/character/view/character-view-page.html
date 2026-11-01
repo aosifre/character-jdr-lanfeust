@@ -20,7 +20,7 @@
     </header>
 
     <nav class="section-nav" aria-label="Sections de la fiche">
-      <a href="#attributes" [class.active]="activeSection() === 'attributes'" [attr.aria-current]="activeSection() === 'attributes' ? 'location' : null" (click)="goToSection($event, 'attributes')">Caractéristiques</a><a href="#scores" [class.active]="activeSection() === 'scores'" [attr.aria-current]="activeSection() === 'scores' ? 'location' : null" (click)="goToSection($event, 'scores')">Scores</a><a href="#skills" [class.active]="activeSection() === 'skills'" [attr.aria-current]="activeSection() === 'skills' ? 'location' : null" (click)="goToSection($event, 'skills')">Compétences</a><a href="#advantages" [class.active]="activeSection() === 'advantages'" [attr.aria-current]="activeSection() === 'advantages' ? 'location' : null" (click)="goToSection($event, 'advantages')">Atouts</a><a href="#flaws" [class.active]="activeSection() === 'flaws'" [attr.aria-current]="activeSection() === 'flaws' ? 'location' : null" (click)="goToSection($event, 'flaws')">Travers</a><a href="#equipment" [class.active]="activeSection() === 'equipment'" [attr.aria-current]="activeSection() === 'equipment' ? 'location' : null" (click)="goToSection($event, 'equipment')">Équipement</a><a href="#encumbrance" [class.active]="activeSection() === 'encumbrance'" [attr.aria-current]="activeSection() === 'encumbrance' ? 'location' : null" (click)="goToSection($event, 'encumbrance')">Encombrement</a>
+      <a href="#attributes" [class.active]="activeSection() === 'attributes'" [attr.aria-current]="activeSection() === 'attributes' ? 'location' : null" (click)="goToSection($event, 'attributes')">Caractéristiques</a><a href="#scores" [class.active]="activeSection() === 'scores'" [attr.aria-current]="activeSection() === 'scores' ? 'location' : null" (click)="goToSection($event, 'scores')">Scores</a><a href="#skills" [class.active]="activeSection() === 'skills'" [attr.aria-current]="activeSection() === 'skills' ? 'location' : null" (click)="goToSection($event, 'skills')">Compétences</a><a href="#advantages" [class.active]="activeSection() === 'advantages'" [attr.aria-current]="activeSection() === 'advantages' ? 'location' : null" (click)="goToSection($event, 'advantages')">Atouts</a><a href="#flaws" [class.active]="activeSection() === 'flaws'" [attr.aria-current]="activeSection() === 'flaws' ? 'location' : null" (click)="goToSection($event, 'flaws')">Travers</a><a href="#equipment" [class.active]="activeSection() === 'equipment'" [attr.aria-current]="activeSection() === 'equipment' ? 'location' : null" (click)="goToSection($event, 'equipment')">Équipement</a><a href="#encumbrance" [class.active]="activeSection() === 'encumbrance'" [attr.aria-current]="activeSection() === 'encumbrance' ? 'location' : null" (click)="goToSection($event, 'encumbrance')">Encombrement</a>@if (currentCharacter.ownerCharacterId || companionsFor(currentCharacter.id).length > 0) { <a href="#companion" [class.active]="activeSection() === 'companion'" [attr.aria-current]="activeSection() === 'companion' ? 'location' : null" (click)="goToSection($event, 'companion')">Compagnon</a> }
     </nav>
 
     <section id="attributes" class="panel">
@@ -105,7 +105,7 @@
     </section>
 
     @if (currentCharacter.ownerCharacterId; as ownerCharacterId) {
-      <section class="panel companion-editor" aria-label="Édition du compagnon">
+      <section id="companion" class="panel companion-editor" aria-label="Édition du compagnon">
         <div class="section-heading"><div><p class="eyebrow">Compagnon animal</p><h2>Modifier les données de {{ currentCharacter.firstName }}</h2></div></div>
         <div class="companion-edit-links">
           <a class="text-link" [routerLink]="['/characters', currentCharacter.id, 'companion-setup']">Créer / modifier le compagnon</a>
@@ -120,7 +120,7 @@
     }
 
     @if (!currentCharacter.ownerCharacterId && companionsFor(currentCharacter.id).length > 0) {
-      <section class="panel companion-panel" aria-label="Compagnon animal">
+      <section id="companion" class="panel companion-panel" aria-label="Compagnon animal">
         <div class="section-heading"><div><p class="eyebrow">Compagnon animal</p><h2>Votre compagnon</h2></div></div>
         <div class="companion-cards">
           @for (companion of companionsFor(currentCharacter.id); track companion.id) {
