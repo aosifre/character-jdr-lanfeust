@@ -179,4 +179,32 @@ describe('CharacterSkillsAddPage', () => {
     expect(savedSkills.every((skill) => skill.degree === 2)).toBe(true);
     expect(navigate).toHaveBeenCalledOnce();
   });
+
+  it('allows a companion to choose unlimited degrees and multiple new skills', () => {
+    testCharacter.ownerCharacterId = 'hero-1';
+    const fixture = TestBed.createComponent(CharacterSkillsAddPage);
+    fixture.detectChanges();
+    const internalPage = fixture.componentInstance as unknown as {
+      maximumDegrees: number;
+      maximumSkillDegree: number;
+      addDegree(id: string): void;
+      selectNewSkill(skill: Skill): void;
+      save(): void;
+    };
+
+    expect(internalPage.maximumDegrees).toBe(Number.POSITIVE_INFINITY);
+    expect(internalPage.maximumSkillDegree).toBe(Number.POSITIVE_INFINITY);
+    for (let index = 0; index < 20; index++) internalPage.addDegree('known-max');
+    internalPage.selectNewSkill(skillList.find((skill) => skill.id === 'new-1')!);
+    internalPage.selectNewSkill(skillList.find((skill) => skill.id === 'new-2')!);
+    internalPage.save();
+
+    const savedSkills = setSkills.mock.calls.at(-1)?.[1] as Character['skills'];
+    expect(savedSkills.find((skill) => skill.skillId === 'known-max')?.degree).toBe(24);
+    expect(savedSkills.filter((skill) => skill.skillId.startsWith('new-'))).toEqual([
+      { skillId: 'new-1', degree: 1 },
+      { skillId: 'new-2', degree: 1 },
+    ]);
+    expect(navigate).toHaveBeenLastCalledWith(['/characters', testCharacter.id, 'companion-setup'], { queryParams: { step: 4 } });
+  });
 });

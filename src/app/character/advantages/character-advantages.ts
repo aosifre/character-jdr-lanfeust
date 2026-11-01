@@ -21,12 +21,14 @@ export class CharacterAdvantagesPage {
   private readonly route = inject(ActivatedRoute);
   protected readonly characterId = this.route.snapshot.paramMap.get('id');
   protected readonly character = this.characterId ? this.characterService.findById(this.characterId) : undefined;
+  protected get hasSelectionLimit(): boolean { return !this.character?.ownerCharacterId; }
   protected readonly advantages = this.advantageService.advantageList;
   protected readonly skills = this.skillService.skillList;
   protected readonly categories: AdvantageCategory[] = ['combat', 'origin', 'magic', 'social', 'heroic'];
   protected readonly selectedCategory = signal<'all' | AdvantageCategory>('all');
   protected readonly selected = new Map<string, number>();
   protected readonly regionChoices = new Map<string, string>();
+  protected readonly animalNames = new Map<string, string>();
   protected readonly weaponChoices = new Map<string, string[]>();
   protected readonly deityChoices = new Map<string, DeityChoiceDraft>();
   protected readonly recipeChoices = new Map<string, CharacterRecipe[]>();
@@ -38,11 +40,13 @@ export class CharacterAdvantagesPage {
   protected magicModalAdvantageId: string | null = null;
 
   constructor() {
+    const companionName = this.characterId ? this.characterService.companionsFor(this.characterId)[0]?.firstName : undefined;
     for (const selectedAdvantage of this.character?.advantages ?? []) {
       const { advantageId } = selectedAdvantage;
       this.selected.set(advantageId, (this.selected.get(advantageId) ?? 0) + 1);
       if (advantageId === 'turf-attitre') this.regionChoices.set(advantageId, selectedAdvantage.chosenRegion ?? '');
       const advantage = this.advantages().find((item) => item.id === advantageId);
+      if (advantage?.animalChoice) this.animalNames.set(advantageId, companionName ?? selectedAdvantage.animalName ?? '');
       if (advantage?.weaponChoice) {
         const choices = this.weaponChoices.get(advantageId) ?? [];
         choices.push(selectedAdvantage.chosenWeapon ?? selectedAdvantage.specializationWeapon ?? '');
@@ -76,12 +80,22 @@ export class CharacterAdvantagesPage {
   protected isSelected(id: string): boolean { return this.selectedCount(id) > 0; }
   protected selectedCount(id: string): number { return this.selected.get(id) ?? 0; }
   protected get selectedTotal(): number { return [...this.selected.values()].reduce((total, count) => total + count, 0); }
-  protected get canSave(): boolean { return this.selectedTotal === this.availableAdvantages().availableAdvantages && this.hasValidChoices(); }
+  protected get occurrenceMaximum(): number {
+    return this.hasSelectionLimit ? this.availableAdvantages().availableAdvantages : Number.POSITIVE_INFINITY;
+  }
+  protected get canSave(): boolean {
+    return (this.hasSelectionLimit ? this.selectedTotal === this.availableAdvantages().availableAdvantages : true)
+      && this.hasValidChoices();
+  }
   protected isRepeatable(advantage: Advantage): boolean { return advantage.repeatable === true; }
   protected canAddOccurrence(advantage: Advantage, maximum: number): boolean {
     return this.selectedTotal < maximum && this.selectedCount(advantage.id) < (advantage.maxRepeatable ?? Number.POSITIVE_INFINITY);
   }
   protected regionChoiceFor(advantageId: string): string { return this.regionChoices.get(advantageId) ?? ''; }
+  protected animalNameFor(advantageId: string): string { return this.animalNames.get(advantageId) ?? ''; }
+  protected setAnimalName(advantageId: string, event: Event): void {
+    this.animalNames.set(advantageId, (event.target as HTMLInputElement).value);
+  }
   protected setRegionChoice(advantageId: string, event: Event): void {
     this.regionChoices.set(advantageId, (event.target as HTMLInputElement).value);
   }
@@ -165,6 +179,7 @@ export class CharacterAdvantagesPage {
         if (count !== 1 || !choice.selection || (choice.selection === 'Autre' && !choice.customName.trim())
           || !choice.circumstances.trim() || !choice.helpingHand.trim()) return false;
       }
+      if (advantage?.animalChoice && !this.animalNameFor(advantageId).trim()) return false;
       if (advantageId === 'turf-attitre' && (count !== 1 || !this.regionChoiceFor(advantageId).trim())) return false;
       if (advantage?.recipeChoice) {
         if (!this.confirmedRecipeChoices.has(advantageId) || !this.areRecipesValid(advantageId)) return false;
@@ -220,7 +235,7 @@ export class CharacterAdvantagesPage {
   }
   protected toggle(id: string): void {
     const count = this.selectedCount(id);
-    const maximum = this.availableAdvantages().availableAdvantages;
+    const maximum = this.occurrenceMaximum;
     const advantage = this.advantages().find((item) => item.id === id);
     if (count > 0 && advantage && !this.isRepeatable(advantage)) {
       this.selected.delete(id);
@@ -266,11 +281,14 @@ export class CharacterAdvantagesPage {
 
   protected save(): void {
     const maximum = this.availableAdvantages().availableAdvantages;
-    if (!this.characterId || !this.canSave || this.selectedTotal !== maximum) return;
+    if (!this.characterId || !this.canSave || (this.hasSelectionLimit && this.selectedTotal !== maximum)) return;
     const selected: CharacterAdvantage[] = [...this.selected].flatMap(([advantageId, count]) => {
       const advantage = this.advantages().find((item) => item.id === advantageId);
       if (advantageId === 'turf-attitre') {
         return Array.from({ length: count }, () => ({ advantageId, chosenRegion: this.regionChoiceFor(advantageId).trim() }));
+      }
+      if (advantage?.animalChoice) {
+        return Array.from({ length: count }, () => ({ advantageId, animalName: this.animalNameFor(advantageId).trim() }));
       }
       if (advantage?.weaponChoice) return this.weaponChoicesFor(advantageId).slice(0, count).map((weapon) => ({ advantageId, chosenWeapon: weapon.trim() }));
       if (advantage?.deityChoice) return Array.from({ length: count }, () => {
@@ -299,6 +317,15 @@ export class CharacterAdvantagesPage {
       return Array.from({ length: count }, () => ({ advantageId }));
     });
     this.characterService.setAdvantages(this.characterId, selected);
+    if (this.character?.ownerCharacterId) {
+      this.router.navigate(['/characters', this.characterId, 'companion-setup'], { queryParams: { step: 4 } });
+      return;
+    }
+    const companion = this.characterService.companionsFor(this.characterId)[0];
+    if (companion) {
+      this.router.navigate(['/characters', companion.id, 'companion-setup'], { queryParams: { returnTo: 'flaws' } });
+      return;
+    }
     this.router.navigate(['/characters', this.characterId, 'flaws']);
   }
   private clearChoices(id: string, advantage: Advantage, recipeCount = Number.POSITIVE_INFINITY): void {

@@ -9,11 +9,17 @@
         <label for="currentExperience">Expérience actuelle</label>
         <input id="currentExperience" type="number" formControlName="currentExperience" min="0" readonly />
         <label for="winExperience">Expérience gagnée</label>
-        <input id="winExperience" type="number" formControlName="winExperience" min="0" />
-        @if (form.controls.winExperience.invalid && form.controls.winExperience.touched) { <small>L'expérience gagnée doit être un nombre positif.</small> }
+        <input id="winExperience" type="number" formControlName="winExperience" min="0" [attr.max]="maximumExperienceGain ?? null" />
+        @if (maximumExperienceGain !== undefined) {
+            <small>Plafond du compagnon : niveau {{ character?.animalLevelCap }} ({{ maximumExperienceGain }} XP restantes).</small>
+        }
+        @if (form.controls.winExperience.invalid && form.controls.winExperience.touched) {
+            <small>{{ form.controls.winExperience.hasError('max') ? 'Le plafond de niveau du compagnon serait dépassé.' : 'L’expérience gagnée doit être un nombre positif.' }}</small>
+        }
+        @if (maximumExperienceGain === 0) { <small>Le plafond de niveau du compagnon est atteint.</small> }
         <div class="form-actions">
             <a class="cancel-link" routerLink="/characters">Annuler</a>
-            <button class="button button-primary" type="submit">Enregistrer</button>
+            <button class="button button-primary" type="submit" [disabled]="maximumExperienceGain === 0">Enregistrer</button>
         </div>
     </form>
 </main>

@@ -5,7 +5,7 @@
       {{ character?.firstName }} {{ character?.lastName }}
     </p>
     <h1>Compétences</h1>
-    <p>Vous pouvez choisir une nouvelle compétence, puis répartir {{ maximumDegrees }} degrés parmi vos compétences connues. Le choix d’une nouvelle compétence est facultatif. Après cette progression, une compétence ne pourra pas dépasser le niveau {{ maximumSkillDegree }}.</p></div>
+    <p>@if (hasSelectionLimit) {Vous pouvez choisir une nouvelle compétence, puis répartir {{ maximumDegrees }} degrés parmi vos compétences connues. Le choix d’une nouvelle compétence est facultatif. Après cette progression, une compétence ne pourra pas dépasser le niveau {{ maximumSkillDegree }}.} @else {Ajoutez librement de nouvelles compétences et des degrés aux compétences connues.}</p></div>
   <form class="custom-skill-form" [formGroup]="skillForm" (ngSubmit)="addCustomSkill()">
     <label for="custom-skill-label">Ajouter une compétence personnalisée</label>
     <input id="custom-skill-label" formControlName="label" placeholder="Nom de la compétence" />
@@ -32,5 +32,5 @@
       </article>
     }
   </section>
-  <footer><p>{{ allocatedDegrees }} / {{ maximumDegrees }} degrés · {{ selectedNewSkill ? '1 nouvelle compétence choisie' : 'Aucune nouvelle compétence choisie (facultatif)' }}</p><button class="button" type="button" [disabled]="allocatedDegrees !== maximumDegrees" (click)="save()">Valider le personnage</button></footer>
+  <footer><p>@if (hasSelectionLimit) { {{ allocatedDegrees }} / {{ maximumDegrees }} degrés · {{ selectedNewSkills.size ? selectedNewSkills.size + ' nouvelle(s) compétence(s) choisie(s)' : 'Aucune nouvelle compétence choisie (facultatif)' }} } @else { {{ allocatedDegrees }} degré(s) · {{ selectedNewSkills.size }} nouvelle(s) compétence(s) · sans plafond }</p><button class="button" type="button" [disabled]="hasSelectionLimit && allocatedDegrees !== maximumDegrees" (click)="save()">Valider le personnage</button></footer>
 </main>

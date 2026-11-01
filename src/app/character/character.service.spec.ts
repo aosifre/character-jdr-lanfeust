@@ -48,4 +48,61 @@ describe('CharacterService', () => {
     expect(energyFor(['reserves-d-energie', 'reserves-d-energie'])).toBe(20);
     expect(energyFor(['reserves-d-energie', 'reserves-d-energie', 'reserves-d-energie'])).toBe(25);
   });
+
+  it('creates a linked companion and raises its level cap by five per advantage occurrence', () => {
+    const hero = service.add('Test', 'Hero', '', 'other');
+    expect(hero).toBeDefined();
+    if (!hero) return;
+
+    service.setAdvantages(hero.id, [{ advantageId: 'compagnon-animal', animalName: 'Félix' }]);
+    let companion = service.companionsFor(hero.id)[0];
+    expect(companion).toMatchObject({ firstName: 'Félix', ownerCharacterId: hero.id, animalLevelCap: 5 });
+    const companionId = companion.id;
+
+    const cappedProgression = service.setExperience(companion.id, 900);
+    expect(cappedProgression).toMatchObject({ level: 5, experience: 500 });
+
+    service.setAdvantages(hero.id, [
+      { advantageId: 'compagnon-animal', animalName: 'Félix' },
+      { advantageId: 'compagnon-animal', animalName: 'Félix' },
+    ]);
+    companion = service.companionsFor(hero.id)[0];
+    expect(companion.id).toBe(companionId);
+    expect(companion).toMatchObject({ animalLevelCap: 10, level: 5, experience: 500 });
+    expect(service.setExperience(companion.id, 1200)).toMatchObject({ level: 10, experience: 1000 });
+  });
+
+  it('calculates companion scores from its freely assigned attributes and level', () => {
+    const hero = service.add('Test', 'Hero', '', 'other');
+    expect(hero).toBeDefined();
+    if (!hero) return;
+    service.setAdvantages(hero.id, [{ advantageId: 'compagnon-animal', animalName: 'Félix' }]);
+    const companion = service.companionsFor(hero.id)[0];
+    const attributes = { force: 4, dexterite: 3, constitution: 3, sagesse: 2, intelligence: 2, charisme: 1 };
+
+    expect(service.updateCompanionSetup(companion.id, 5, attributes, '1d6+2')).toBe(true);
+    expect(service.findById(companion.id)).toMatchObject({
+      level: 5,
+      experience: 500,
+      attributes,
+      companionDamage: '1d6+2',
+      otherScores: {
+        attack: 9,
+        defense: 7,
+        save: 8,
+        hitPoints: 40,
+      },
+    });
+    expect(service.updateCompanionSetup(companion.id, 6, attributes, '')).toBe(false);
+    expect(service.updateCompanionSetup(companion.id, 0, attributes, '')).toBe(false);
+    expect(service.updateCompanionSetup(companion.id, 5, { ...attributes, force: 1.5 }, '')).toBe(false);
+
+    service.setAttributes(companion.id, { ...attributes, force: 5 });
+    expect(service.findById(companion.id)?.otherScores).toMatchObject({
+      attack: 10,
+      defense: 7,
+      save: 8,
+      hitPoints: 40,
+    });
+  });
 });

@@ -36,6 +36,10 @@ export class CharacterFlawsPage {
     if (!this.characterId) return;
     const selectedFlaws: CharacterFlaw[] = [...this.selected].map((flawId) => ({ flawId }));
     this.characterService.setFlaws(this.characterId, selectedFlaws);
+    if (this.character?.ownerCharacterId) {
+      this.router.navigate(['/characters', this.characterId, 'companion-setup'], { queryParams: { step: 4 } });
+      return;
+    }
     this.router.navigate(['/characters']);
   }
 }

@@ -30,6 +30,7 @@ export class CharacterOtherScoresPage {
   }
 
   protected selectCombatBonus(bonus: 'attack' | 'defense' | 'save'): void {
+    if (this.character?.ownerCharacterId) return;
     const points = this.otherScores.combatBonusPoints;
     const total = points.attack + points.defense + points.save;
     if (points[bonus] > 0) points[bonus]--;
@@ -39,9 +40,13 @@ export class CharacterOtherScoresPage {
   }
 
   protected save(): void {
-    if (!this.characterId || !this.character || this.bonusPointsTotal !== 2) return;
+    if (!this.characterId || !this.character || (!this.character.ownerCharacterId && this.bonusPointsTotal !== 2)) return;
     this.refreshCombatScores();
     this.characterService.setOtherScores(this.characterId, this.otherScores);
+    if (this.character.ownerCharacterId) {
+      this.router.navigate(['/characters', this.characterId, 'companion-setup']);
+      return;
+    }
     this.router.navigate(['/characters', this.characterId, 'skills']);
   }
 
@@ -56,6 +61,7 @@ export class CharacterOtherScoresPage {
       this.otherScores,
       this.character.equipment.filter((item) => item.equipped).map((item) => item.equipmentId),
       this.character.advantages.map((item) => item.advantageId),
+      !!this.character.ownerCharacterId,
     ));
   }
 }

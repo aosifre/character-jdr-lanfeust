@@ -28,8 +28,13 @@ export class CharacterViewPage implements AfterViewInit {
   private readonly flawService = inject(FlawService);
   private readonly route = inject(ActivatedRoute);
 
-  protected readonly characterId = this.route.snapshot.paramMap.get('id');
-  protected readonly character = this.characterId ? this.characterService.findById(this.characterId) : undefined;
+  protected get characterId(): string | null { return this.route.snapshot.paramMap.get('id'); }
+  protected get character() { return this.characterId ? this.characterService.findById(this.characterId) : undefined; }
+  protected companionsFor(characterId: string) { return this.characterService.companionsFor(characterId); }
+  protected ownerName(characterId: string): string {
+    const owner = this.characterService.findById(characterId);
+    return owner ? `${owner.firstName} ${owner.lastName}`.trim() : 'personnage';
+  }
   protected readonly skills = this.skillService.skillList;
   protected readonly advantages = this.advantageService.advantageList;
   protected readonly flaws = this.flawService.flawList;

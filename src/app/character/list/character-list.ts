@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CharacterService } from '../character.service';
 
@@ -10,7 +10,7 @@ import { CharacterService } from '../character.service';
 })
 export class CharacterList {
   private readonly characterService = inject(CharacterService);
-  protected readonly characters = this.characterService.characterList;
+  protected readonly characters = computed(() => this.characterService.characterList().filter((character) => !character.ownerCharacterId));
   protected importError = false;
 
   protected removeCharacter(id: string, firstName: string, lastName: string): void {

@@ -45,6 +45,9 @@ export interface Character {
   flaws: CharacterFlaw[];
   equipment: CharacterEquipment[];
   history?: CharacterSnapshot[];
+  ownerCharacterId?: string;
+  animalLevelCap?: number;
+  companionDamage?: string;
 }
 
 export interface CharacterSnapshot {
@@ -84,6 +87,8 @@ export interface CharacterAdvantage {
     circumstances: string;
     helpingHand: string;
   };
+  animalName?: string;
+  animalId?: string;
 }
 
 export type RecipePowerType = 'communs' | 'mineurs' | 'majeurs';

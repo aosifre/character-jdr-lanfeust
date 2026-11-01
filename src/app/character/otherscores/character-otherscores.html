@@ -3,9 +3,10 @@
   <div class="scores-heading">
     <p class="eyebrow">{{ character?.firstName }} {{ character?.lastName }}</p>
     <h1>Autres scores</h1>
-    <p>Répartissez 2 points entre ATT, DEF et SAV. Les scores sont calculés automatiquement.</p>
+    <p>@if (character?.ownerCharacterId) {Les scores du compagnon sont calculés automatiquement à partir de son niveau et de ses caractéristiques.} @else {Répartissez 2 points entre ATT, DEF et SAV. Les scores sont calculés automatiquement.}</p>
   </div>
 
+  @if (!character?.ownerCharacterId) {
   <section class="score-section">
     <h2>Bonus de combat</h2>
     <p class="section-help">Cliquez sur une ou plusieurs lignes pour répartir les 2 points.</p>
@@ -21,6 +22,16 @@
       </button>
     </div>
   </section>
+  } @else {
+    <section class="score-section">
+      <h2>Scores du compagnon</h2>
+      <div class="bonus-grid">
+        <article class="score-card"><span>Attaque</span><strong>{{ otherScores.attack }}</strong></article>
+        <article class="score-card"><span>Défense</span><strong>{{ otherScores.defense }}</strong></article>
+        <article class="score-card"><span>Sauvegarde</span><strong>{{ otherScores.save }}</strong></article>
+      </div>
+    </section>
+  }
 
   <section class="score-section secondary-scores">
     <h2>Points de vie et d'énergie</h2>
@@ -31,6 +42,6 @@
   </section>
 
   <div class="scores-footer">
-    <button class="button button-primary" type="button" [disabled]="bonusPointsTotal !== 2" (click)="save()">Valider le personnage</button>
+    <button class="button button-primary" type="button" [disabled]="!character?.ownerCharacterId && bonusPointsTotal !== 2" (click)="save()">{{ character?.ownerCharacterId ? 'Retour à la configuration' : 'Valider le personnage' }}</button>
   </div>
 </main>

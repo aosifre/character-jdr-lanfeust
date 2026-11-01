@@ -79,6 +79,7 @@ export interface Advantage {
   maxRepeatable?: number;
   weaponChoice?: boolean;
   deityChoice?: boolean;
+  animalChoice?: boolean;
   excludedAdvantageIds?: string[];
   recipeChoice?: boolean;
   recipeCount?: number;

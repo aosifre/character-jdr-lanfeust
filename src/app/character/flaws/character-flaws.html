@@ -7,7 +7,7 @@
   <div class="heading">
     <p class="eyebrow">{{ character?.firstName }} {{ character?.lastName }}</p>
     <h1>Travers</h1>
-    <p>Choisissez un ou plusieurs travers pour votre personnage.</p>
+    <p>@if (character?.ownerCharacterId) {Choisissez librement les travers du compagnon, sans plafond.} @else {Choisissez un ou plusieurs travers pour votre personnage.}</p>
   </div>
   <button class="button outline" type="button" (click)="openModal()">Ajouter un travers</button>
   <section class="flaw-grid" aria-label="Choix des travers">
@@ -25,7 +25,7 @@
     }
   </section>
   <footer>
-    <p>{{ selected.size }} travers sélectionné(s)</p>
+    <p>{{ selected.size }} travers sélectionné(s)@if (character?.ownerCharacterId) { · sans plafond}</p>
     <button class="button" type="button" (click)="save()">Valider le personnage</button>
   </footer>
 </main>

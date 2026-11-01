@@ -23,6 +23,7 @@ export class CharacterSkillsPage {
   private readonly route = inject(ActivatedRoute);
   protected readonly characterId = this.route.snapshot.paramMap.get('id');
   protected readonly character = this.characterId ? this.characterService.findById(this.characterId) : undefined;
+  protected get hasSelectionLimit(): boolean { return !this.character?.ownerCharacterId; }
   protected readonly skills = this.skillService.skillList;
   protected readonly selected = new Set(this.character?.skills.map((skill) => skill.skillId) ?? []);
   protected readonly attributes = [
@@ -41,7 +42,7 @@ export class CharacterSkillsPage {
     const attributes = this.character
       ? this.advantageService.effectiveAttributes(this.character.attributes, selectedAdvantages)
       : undefined;
-    return 4 + (attributes?.intelligence ?? 0);
+    return this.hasSelectionLimit ? 4 + (attributes?.intelligence ?? 0) : Number.POSITIVE_INFINITY;
   }
   protected isSelected(id: string): boolean { return this.selected.has(id); }
   protected toggle(skill: Skill): void {
@@ -65,9 +66,13 @@ export class CharacterSkillsPage {
       : 0;
   }
   protected save(): void {
-    if (!this.characterId || this.selected.size !== this.maximum) return;
+    if (!this.characterId || (this.hasSelectionLimit && this.selected.size !== this.maximum)) return;
     const selectedSkills: CharacterSkill[] = [...this.selected].map((skillId) => ({ skillId, degree: 1 }));
     this.characterService.setSkills(this.characterId, selectedSkills);
+    if (this.character?.ownerCharacterId) {
+      this.router.navigate(['/characters', this.characterId, 'companion-setup'], { queryParams: { step: 4 } });
+      return;
+    }
     this.router.navigate(['/characters', this.characterId, 'advantages']);
   }
 }
