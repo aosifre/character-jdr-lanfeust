@@ -49,6 +49,23 @@ describe('CharacterService', () => {
     expect(energyFor(['reserves-d-energie', 'reserves-d-energie', 'reserves-d-energie'])).toBe(25);
   });
 
+  it('adds the Robustesse hit point bonus to heroes and animal companions', () => {
+    const attributes = { force: 0, dexterite: 0, constitution: 2, sagesse: 0, intelligence: 0, charisme: 0 };
+    const scores = {
+      attack: 0,
+      defense: 0,
+      save: 0,
+      hitPoints: 0,
+      energyPoints: 0,
+      combatBonus: null,
+      combatBonusPoints: { attack: 0, defense: 0, save: 0 },
+    } as const;
+    const robustesse = ['robustesse', 'robustesse', 'robustesse'];
+
+    expect(service.recalculateOtherScores(attributes, 2, scores, [], robustesse).hitPoints).toBe(41);
+    expect(service.recalculateOtherScores(attributes, 2, scores, [], robustesse, true).hitPoints).toBe(29);
+  });
+
   it('creates a linked companion and raises its level cap by five per advantage occurrence', () => {
     const hero = service.add('Test', 'Hero', '', 'other');
     expect(hero).toBeDefined();

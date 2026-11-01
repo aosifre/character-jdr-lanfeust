@@ -2,7 +2,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { Inject, Injectable, PLATFORM_ID, signal } from '@angular/core';
 import { Advantage, AdvantageAttributeBonuses, AdvantageBenefit, AdvantageCategory } from './advantage.model';
 import { AttributeKey } from '../skill/skill.model';
-import { CharacterAttributes, CharacterOrigin } from '../character/character.model';
+import { CharacterAdvantage, CharacterAttributes, CharacterOrigin } from '../character/character.model';
 
 const defaultAdvantages: Advantage[] = [
   { id: 'armes-armures-pro', title: 'Armes et armures de professionnel', category: 'combat', description: 'Vous ne subissez aucun malus quand vous utilisez des armes, boucliers et armures de professionnel p.123, 126', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
@@ -35,17 +35,17 @@ const defaultAdvantages: Advantage[] = [
   { id: 'tir-de-loin', title: 'Tir de loin', category: 'combat', description: 'Vous êtes capable d\'atteindre une mouche à troll à 150 pas. Vous ne subissez pas de malus à l\'attaque quand votre cible est éloignée (voir page 104).', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
   { id: 'tir-rapide', title: 'Tir rapide', category: 'combat', description: 'Que vous lanciez des couteaux  ou que vous tiriez des carreaux d\'arbalète, la rapidité avec laquelle vous faites feu est proprement hallucinante. Vous pouvez faire une attaque à distance de plus à chacun de vos tours (en utilisant votre meilleur bonus si vous avez plusieurs attaques). Cependant, toutes vos attaques se font avec un malus de -2.', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
   { id: 'uppercut', title: 'Uppercut', category: 'combat', description: 'Vous pouvez décider de tenter un uppercut à votre tour, à la place de toutes vos attaques normales. Cette attaque fonctionne comme une tentative d\'assomer (voir page 113), sauf que vous n\'avez pas de malus à votre jet d\'Attaque.', conditionAttribute: null, conditionMinimum: null, prerequisiteId: 'arts-martiaux' },
-  { id: 'boussole-vivante', title: 'Boussole vivante', category: 'heroic', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
-  { id: 'chanceux', title: 'Chanceux', category: 'heroic', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
-  { id: 'la-musique-adoucit-les-moeurs', title: 'La musique adoucit les moeurs', category: 'heroic', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
-  { id: 'porte-poisse', title: 'Porte poisse', category: 'heroic', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
-  { id: 'que-d-un-oeil', title: 'Que d\'un oeil', category: 'heroic', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
-  { id: 'qu-est-ce-que-j-ai-dans-ma-poche', title: 'Qu\'est-ce que j\'ai dans ma poche', category: 'heroic', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
-  { id: 'resistant', title: 'Résistant', category: 'heroic', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
-  { id: 'robustesse', title: 'Robustesse', category: 'heroic', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
-  { id: 'sixieme-sens', title: 'Sixième sens', category: 'heroic', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
-  { id: 'endurant', title: 'Sommeil réparateur', category: 'heroic', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
-  { id: 'endurant', title: 'Talentueux', category: 'heroic', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
+  { id: 'boussole-vivante', title: 'Boussole vivante', category: 'heroic', description: "Tous les jets de Survie destinés à vous orienter se font avec un bonus de +4.", conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
+  { id: 'chanceux', title: 'Chanceux', category: 'heroic', description: "Une fois par séance de jeu, vous pouvez relancer tous les dés d'une Krâsse (y compris lors d'une Contre-krâsse)", conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
+  { id: 'la-musique-adoucit-les-moeurs', title: 'La musique adoucit les moeurs', category: 'heroic', description: "Chaque fois que vous avez l'occasion de jouer au moins un air, vous recevez un bonus de +4 à tous vos jets de Diplomatie et de Bluff effectués sur une personne qui vous a entendu.", conditionAttribute: null, conditionMinimum: null, prerequisiteId: null, conditionSkillId: 'metier-musicien', conditionSkillMinimum: 1 },
+  { id: 'porte-poisse', title: 'Porte poisse', category: 'heroic', description: "Les seconds rôles, amis ou ennemis, situés à moins de 3m de vous souffrent d'un malus de -2 à tous leurs jets de Sauvegarde.", conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
+  { id: 'que-d-un-oeil', title: 'Que d\'un oeil', category: 'heroic', description: "Vous n'êtes jamais surpris dans votre sommeil. Vous avez toujours droit à un jet de Défense ou de Sauvegarde pour éviter une attaque, même si vous dormez à poings fermés au moment de l'attaque. En outre, vous pouvez toujours faire des jets de Perception pour entendre ce qui se passe autour de vous quand vous dormez. En cas de réussite d'un tel jet, vous pouvez décider de vous réveiller ou de rester endormi.", conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
+  { id: 'qu-est-ce-que-j-ai-dans-ma-poche', title: 'Qu\'est-ce que j\'ai dans ma poche', category: 'heroic', description: "Avec cet Atout, vous ne serez plus jamais coincé quand il s'agit d'allumer un feu ou de crocheter une serrure. Dépensez une Krâsse et hop, vous venez de trouver dans votre poche ou ailleurs un petit objet qui ne se trouvait pas dans votre liste d'équipement.", conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
+  { id: 'resistant', title: 'Résistant', category: 'heroic', description: "Vous bénéficiez d'un bonus de +4 à tout jet de Sauvegarde effectué pour résister à la maladie ou au poison.", conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
+  { id: 'robustesse', title: 'Robustesse', category: 'heroic', description: "Ajoutez 5 à votre total de points de vie. Vous pouvez prendre cet atout plusieurs fois et cumuler les ajouts de points de vie.", conditionAttribute: null, conditionMinimum: null, prerequisiteId: null, repeatable: true, hitPointsBonus: 5, additionalHitPointsBonus: 5 },
+  { id: 'sixieme-sens', title: 'Sixième sens', category: 'heroic', description: "Ajoutez un bonus de +2 à tous vos jets de Perception. Vous avez le droit d'accomplir une action avant tout le monde si vous réussisez à détecter une embuscade. Il peut s'agit d'une attaque, d'un pouvoir ou d'un déplacement.", conditionAttribute: null, conditionMinimum: null, prerequisiteId: null, contextualSkillBonuses: { perception: 2 } },
+  { id: 'endurant', title: 'Sommeil réparateur', category: 'heroic', description: "En une nuit de sommeil de 6 heures minimum, vous récupérez autant de points de vie que vis vous vous étiez reposé toute une journée (1d6 + Constitution)", conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
+  { id: 'talentueux', title: 'Talentueux', category: 'heroic', description: "Vous disposez d'un talent hors du commun dans une compétence de votre choix. Ajoutez un bonus de +4 à tous les jets de cette compétence. Vous devez avoir au moins un degré dans la compétence choisie pour prendre cet Atout.", conditionAttribute: null, conditionMinimum: null, prerequisiteId: null, skillChoice: true, skillChoiceBonus: 4 },
   { id: 'bon-sens-souard', title: 'Bon sens souard', category: 'origin', description: 'Le conteur ne peut jamais faire de tentative de Krâsse quand un de ses seconds rôles essaie de vous embobiner ou de vous mentir. Votre bon sens s\'étend également aux effets magiques qui essaieraient de vous faire prendre des vessises pour des lanternes. Vous bénéficiez d\'un bonus de +4 aux jets de Sauvegarde contre de tels pouvoirs.', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null, conditionOrigin: 'souardie' },
   { id: 'chouchou-d-un-dieu', title: 'Chouchou d\'un dieu', category: 'origin', description: 'Choisissez avec le conteur dans la liste située en page 148 quel est le dieu qui vous convient le mieux à votre concept de héros. Les règles concenrant les interventions divines se trouvent également en page 148.', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null, conditionOrigin: 'darshan', deityChoice: true },
   { id: 'chaman', title: 'Chaman', category: 'origin', description: 'La magie des chamans se confine le plus souvent à créer des potions, des onguents et d\'autres concoctions peu ragoûtantes mais néanmoins efficaces. Au départ, vous connaissez deux recettes magiques. Allez voir en page 155 pour plus de détails.', conditionAttribute: null, conditionMinimum: null, conditionOrigin: 'region-primitive-reculee', conditionSkillId: 'metier-alchimiste', conditionSkillMinimum: 5, prerequisiteId: null, excludedAdvantageIds: ['pouvoir-magique', 'sage-d-eckmul'], recipeChoice: true, recipeCount: 2 },
@@ -97,9 +97,9 @@ const defaultAdvantages: Advantage[] = [
   { id: 'croque-mitaine', title: 'Croque-mitaine', category: 'social', description: "Les gens ont tendance à vous craindre, voire à vous fuir. A partir du moment où votre identité est connue, vos jets d'Intimidation se font avec un bonus de +4. Lors d'un combat, les têtes à claques qui vous reconnaissent doivent réussir un jet de Sauvegarde difficulté 12 quand elles s'approchent à au moins de 10m. En cas d'échec, elles reçoivent un malus de -2 à leurs jets d'Attaque et de Sauvegarde.", conditionAttribute: null, conditionMinimum: null, prerequisiteId: null, minimumLevel: 5, excludedAdvantageIds: ['chevalier-blanc'] },
   { id: 'devoue-serviteur', title: 'Dévoué serviteur', category: 'social', description: "Cet atout vous attache les services et l'amitié d'un second rôle joué par le conteur. Votre dévoué compagnon est un personnage de niveau 1 de type \"tête à claques\"", conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
   { id: 'gros-bras-a-la-pelle', title: 'Gros bras à la pelle', category: 'social', description: "Une fois par aventure, vous pouvez engager un nombre de têtes à claques de niveau 1 égal à votre bonus de Charisme, plus un par Krâsse que vous dépensez. Ils ne se déplacent que si vous leur promettez une quelconque récompense et vous quittent de toute façon à la fin de l'aventure en cours.", conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
-  { id: 'identite-secrete', title: 'Identité secrète', category: 'social', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
-  { id: 'relations', title: 'Relations', category: 'social', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
-  { id: 'sexy', title: 'Sexy', category: 'social', description: '', conditionAttribute: null, conditionMinimum: null, prerequisiteId: null },
+  { id: 'identite-secrete', title: 'Identité secrète', category: 'social', description: "Vous menez une double vie. Avec cet Atout, vous ne risquez jamais que votre identité soit découverte. A moins d'être confrontés à une preuve flagrante, les gens ne voudront jamais croire qie vpis êtes en réalité le justicier vêtu  de noir qui terrorise les brigands. De plus, vous bénéficiez d'un bonus de +4 aux jets d'Intimidation effectués sous votre identité d'emprunt.", conditionAttribute: null, conditionMinimum: null, prerequisiteId: null, skillBonuses: { intimidation: 4 } },
+  { id: 'relations', title: 'Relations', category: 'social', description: "Votre nom est connu à travers Troy. Pour ce faire, prenez un nombre quelconque de Krâsses et jetez le même nombre de dK. Si vous obtenez au moins un 6, votre héros parvient à se faire entendre de quelqu'un pour vous tirer d'une situation épineuse.", conditionAttribute: null, conditionMinimum: null, prerequisiteId: null, conditionSkillId: 'connaissance-troy', conditionSkillMinimum: 1 },
+  { id: 'sexy', title: 'Sexy', category: 'social', description: "Vous recevez un bonus de +4 à tous vos jets de Bluff et de Diplomatie quand votre interlocuteur est naturellement attiré par les membres de votre sexe.", conditionAttribute: "charisme", conditionMinimum: 2, prerequisiteId: null },
 ];
 
 @Injectable({ providedIn: 'root' })
@@ -135,10 +135,16 @@ export class AdvantageService {
     };
   }
 
-  skillBonus(selectedAdvantageIds: string[], skillId: string): number {
-    return selectedAdvantageIds.reduce((total, id) => {
+  skillBonus(selectedAdvantages: string[] | CharacterAdvantage[], skillId: string): number {
+    return selectedAdvantages.reduce((total, selectedAdvantage) => {
+      const id = typeof selectedAdvantage === 'string' ? selectedAdvantage : selectedAdvantage.advantageId;
       const advantage = this.advantages().find((item) => item.id === id);
-      return total + (advantage?.skillBonuses?.[skillId] ?? 0);
+      const chosenSkillBonus = typeof selectedAdvantage !== 'string'
+        && advantage?.skillChoice
+        && selectedAdvantage.chosenSkillId === skillId
+        ? advantage.skillChoiceBonus ?? 0
+        : 0;
+      return total + (advantage?.skillBonuses?.[skillId] ?? 0) + chosenSkillBonus;
     }, 0);
   }
 
@@ -164,6 +170,20 @@ export class AdvantageService {
     return selectedAdvantageIds.reduce((total, id) => {
       const advantage = this.advantages().find((item) => item.id === id);
       return total + (advantage?.damageReduction ?? 0);
+    }, 0);
+  }
+
+  hitPointsBonus(selectedAdvantageIds: string[]): number {
+    const occurrenceCounts = new Map<string, number>();
+    for (const id of selectedAdvantageIds) {
+      occurrenceCounts.set(id, (occurrenceCounts.get(id) ?? 0) + 1);
+    }
+    return [...occurrenceCounts].reduce((total, [id, count]) => {
+      const advantage = this.advantages().find((item) => item.id === id);
+      if (!advantage) return total;
+      return total
+        + (advantage.hitPointsBonus ?? 0)
+        + Math.max(0, count - 1) * (advantage.additionalHitPointsBonus ?? 0);
     }, 0);
   }
 
@@ -246,6 +266,8 @@ export class AdvantageService {
       && (advantage['repeatable'] === undefined || typeof advantage['repeatable'] === 'boolean')
       && (advantage['maxRepeatable'] === undefined || (typeof advantage['maxRepeatable'] === 'number' && this.isNumber(advantage['maxRepeatable']) && advantage['maxRepeatable'] > 0))
       && (advantage['weaponChoice'] === undefined || typeof advantage['weaponChoice'] === 'boolean')
+      && (advantage['skillChoice'] === undefined || typeof advantage['skillChoice'] === 'boolean')
+      && (advantage['skillChoiceBonus'] === undefined || this.isNumber(advantage['skillChoiceBonus']))
       && (advantage['deityChoice'] === undefined || typeof advantage['deityChoice'] === 'boolean')
       && (advantage['recipeChoice'] === undefined || typeof advantage['recipeChoice'] === 'boolean')
       && (advantage['recipeCount'] === undefined || (typeof advantage['recipeCount'] === 'number' && this.isNumber(advantage['recipeCount']) && advantage['recipeCount'] > 0))
@@ -261,6 +283,8 @@ export class AdvantageService {
       && this.isSkillBonusRecord(advantage['skillBonuses'])
       && this.isSkillBonusRecord(advantage['contextualSkillBonuses'])
       && this.isCombatBonusRecord(advantage['combatBonuses'])
+      && (advantage['hitPointsBonus'] === undefined || this.isNumber(advantage['hitPointsBonus']))
+      && (advantage['additionalHitPointsBonus'] === undefined || this.isNumber(advantage['additionalHitPointsBonus']))
       && (advantage['energyPointsBonus'] === undefined || this.isNumber(advantage['energyPointsBonus']))
       && (advantage['additionalEnergyPointsBonus'] === undefined || this.isNumber(advantage['additionalEnergyPointsBonus']))
       && (advantage['emissionSurfaceBase'] === undefined || this.isNumber(advantage['emissionSurfaceBase']))
@@ -301,8 +325,10 @@ export class AdvantageService {
   }
 
   private normalize(value: Advantage & { label?: string }): Advantage {
-    const defaultAdvantage = defaultAdvantages.find((advantage) => advantage.id === value.id);
-    return { id: value.id, title: value.title ?? value.label ?? '', category: value.category ?? 'heroic', description: value.description ?? '', benefits: value.benefits ?? defaultAdvantage?.benefits ?? [], drawbacks: value.drawbacks ?? defaultAdvantage?.drawbacks ?? [], attributeBonuses: value.attributeBonuses ?? defaultAdvantage?.attributeBonuses ?? {}, attributeMinimums: value.attributeMinimums ?? defaultAdvantage?.attributeMinimums ?? {}, skillBonuses: value.skillBonuses ?? defaultAdvantage?.skillBonuses ?? {}, contextualSkillBonuses: value.contextualSkillBonuses ?? defaultAdvantage?.contextualSkillBonuses ?? {}, combatBonuses: value.combatBonuses ?? defaultAdvantage?.combatBonuses ?? {}, energyPointsBonus: value.energyPointsBonus ?? defaultAdvantage?.energyPointsBonus, additionalEnergyPointsBonus: value.additionalEnergyPointsBonus ?? defaultAdvantage?.additionalEnergyPointsBonus, emissionSurfaceBase: value.emissionSurfaceBase ?? defaultAdvantage?.emissionSurfaceBase, emissionSurfaceAttribute: value.emissionSurfaceAttribute ?? defaultAdvantage?.emissionSurfaceAttribute, emissionSurfaceLevelBonus: value.emissionSurfaceLevelBonus ?? defaultAdvantage?.emissionSurfaceLevelBonus, damageReduction: value.damageReduction ?? defaultAdvantage?.damageReduction ?? 0, conditionAttribute: value.conditionAttribute ?? null, conditionMinimum: value.conditionMinimum ?? null, conditionOrigin: value.conditionOrigin ?? defaultAdvantage?.conditionOrigin ?? null, conditionSkillId: value.conditionSkillId ?? defaultAdvantage?.conditionSkillId ?? null, conditionSkillMinimum: value.conditionSkillMinimum ?? defaultAdvantage?.conditionSkillMinimum ?? null, conditionDescription: value.conditionDescription ?? defaultAdvantage?.conditionDescription, excludedAdvantageIds: value.excludedAdvantageIds ?? defaultAdvantage?.excludedAdvantageIds ?? [], prerequisiteId: value.prerequisiteId ?? null, minimumLevel: value.minimumLevel === undefined ? defaultAdvantage?.minimumLevel ?? null : value.minimumLevel, repeatable: value.repeatable ?? defaultAdvantage?.repeatable ?? false, maxRepeatable: value.maxRepeatable ?? defaultAdvantage?.maxRepeatable, weaponChoice: value.weaponChoice ?? defaultAdvantage?.weaponChoice ?? false, deityChoice: value.deityChoice ?? defaultAdvantage?.deityChoice ?? false, recipeChoice: value.recipeChoice ?? defaultAdvantage?.recipeChoice ?? false, recipeCount: value.recipeCount ?? defaultAdvantage?.recipeCount ?? 1, evolutionOnly: value.evolutionOnly ?? defaultAdvantage?.evolutionOnly ?? false };
+    const title = value.title ?? value.label ?? '';
+    const id = value.id === 'endurant' && title === 'Talentueux' ? 'talentueux' : value.id;
+    const defaultAdvantage = defaultAdvantages.find((advantage) => advantage.id === id);
+    return { id, title, category: value.category ?? 'heroic', description: value.description ?? '', benefits: value.benefits ?? defaultAdvantage?.benefits ?? [], drawbacks: value.drawbacks ?? defaultAdvantage?.drawbacks ?? [], attributeBonuses: value.attributeBonuses ?? defaultAdvantage?.attributeBonuses ?? {}, attributeMinimums: value.attributeMinimums ?? defaultAdvantage?.attributeMinimums ?? {}, skillBonuses: value.skillBonuses ?? defaultAdvantage?.skillBonuses ?? {}, skillChoice: value.skillChoice ?? defaultAdvantage?.skillChoice ?? false, skillChoiceBonus: value.skillChoiceBonus ?? defaultAdvantage?.skillChoiceBonus, contextualSkillBonuses: value.contextualSkillBonuses ?? defaultAdvantage?.contextualSkillBonuses ?? {}, combatBonuses: value.combatBonuses ?? defaultAdvantage?.combatBonuses ?? {}, hitPointsBonus: value.hitPointsBonus ?? defaultAdvantage?.hitPointsBonus, additionalHitPointsBonus: value.additionalHitPointsBonus ?? defaultAdvantage?.additionalHitPointsBonus, energyPointsBonus: value.energyPointsBonus ?? defaultAdvantage?.energyPointsBonus, additionalEnergyPointsBonus: value.additionalEnergyPointsBonus ?? defaultAdvantage?.additionalEnergyPointsBonus, emissionSurfaceBase: value.emissionSurfaceBase ?? defaultAdvantage?.emissionSurfaceBase, emissionSurfaceAttribute: value.emissionSurfaceAttribute ?? defaultAdvantage?.emissionSurfaceAttribute, emissionSurfaceLevelBonus: value.emissionSurfaceLevelBonus ?? defaultAdvantage?.emissionSurfaceLevelBonus, damageReduction: value.damageReduction ?? defaultAdvantage?.damageReduction ?? 0, conditionAttribute: value.conditionAttribute ?? null, conditionMinimum: value.conditionMinimum ?? null, conditionOrigin: value.conditionOrigin ?? defaultAdvantage?.conditionOrigin ?? null, conditionSkillId: value.conditionSkillId ?? defaultAdvantage?.conditionSkillId ?? null, conditionSkillMinimum: value.conditionSkillMinimum ?? defaultAdvantage?.conditionSkillMinimum ?? null, conditionDescription: value.conditionDescription ?? defaultAdvantage?.conditionDescription, excludedAdvantageIds: value.excludedAdvantageIds ?? defaultAdvantage?.excludedAdvantageIds ?? [], prerequisiteId: value.prerequisiteId ?? null, minimumLevel: value.minimumLevel === undefined ? defaultAdvantage?.minimumLevel ?? null : value.minimumLevel, repeatable: value.repeatable ?? defaultAdvantage?.repeatable ?? false, maxRepeatable: value.maxRepeatable ?? defaultAdvantage?.maxRepeatable, weaponChoice: value.weaponChoice ?? defaultAdvantage?.weaponChoice ?? false, deityChoice: value.deityChoice ?? defaultAdvantage?.deityChoice ?? false, recipeChoice: value.recipeChoice ?? defaultAdvantage?.recipeChoice ?? false, recipeCount: value.recipeCount ?? defaultAdvantage?.recipeCount ?? 1, evolutionOnly: value.evolutionOnly ?? defaultAdvantage?.evolutionOnly ?? false };
   }
 
   private isOrigin(value: unknown): value is CharacterOrigin { return ['human', 'darshan', 'troll', 'eckmul', 'souardie', 'region-primitive-reculee'].includes(value as string); }

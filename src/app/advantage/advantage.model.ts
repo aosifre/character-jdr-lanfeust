@@ -59,8 +59,12 @@ export interface Advantage {
   attributeBonuses?: AdvantageAttributeBonuses;
   attributeMinimums?: Partial<Record<AttributeKey, number>>;
   skillBonuses?: AdvantageSkillBonuses;
+  skillChoice?: boolean;
+  skillChoiceBonus?: number;
   contextualSkillBonuses?: AdvantageSkillBonuses;
   combatBonuses?: AdvantageCombatBonuses;
+  hitPointsBonus?: number;
+  additionalHitPointsBonus?: number;
   energyPointsBonus?: number;
   additionalEnergyPointsBonus?: number;
   emissionSurfaceBase?: number;

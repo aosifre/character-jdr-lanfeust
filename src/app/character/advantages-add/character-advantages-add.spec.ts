@@ -133,6 +133,17 @@ describe('CharacterAdvantagesAddPage', () => {
     conditionMinimum: null,
     prerequisiteId: null,
   };
+  const talentedAdvantage = {
+    id: 'talentueux',
+    title: 'Talentueux',
+    category: 'heroic' as const,
+    description: 'Choisissez une compétence apprise et ajoutez +4 à ses jets.',
+    conditionAttribute: null,
+    conditionMinimum: null,
+    prerequisiteId: null,
+    skillChoice: true,
+    skillChoiceBonus: 4,
+  };
   let character: Character;
   let setAdvantages: ReturnType<typeof vi.fn>;
   let page: CharacterAdvantagesAddPage;
@@ -168,7 +179,7 @@ describe('CharacterAdvantagesAddPage', () => {
         { provide: Router, useValue: { navigate: vi.fn() } },
         { provide: CharacterService, useValue: { findById: () => character, companionsFor: () => [], setAdvantages } },
         { provide: AdvantageService, useValue: {
-          advantageList: signal([repeatableAdvantage, animalChoiceAdvantage, specializationAdvantage, weaponChoiceAdvantage, souardAdvantage, deityChoiceAdvantage, shamanAdvantage, newRecipeAdvantage, magicPowerAdvantage, turfAdvantage, maxRepeatableAdvantage]),
+          advantageList: signal([repeatableAdvantage, animalChoiceAdvantage, specializationAdvantage, weaponChoiceAdvantage, souardAdvantage, deityChoiceAdvantage, shamanAdvantage, newRecipeAdvantage, magicPowerAdvantage, turfAdvantage, maxRepeatableAdvantage, talentedAdvantage]),
           effectiveAttributes: (attributes: Character['attributes']) => attributes,
           skillBonus: () => 0,
         } },
@@ -223,6 +234,54 @@ describe('CharacterAdvantagesAddPage', () => {
     expect(setAdvantages).toHaveBeenCalledWith(character.id, [
       { advantageId: repeatableAdvantage.id },
       { advantageId: animalChoiceAdvantage.id, animalName: 'Félix' },
+    ]);
+  });
+
+  it('requires Talentueux to select an already learned skill and saves the choice', () => {
+    character.skills = [{ skillId: 'metier-alchimiste', degree: 1 }];
+    const internalPage = page as unknown as {
+      toggle(id: string): void;
+      availableSkills(): { id: string }[];
+      setSkillChoice(id: string, event: Event): void;
+      canSave: boolean;
+      save(): void;
+    };
+
+    internalPage.toggle(talentedAdvantage.id);
+    expect(internalPage.availableSkills().map((skill) => skill.id)).toEqual(['metier-alchimiste']);
+    expect(internalPage.canSave).toBe(false);
+
+    internalPage.setSkillChoice(talentedAdvantage.id, { target: { value: 'metier-alchimiste' } } as unknown as Event);
+    expect(internalPage.canSave).toBe(true);
+    internalPage.save();
+
+    expect(setAdvantages).toHaveBeenCalledWith(character.id, [
+      { advantageId: repeatableAdvantage.id },
+      { advantageId: talentedAdvantage.id, chosenSkillId: 'metier-alchimiste' },
+    ]);
+  });
+
+  it('lets character creation select a learned skill for Talentueux', () => {
+    character.skills = [{ skillId: 'metier-alchimiste', degree: 1 }];
+    character.advantages = [];
+    availableAdvantages.set({ availableAdvantages: 1 });
+    const fixture = TestBed.createComponent(CharacterAdvantagesPage);
+    fixture.detectChanges();
+    const internalPage = fixture.componentInstance as unknown as {
+      toggle(id: string): void;
+      setSkillChoice(id: string, event: Event): void;
+      canSave: boolean;
+      save(): void;
+    };
+
+    internalPage.toggle(talentedAdvantage.id);
+    internalPage.setSkillChoice(talentedAdvantage.id, { target: { value: 'metier-alchimiste' } } as unknown as Event);
+
+    expect(internalPage.canSave).toBe(true);
+    internalPage.save();
+
+    expect(setAdvantages).toHaveBeenCalledWith(character.id, [
+      { advantageId: talentedAdvantage.id, chosenSkillId: 'metier-alchimiste' },
     ]);
   });
 

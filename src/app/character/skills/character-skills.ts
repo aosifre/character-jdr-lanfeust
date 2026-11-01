@@ -62,7 +62,7 @@ export class CharacterSkillsPage {
       : undefined;
     const equipmentIds = this.character?.equipment.filter((item) => item.equipped).map((item) => item.equipmentId) ?? [];
     return attributes
-      ? attributes[skill.attributeOne] + attributes[skill.attributeTwo] + this.equipmentService.skillBonus(skill.id, equipmentIds) + this.advantageService.skillBonus(selectedAdvantages, skill.id)
+      ? attributes[skill.attributeOne] + attributes[skill.attributeTwo] + this.equipmentService.skillBonus(skill.id, equipmentIds) + this.advantageService.skillBonus(this.character?.advantages ?? [], skill.id)
       : 0;
   }
   protected save(): void {

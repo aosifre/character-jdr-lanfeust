@@ -118,7 +118,7 @@ export class CharacterViewPage implements AfterViewInit {
       + attributes[skill.attributeTwo]
       + (selected?.degree ?? 0)
       + this.equipmentService.skillBonus(skillId, equipmentIds)
-      + this.advantageService.skillBonus(this.character.advantages.map((item) => item.advantageId), skillId)
+      + this.advantageService.skillBonus(this.character.advantages, skillId)
       + this.regionalSkillBonus(skill)
       - this.numberOrZero(this.globalSkillPenalty)
       - this.numberOrZero(this.skillPenalties[skillId]);

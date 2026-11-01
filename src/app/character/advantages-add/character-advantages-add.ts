@@ -35,6 +35,7 @@ export class CharacterAdvantagesAddPage {
   protected readonly regionChoices = new Map<string, string>();
   protected readonly animalNames = new Map<string, string>();
   protected readonly weaponChoices = new Map<string, string[]>();
+  protected readonly skillChoices = new Map<string, string>();
   protected readonly deityChoices = new Map<string, DeityChoiceDraft>();
   protected readonly recipeChoices = new Map<string, CharacterRecipe[]>();
   protected readonly magicPowerChoices = new Map<string, MagicPowerChoice>();
@@ -56,6 +57,7 @@ export class CharacterAdvantagesAddPage {
        if (advantageId === 'turf-attitre') this.regionChoices.set(advantageId, selectedAdvantage.chosenRegion ?? '');
        const advantage = this.advantages().find((item) => item.id === advantageId);
        if (advantage?.animalChoice) this.animalNames.set(advantageId, companionName ?? selectedAdvantage.animalName ?? '');
+       if (advantage?.skillChoice && selectedAdvantage.chosenSkillId) this.skillChoices.set(advantageId, selectedAdvantage.chosenSkillId);
        if (advantage?.weaponChoice) {
          const choices = this.weaponChoices.get(advantageId) ?? [];
          choices.push(selectedAdvantage.chosenWeapon ?? selectedAdvantage.specializationWeapon ?? '');
@@ -98,6 +100,14 @@ export class CharacterAdvantagesAddPage {
  }
  protected regionChoiceFor(advantageId: string): string { return this.regionChoices.get(advantageId) ?? ''; }
  protected animalNameFor(advantageId: string): string { return this.animalNames.get(advantageId) ?? ''; }
+ protected skillChoiceFor(advantageId: string): string { return this.skillChoices.get(advantageId) ?? ''; }
+ protected availableSkills() {
+   const learnedSkillIds = new Set((this.character?.skills ?? []).filter((skill) => skill.degree >= 1).map((skill) => skill.skillId));
+   return this.skills().filter((skill) => learnedSkillIds.has(skill.id));
+ }
+ protected setSkillChoice(advantageId: string, event: Event): void {
+   this.skillChoices.set(advantageId, (event.target as HTMLSelectElement).value);
+ }
  protected setAnimalName(advantageId: string, event: Event): void {
    this.animalNames.set(advantageId, (event.target as HTMLInputElement).value);
  }
@@ -185,6 +195,7 @@ export class CharacterAdvantagesAddPage {
          || !choice.circumstances.trim() || !choice.helpingHand.trim()) return false;
      }
      if (advantage?.animalChoice && !this.animalNameFor(advantageId).trim()) return false;
+     if (advantage?.skillChoice && !this.availableSkills().some((skill) => skill.id === this.skillChoiceFor(advantageId))) return false;
      if (advantageId === 'turf-attitre' && (count !== 1 || !this.regionChoiceFor(advantageId).trim())) return false;
      if (advantage?.recipeChoice) {
        if (!this.confirmedRecipeChoices.has(advantageId) || !this.areRecipesValid(advantageId)) return false;
@@ -219,7 +230,7 @@ export class CharacterAdvantagesAddPage {
     const skill = advantage.conditionSkillId ? this.skills().find((item) => item.id === advantage.conditionSkillId) : undefined;
     const selectedSkill = this.character?.skills.find((item) => item.skillId === advantage.conditionSkillId);
     const skillScore = skill && attributes
-      ? attributes[skill.attributeOne] + attributes[skill.attributeTwo] + (selectedSkill?.degree ?? 0) + this.advantageService.skillBonus([...this.selected.keys()], skill.id)
+      ? attributes[skill.attributeOne] + attributes[skill.attributeTwo] + (selectedSkill?.degree ?? 0) + this.advantageService.skillBonus(this.selectedAdvantageChoices(), skill.id)
       : 0;
     const meetsSkill = !advantage.conditionSkillId || (!!skill && skillScore >= (advantage.conditionSkillMinimum ?? 0));
     const meetsPrerequisite = !advantage.prerequisiteId || this.isSelected(advantage.prerequisiteId);
@@ -299,6 +310,9 @@ export class CharacterAdvantagesAddPage {
       if (advantage?.animalChoice) {
         return Array.from({ length: count }, () => ({ advantageId, animalName: this.animalNameFor(advantageId).trim() }));
       }
+      if (advantage?.skillChoice) {
+        return Array.from({ length: count }, () => ({ advantageId, chosenSkillId: this.skillChoiceFor(advantageId) }));
+      }
       if (advantage?.weaponChoice) return this.weaponChoicesFor(advantageId).slice(0, count).map((weapon) => ({ advantageId, chosenWeapon: weapon.trim() }));
       if (advantage?.deityChoice) return Array.from({ length: count }, () => {
           const choice = this.deityChoiceFor(advantageId);
@@ -339,6 +353,7 @@ export class CharacterAdvantagesAddPage {
   }
   private clearChoices(id: string, advantage: Advantage, recipeCount = Number.POSITIVE_INFINITY): void {
     if (id === 'turf-attitre') this.regionChoices.delete(id);
+    if (advantage.skillChoice) this.skillChoices.delete(id);
     if (advantage.weaponChoice) this.weaponChoices.get(id)?.pop();
     if (advantage.deityChoice) this.deityChoices.delete(id);
     if (advantage.recipeChoice) {
@@ -347,6 +362,16 @@ export class CharacterAdvantagesAddPage {
       else recipes.length = 0;
       this.recipeChoices.set(id, recipes);
     }
+  }
+  private selectedAdvantageChoices(): CharacterAdvantage[] {
+    return [...this.selected].flatMap(([advantageId, count]) => {
+      const existing = this.character?.advantages.filter((item) => item.advantageId === advantageId) ?? [];
+      return Array.from({ length: count }, (_, index) => ({
+        ...(existing[index] ?? {}),
+        advantageId,
+        ...(this.skillChoices.has(advantageId) ? { chosenSkillId: this.skillChoiceFor(advantageId) } : {}),
+      }));
+    });
   }
 
   protected openMagicPowerModal(advantageId: string): void {

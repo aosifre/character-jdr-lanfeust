@@ -22,6 +22,16 @@
             <small>Chaque occurrence doit concerner une arme différente.</small>
           </div>
         }
+        @if (advantage.skillChoice && isSelected(advantage.id)) {
+          <div class="specialization-weapons">
+            <label [for]="advantage.id + '-skill'">Compétence choisie</label>
+            <select [id]="advantage.id + '-skill'" required [value]="skillChoiceFor(advantage.id)" (change)="setSkillChoice(advantage.id, $event)">
+              <option value="">Choisir une compétence</option>
+              @for (skill of availableSkills(); track skill.id) { <option [value]="skill.id">{{ skill.label }}</option> }
+            </select>
+            <small>Seules les compétences possédant au moins un degré sont disponibles.</small>
+          </div>
+        }
         @if (advantage.id === 'turf-attitre' && isSelected(advantage.id)) {
           <div class="specialization-weapons">
             <label [for]="advantage.id + '-region'">Région choisie</label>

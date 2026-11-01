@@ -77,7 +77,7 @@ export class CharacterCharacteristicsAddPage {
     const effectiveAttributes = this.advantageService.effectiveAttributes(attributes, selectedAdvantages);
     return effectiveAttributes[skill.attributeOne]
       + effectiveAttributes[skill.attributeTwo]
-      + this.advantageService.skillBonus(selectedAdvantages, skill.id);
+      + this.advantageService.skillBonus(this.character?.advantages ?? [], skill.id);
   }
 
   protected get currentScores(): CharacterOtherScores | undefined {

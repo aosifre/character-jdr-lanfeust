@@ -81,6 +81,7 @@ export interface CharacterAdvantage {
   advantageId: string;
   chosenRegion?: string;
   chosenWeapon?: string;
+  chosenSkillId?: string;
   specializationWeapon?: string;
   recipes?: CharacterRecipe[];
   magicPowerChoice?: MagicPowerChoice;

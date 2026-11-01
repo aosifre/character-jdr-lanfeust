@@ -131,8 +131,8 @@ export class CharacterService {
       defense: effectiveAttributes.dexterite + effectiveAttributes.charisme + (isCompanion ? levelBonus : points.defense + equipmentBonuses.defense + this.advantageService.combatScoreBonus(advantageIds, 'defense')),
       save: effectiveAttributes.constitution + effectiveAttributes.sagesse + (isCompanion ? levelBonus : points.save + this.advantageService.combatScoreBonus(advantageIds, 'save')),
       hitPoints: isCompanion
-        ? (5 + effectiveAttributes.constitution) * levelUps
-        : 10 + effectiveAttributes.constitution + (levelUps * (5 + effectiveAttributes.constitution)),
+        ? (5 + effectiveAttributes.constitution) * levelUps + this.advantageService.hitPointsBonus(advantageIds)
+        : 10 + effectiveAttributes.constitution + (levelUps * (5 + effectiveAttributes.constitution)) + this.advantageService.hitPointsBonus(advantageIds),
       energyPoints: 5 + effectiveAttributes.sagesse + (levelUps * (1 + effectiveAttributes.sagesse)) + this.advantageService.energyPointsBonus(advantageIds),
     };
   }
