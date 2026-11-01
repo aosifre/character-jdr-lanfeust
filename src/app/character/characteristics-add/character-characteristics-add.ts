@@ -77,7 +77,7 @@ export class CharacterCharacteristicsAddPage {
     const effectiveAttributes = this.advantageService.effectiveAttributes(attributes, selectedAdvantages);
     return effectiveAttributes[skill.attributeOne]
       + effectiveAttributes[skill.attributeTwo]
-      + this.advantageService.skillBonus(selectedAdvantages, skill.id);
+      + this.advantageService.skillBonus(this.character?.advantages ?? [], skill.id);
   }
 
   protected get currentScores(): CharacterOtherScores | undefined {
@@ -92,6 +92,7 @@ export class CharacterCharacteristicsAddPage {
       this.character.otherScores,
       this.character.equipment.filter((item) => item.equipped).map((item) => item.equipmentId),
       this.character.advantages.map((item) => item.advantageId),
+      this.character.animalLevelCap !== undefined,
     );
   }
 

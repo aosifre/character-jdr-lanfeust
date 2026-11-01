@@ -1,6 +1,6 @@
 <main class="skills-shell">
   <a class="back-link" [routerLink]="characterId ? ['/characters', characterId, 'otherscores'] : '/characters'">← Retour</a>
-  <div class="heading"><p class="eyebrow">{{ character?.firstName }} {{ character?.lastName }}</p><h1>Compétences</h1><p>Choisissez {{ maximum }} compétences, soit 4 + votre Intelligence. Chaque compétence sélectionnée reçoit un degré de +1.</p></div>
+  <div class="heading"><p class="eyebrow">{{ character?.firstName }} {{ character?.lastName }}</p><h1>Compétences</h1><p>@if (hasSelectionLimit) {Choisissez {{ maximum }} compétences, soit 4 + votre Intelligence. Chaque compétence sélectionnée reçoit un degré de +1.} @else {Choisissez librement les compétences du compagnon. Chaque compétence sélectionnée reçoit un degré de +1.}</p></div>
   <form class="custom-skill-form" [formGroup]="skillForm" (ngSubmit)="addCustomSkill()">
     <label for="custom-skill-label">Ajouter une compétence personnalisée</label>
     <input id="custom-skill-label" formControlName="label" placeholder="Nom de la compétence" />
@@ -15,5 +15,5 @@
       </button>
     }
   </section>
-  <footer><p>{{ selected.size }} / {{ maximum }} choisies</p><button class="button" type="button" [disabled]="selected.size !== maximum" (click)="save()">Valider le personnage</button></footer>
+  <footer><p>@if (hasSelectionLimit) { {{ selected.size }} / {{ maximum }} choisies } @else { {{ selected.size }} compétence(s) sélectionnée(s) · sans plafond }</p><button class="button" type="button" [disabled]="hasSelectionLimit && selected.size !== maximum" (click)="save()">Valider le personnage</button></footer>
 </main>

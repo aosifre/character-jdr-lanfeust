@@ -5,7 +5,7 @@
         {{ character?.firstName }} {{ character?.lastName }}
       </p>
       <h1>Atouts</h1>
-      <p>Choisissez 1 atout supplémentaire pour votre personnage.</p>
+      <p>@if (hasSelectionLimit) {Choisissez 1 atout supplémentaire pour votre personnage.} @else {Choisissez librement les atouts du compagnon, dans le respect de leurs conditions propres.}</p>
   </div>
   <label class="category-filter" for="advantage-category-filter">Filtrer par catégorie
     <select id="advantage-category-filter" [value]="selectedCategory()" (change)="onCategoryChange($event)">
@@ -33,10 +33,26 @@
                   <small>Chaque occurrence doit concerner une arme différente.</small>
                 </div>
               }
+              @if (advantage.skillChoice && isSelected(advantage.id)) {
+                <div class="specialization-weapons">
+                  <label [for]="advantage.id + '-skill'">Compétence choisie</label>
+                  <select [id]="advantage.id + '-skill'" required [value]="skillChoiceFor(advantage.id)" (change)="setSkillChoice(advantage.id, $event)">
+                    <option value="">Choisir une compétence</option>
+                    @for (skill of availableSkills(); track skill.id) { <option [value]="skill.id">{{ skill.label }}</option> }
+                  </select>
+                  <small>Seules les compétences possédant au moins un degré sont disponibles.</small>
+                </div>
+              }
               @if (advantage.id === 'turf-attitre' && isSelected(advantage.id)) {
                 <div class="specialization-weapons">
                   <label [for]="advantage.id + '-region'">Région choisie</label>
                   <input [id]="advantage.id + '-region'" type="text" required [value]="regionChoiceFor(advantage.id)" (input)="setRegionChoice(advantage.id, $event)" />
+                </div>
+              }
+              @if (advantage.animalChoice && isSelected(advantage.id)) {
+                <div class="specialization-weapons">
+                  <label [for]="advantage.id + '-animal-name'">Nom du compagnon</label>
+                  <input [id]="advantage.id + '-animal-name'" type="text" required [value]="animalNameFor(advantage.id)" (input)="setAnimalName(advantage.id, $event)" />
                 </div>
               }
               @if (advantage.deityChoice && isSelected(advantage.id)) {
@@ -81,7 +97,7 @@
       }
     }
   </section>
-  <footer><p>{{ selectedTotal }} / {{ advantageMaximum }} choisis</p><button class="button" type="button" [disabled]="!canSave" (click)="save()">
+  <footer><p>@if (hasSelectionLimit) { {{ selectedTotal }} / {{ advantageMaximum }} choisis } @else { {{ selectedTotal }} atout(s) choisi(s) · sans plafond }</p><button class="button" type="button" [disabled]="!canSave" (click)="save()">
     Ajouter l'atout
   </button></footer>
 </main>

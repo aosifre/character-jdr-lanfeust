@@ -1,0 +1,94 @@
+@if (character; as companion) {
+  <main class="companion-setup-shell">
+    <a class="back-link" routerLink="/characters">← Retour à la liste des héros</a>
+    <header class="setup-heading">
+      <p class="eyebrow">Configuration du compagnon</p>
+      <h1>{{ companion.firstName }}</h1>
+      @if (maximumLevel !== undefined) {
+        <p>Étape {{ step() }} sur 4 · Niveau maximal {{ maximumLevel }}</p>
+      } @else {
+        <p>Étape {{ step() }} sur 4 · Sans plafond de niveau</p>
+      }
+    </header>
+
+    <nav class="step-navigation" aria-label="Étapes de création">
+      <button type="button" [class.active]="step() === 1" (click)="step.set(1)">1. Niveau</button>
+      <button type="button" [class.active]="step() === 2" [disabled]="!canContinueLevel" (click)="step.set(2)">2. Caractéristiques</button>
+      <button type="button" [class.active]="step() === 3" [disabled]="!canContinueLevel" (click)="step.set(3)">3. Scores calculés</button>
+      <button type="button" [class.active]="step() === 4" [disabled]="!canContinueLevel" (click)="step.set(4)">4. Autres données</button>
+    </nav>
+    @if (error()) { <p class="validation-message" role="alert">{{ error() }}</p> }
+
+    @if (step() === 1) {
+      <section class="setup-panel">
+        <h2>Choisir le niveau</h2>
+        @if (maximumLevel !== undefined) {
+          <p>Le niveau du compagnon ne peut pas dépasser le plafond donné par les atouts Compagnon animal.</p>
+          <label for="companion-level">Niveau (1 à {{ maximumLevel }})</label>
+          <input id="companion-level" type="number" min="1" [max]="maximumLevel" step="1" [value]="selectedLevel" (input)="setLevel($event)" />
+          @if (!canContinueLevel) { <p class="validation-message">Choisissez un niveau entier compris entre 1 et {{ maximumLevel }}.</p> }
+        } @else {
+          <p>Choisissez le niveau de votre compagnon. Ses scores sont recalculés automatiquement.</p>
+          <label for="companion-level">Niveau</label>
+          <input id="companion-level" type="number" min="1" step="1" [value]="selectedLevel" (input)="setLevel($event)" />
+          @if (!canContinueLevel) { <p class="validation-message">Choisissez un niveau entier supérieur ou égal à 1.</p> }
+        }
+        <button class="button" type="button" [disabled]="!canContinueLevel" (click)="saveStep(2)">Continuer vers les caractéristiques</button>
+      </section>
+    }
+
+    @if (step() === 2) {
+      <section class="setup-panel">
+        <h2>Fixer les caractéristiques</h2>
+        <p>Attribuez librement une valeur entière positive à chaque caractéristique.</p>
+        <div class="attribute-inputs">
+          @for (attribute of attributeFields; track attribute.key) {
+            <label [for]="'companion-' + attribute.key">{{ attribute.label }}
+              <input [id]="'companion-' + attribute.key" type="number" min="0" step="1" [value]="attributes[attribute.key]" (input)="setAttribute(attribute.key, $event)" />
+            </label>
+          }
+        </div>
+        <button class="button" type="button" [disabled]="!canSaveSetup" (click)="saveStep(3)">Calculer les scores</button>
+      </section>
+    }
+
+    @if (step() === 3) {
+      <section class="setup-panel">
+        <h2>Scores calculés automatiquement</h2>
+        @if (previewScores; as scores) {
+          <div class="score-preview">
+            <article><span>Points de vie</span><strong>{{ scores.hitPoints }}</strong><small>@if (companion.animalLevelCap !== undefined) { (5 + CON) × niveau } @else { Calcul selon les règles du personnage }</small></article>
+            <article><span>Attaque</span><strong>{{ scores.attack }}</strong><small>@if (companion.animalLevelCap !== undefined) { FOR + INT + ⌊2 × niveau / 3⌋ } @else { FOR + INT et bonus de combat }</small></article>
+            <article><span>Défense</span><strong>{{ scores.defense }}</strong><small>@if (companion.animalLevelCap !== undefined) { DEX + CHA + ⌊2 × niveau / 3⌋ } @else { DEX + CHA et bonus de combat }</small></article>
+            <article><span>Sauvegarde</span><strong>{{ scores.save }}</strong><small>@if (companion.animalLevelCap !== undefined) { CON (VON) + SAG + ⌊2 × niveau / 3⌋ } @else { CON + SAG et bonus de combat }</small></article>
+          </div>
+        }
+        <div class="step-actions">
+          <button class="button outline" type="button" (click)="backToAttributes()">Modifier les caractéristiques</button>
+          <button class="button" type="button" [disabled]="!canSaveSetup" (click)="saveStep(4)">Valider et continuer</button>
+        </div>
+      </section>
+    }
+
+    @if (step() === 4) {
+      <section class="setup-panel">
+        <h2>Compléter le compagnon</h2>
+        <label for="companion-damage">Dégâts (ex. 1d6+2)</label>
+        <input id="companion-damage" type="text" [value]="damage" (input)="setDamage($event)" />
+        <p>Les autres données se modifient dans les fiches dédiées :</p>
+        <div class="detail-links">
+          <a [routerLink]="['/characters', companion.id, 'skills']" [queryParams]="{ step: 4 }">Compétences</a>
+          <a [routerLink]="['/characters', companion.id, 'advantages']" [queryParams]="{ step: 4 }">Atouts</a>
+          <a [routerLink]="['/characters', companion.id, 'flaws']" [queryParams]="{ step: 4 }">Travers</a>
+          <a [routerLink]="['/characters', companion.id, 'equipment']">Équipement</a>
+        </div>
+        <div class="step-actions">
+          <button class="button outline" type="button" (click)="backToAttributes()">Retour aux caractéristiques</button>
+          <button class="button" type="button" [disabled]="!canSaveSetup" (click)="finish()">Enregistrer le compagnon</button>
+        </div>
+      </section>
+    }
+  </main>
+} @else {
+  <main class="companion-setup-shell"><a class="back-link" routerLink="/characters">← Retour aux personnages</a><section class="setup-panel"><h1>Compagnon introuvable</h1></section></main>
+}

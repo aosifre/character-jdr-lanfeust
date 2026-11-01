@@ -28,8 +28,8 @@ export class CharacterViewPage implements AfterViewInit {
   private readonly flawService = inject(FlawService);
   private readonly route = inject(ActivatedRoute);
 
-  protected readonly characterId = this.route.snapshot.paramMap.get('id');
-  protected readonly character = this.characterId ? this.characterService.findById(this.characterId) : undefined;
+  protected get characterId(): string | null { return this.route.snapshot.paramMap.get('id'); }
+  protected get character() { return this.characterId ? this.characterService.findById(this.characterId) : undefined; }
   protected readonly skills = this.skillService.skillList;
   protected readonly advantages = this.advantageService.advantageList;
   protected readonly flaws = this.flawService.flawList;
@@ -118,7 +118,7 @@ export class CharacterViewPage implements AfterViewInit {
       + attributes[skill.attributeTwo]
       + (selected?.degree ?? 0)
       + this.equipmentService.skillBonus(skillId, equipmentIds)
-      + this.advantageService.skillBonus(this.character.advantages.map((item) => item.advantageId), skillId)
+      + this.advantageService.skillBonus(this.character.advantages, skillId)
       + this.regionalSkillBonus(skill)
       - this.numberOrZero(this.globalSkillPenalty)
       - this.numberOrZero(this.skillPenalties[skillId]);
@@ -223,7 +223,7 @@ export class CharacterViewPage implements AfterViewInit {
     if (!navigation) return;
 
     const activationLine = navigation.getBoundingClientRect().bottom + 16;
-    const sectionIds = ['attributes', 'scores', 'skills', 'advantages', 'flaws', 'equipment', 'encumbrance'];
+    const sectionIds = ['attributes', 'scores', 'skills', 'advantages', 'flaws', 'equipment', 'encumbrance', 'companion'];
     this.activeSection.set(sectionIds.reduce((activeId, sectionId) => {
       const section = document.getElementById(sectionId);
       return section && section.getBoundingClientRect().top <= activationLine ? sectionId : activeId;

@@ -16,9 +16,19 @@ export class CharacterLevelPage {
     private readonly router = inject(Router);
     protected readonly characterId = this.route.snapshot.paramMap.get('id');
     protected character = this.characterId ? this.characterService.findById(this.characterId) : undefined;
+    protected readonly maximumExperienceGain = this.character?.animalLevelCap === undefined
+        ? undefined
+        : Math.max(0, this.character.animalLevelCap * 100 - this.character.experience);
     protected readonly form = new FormGroup({
         currentExperience: new FormControl(this.character?.experience.toString() || '', { nonNullable: true, validators: [Validators.required] }),
-        winExperience: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+        winExperience: new FormControl('', {
+            nonNullable: true,
+            validators: [
+                Validators.required,
+                Validators.min(0),
+                ...(this.maximumExperienceGain === undefined ? [] : [Validators.max(this.maximumExperienceGain)]),
+            ],
+        }),
     });
 
     constructor() {
@@ -31,16 +41,13 @@ export class CharacterLevelPage {
     }
 
     protected save(): void {
-        if (!this.characterId || !this.character || this.form.invalid) return;
+        if (!this.characterId || !this.character || this.form.invalid || this.maximumExperienceGain === 0) return;
         
         const experienceTotal = parseInt(this.form.getRawValue().winExperience, 10) + this.character.experience;
         const currentLevel = this.character.level;
-        const currentExperience = this.character.experience;
+        const progression = this.characterService.setExperience(this.characterId, experienceTotal);
 
-        //  this.characterService.setExperience(this.characterId, 10);
-        this.characterService.setExperience(this.characterId, experienceTotal);
-
-        if (Math.floor(experienceTotal / 100) > currentLevel) {
+        if (progression.level > currentLevel) {
             this.router.navigate(['/characters', this.characterId, 'level', 'result']);
         } else {
             this.router.navigate(['/characters', this.characterId]);

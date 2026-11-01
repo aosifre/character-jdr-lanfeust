@@ -1,21 +1,26 @@
 @if (character; as currentCharacter) {
   <main class="view-shell">
-    <a class="back-link" routerLink="/characters">← Retour aux personnages</a>
+    @if (currentCharacter.ownerCharacterId) {
+      <a class="back-link" routerLink="/characters">← Retour à la liste des héros</a>
+    } @else {
+      <a class="back-link" routerLink="/characters">← Retour aux personnages</a>
+    }
     <header class="view-heading">
       <div>
         @if (currentCharacter.portrait) { <img class="profile-portrait" [src]="currentCharacter.portrait" alt="Portrait du personnage" /> }
         <p class="eyebrow">Fiche personnage</p>
         <h1>{{ currentCharacter.firstName }} {{ currentCharacter.lastName }}</h1>
         <p>{{ currentCharacter.description || 'Aucune description renseignée.' }}</p>
+        @if (currentCharacter.ownerCharacterId && currentCharacter.companionDamage) { <p>Dégâts : {{ currentCharacter.companionDamage }}</p> }
       </div>
       <div class="header-stats" aria-label="Progression du personnage">
-        <strong>Niveau {{ currentCharacter.level }}</strong>
+        <strong>Niveau {{ currentCharacter.level }}@if (currentCharacter.animalLevelCap !== undefined) { / {{ currentCharacter.animalLevelCap }}}</strong>
         <span>{{ currentCharacter.experience }} XP</span>
       </div>
     </header>
 
     <nav class="section-nav" aria-label="Sections de la fiche">
-      <a href="#attributes" [class.active]="activeSection() === 'attributes'" [attr.aria-current]="activeSection() === 'attributes' ? 'location' : null" (click)="goToSection($event, 'attributes')">Caractéristiques</a><a href="#scores" [class.active]="activeSection() === 'scores'" [attr.aria-current]="activeSection() === 'scores' ? 'location' : null" (click)="goToSection($event, 'scores')">Scores</a><a href="#skills" [class.active]="activeSection() === 'skills'" [attr.aria-current]="activeSection() === 'skills' ? 'location' : null" (click)="goToSection($event, 'skills')">Compétences</a><a href="#advantages" [class.active]="activeSection() === 'advantages'" [attr.aria-current]="activeSection() === 'advantages' ? 'location' : null" (click)="goToSection($event, 'advantages')">Atouts</a><a href="#flaws" [class.active]="activeSection() === 'flaws'" [attr.aria-current]="activeSection() === 'flaws' ? 'location' : null" (click)="goToSection($event, 'flaws')">Travers</a><a href="#equipment" [class.active]="activeSection() === 'equipment'" [attr.aria-current]="activeSection() === 'equipment' ? 'location' : null" (click)="goToSection($event, 'equipment')">Équipement</a><a href="#encumbrance" [class.active]="activeSection() === 'encumbrance'" [attr.aria-current]="activeSection() === 'encumbrance' ? 'location' : null" (click)="goToSection($event, 'encumbrance')">Encombrement</a>
+      <a href="#attributes" [class.active]="activeSection() === 'attributes'" [attr.aria-current]="activeSection() === 'attributes' ? 'location' : null" (click)="goToSection($event, 'attributes')">Caractéristiques</a><a href="#scores" [class.active]="activeSection() === 'scores'" [attr.aria-current]="activeSection() === 'scores' ? 'location' : null" (click)="goToSection($event, 'scores')">Scores</a><a href="#skills" [class.active]="activeSection() === 'skills'" [attr.aria-current]="activeSection() === 'skills' ? 'location' : null" (click)="goToSection($event, 'skills')">Compétences</a><a href="#advantages" [class.active]="activeSection() === 'advantages'" [attr.aria-current]="activeSection() === 'advantages' ? 'location' : null" (click)="goToSection($event, 'advantages')">Atouts</a><a href="#flaws" [class.active]="activeSection() === 'flaws'" [attr.aria-current]="activeSection() === 'flaws' ? 'location' : null" (click)="goToSection($event, 'flaws')">Travers</a><a href="#equipment" [class.active]="activeSection() === 'equipment'" [attr.aria-current]="activeSection() === 'equipment' ? 'location' : null" (click)="goToSection($event, 'equipment')">Équipement</a><a href="#encumbrance" [class.active]="activeSection() === 'encumbrance'" [attr.aria-current]="activeSection() === 'encumbrance' ? 'location' : null" (click)="goToSection($event, 'encumbrance')">Encombrement</a>@if (currentCharacter.ownerCharacterId) { <a href="#companion" [class.active]="activeSection() === 'companion'" [attr.aria-current]="activeSection() === 'companion' ? 'location' : null" (click)="goToSection($event, 'companion')">Compagnon</a> }
     </nav>
 
     <section id="attributes" class="panel">
@@ -98,6 +103,27 @@
       @if (carriedWeight > carryingCapacity) { <p class="encumbrance-warning">La charge dépasse la capacité de port du personnage.</p> }
       <small>Capacité : 10 kg + 10 kg par point de Force.</small>
     </section>
+
+    @if (currentCharacter.ownerCharacterId; as ownerCharacterId) {
+      <section id="companion" class="panel companion-editor" aria-label="Édition du compagnon">
+        <div class="section-heading"><div><p class="eyebrow">Compagnon</p><h2>Modifier les données de {{ currentCharacter.firstName }}</h2></div></div>
+        <div class="companion-edit-links">
+          @if (currentCharacter.animalLevelCap !== undefined) {
+            <a class="text-link" [routerLink]="['/characters', currentCharacter.id, 'companion-setup']">Configurer le compagnon animal</a>
+          } @else {
+            <a class="text-link" [routerLink]="['/characters', currentCharacter.id, 'characteristics', 'add']">Caractéristiques</a>
+            <a class="text-link" [routerLink]="['/characters', currentCharacter.id, 'otherscores']">Scores</a>
+          }
+          <a class="text-link" [routerLink]="['/characters', currentCharacter.id, 'skills']">Compétences</a>
+          <a class="text-link" [routerLink]="['/characters', currentCharacter.id, 'advantages']">Atouts</a>
+          <a class="text-link" [routerLink]="['/characters', currentCharacter.id, 'flaws']">Travers</a>
+          <a class="text-link" [routerLink]="['/characters', currentCharacter.id, 'equipment']">Équipement</a>
+          <a class="text-link" [routerLink]="['/characters', currentCharacter.id, 'level']">Expérience</a>
+        </div>
+        <a class="back-link" routerLink="/characters">← Retour à la liste des héros</a>
+      </section>
+    }
+
   </main>
 } @else {
   <main class="view-shell"><a class="back-link" routerLink="/characters">← Retour aux personnages</a><section class="empty-state"><h1>Personnage introuvable</h1><p>Cette fiche n’existe plus.</p></section></main>

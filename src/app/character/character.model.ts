@@ -11,6 +11,7 @@ export interface CharacterAttributes {
 
 export type CombatBonus = 'attack' | 'defense' | 'save' | null;
 export type CharacterOrigin = 'darshan' | 'eckmul' | 'souardie' | 'region-primitive-reculee' | 'baronies' | 'barronies' | 'other';
+export type CompanionType = 'animal' | 'devoted-servant' | 'hired-thug';
 
 export interface CharacterOtherScores {
   attack: number;
@@ -45,6 +46,10 @@ export interface Character {
   flaws: CharacterFlaw[];
   equipment: CharacterEquipment[];
   history?: CharacterSnapshot[];
+  ownerCharacterId?: string;
+  companionType?: CompanionType;
+  animalLevelCap?: number;
+  companionDamage?: string;
 }
 
 export interface CharacterSnapshot {
@@ -76,6 +81,7 @@ export interface CharacterAdvantage {
   advantageId: string;
   chosenRegion?: string;
   chosenWeapon?: string;
+  chosenSkillId?: string;
   specializationWeapon?: string;
   recipes?: CharacterRecipe[];
   magicPowerChoice?: MagicPowerChoice;
@@ -84,6 +90,8 @@ export interface CharacterAdvantage {
     circumstances: string;
     helpingHand: string;
   };
+  animalName?: string;
+  animalId?: string;
 }
 
 export type RecipePowerType = 'communs' | 'mineurs' | 'majeurs';

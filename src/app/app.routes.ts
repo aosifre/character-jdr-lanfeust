@@ -20,6 +20,7 @@ import { CharacterCharacteristicsAddPage } from './character/characteristics-add
 import { CharacterEquipmentPage } from './character/equipment/character-equipment';
 import { CharacterViewPage } from './character/view/character-view-page';
 import { CharacterHistoryPage } from './character/history/character-history-page';
+import { CharacterCompanionSetupPage } from './character/companion-setup/character-companion-setup';
 
 export const routes: Routes = [
 	{ path: '', pathMatch: 'full', redirectTo: 'characters' },
@@ -27,6 +28,7 @@ export const routes: Routes = [
 	{ path: 'characters/new', component: CharacterForm },
 	{ path: 'characters/:id/edit', component: CharacterForm },
 	{ path: 'characters/:id/history', component: CharacterHistoryPage },
+	{ path: 'characters/:id/companion-setup', component: CharacterCompanionSetupPage },
 	{ path: 'characters/:id', component: CharacterViewPage },
 	{ path: 'characters/:id/characteristics', component: CharacterCharacteristics },
 	{ path: 'characters/:id/characteristics/add', component: CharacterCharacteristicsAddPage },

@@ -23,15 +23,18 @@ export class CharacterSkillsAddPage {
   private readonly route = inject(ActivatedRoute);
   protected readonly characterId = this.route.snapshot.paramMap.get('id');
   protected readonly character = this.characterId ? this.characterService.findById(this.characterId) : undefined;
+  protected get hasSelectionLimit(): boolean { return !this.character?.ownerCharacterId; }
   protected readonly skills = this.skillService.skillList;
-  protected selectedNewSkill: string | undefined;
+  protected readonly selectedNewSkills = new Set<string>();
   protected readonly selectedDegreeSkills = new Map<string, number>();
   protected readonly attributes = [
     { key: 'force', label: 'Force' }, { key: 'dexterite', label: 'Dextérité' },
     { key: 'constitution', label: 'Constitution' }, { key: 'sagesse', label: 'Sagesse' },
     { key: 'intelligence', label: 'Intelligence' }, { key: 'charisme', label: 'Charisme' },
   ] as const;
-  protected get maximumSkillDegree(): number { return (this.character?.level ?? 0) + 1; }
+  protected get maximumSkillDegree(): number {
+    return this.hasSelectionLimit ? (this.character?.level ?? 0) + 1 : Number.POSITIVE_INFINITY;
+  }
   protected readonly skillForm = new FormGroup({
     label: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     attributeOne: new FormControl<'force' | 'dexterite' | 'constitution' | 'sagesse' | 'intelligence' | 'charisme'>('force', { nonNullable: true }),
@@ -43,7 +46,7 @@ export class CharacterSkillsAddPage {
     const attributes = this.character
       ? this.advantageService.effectiveAttributes(this.character.attributes, selectedAdvantages)
       : undefined;
-    return 4 + (attributes?.intelligence ?? 0);
+    return this.hasSelectionLimit ? 4 + (attributes?.intelligence ?? 0) : Number.POSITIVE_INFINITY;
   }
 
   protected get allocatedDegrees(): number {
@@ -61,11 +64,21 @@ export class CharacterSkillsAddPage {
 
   protected selectedDegreeCount(id: string): number { return this.selectedDegreeSkills.get(id) ?? 0; }
 
-  protected isNewSelected(id: string): boolean { return this.selectedNewSkill === id; }
+  protected isNewSelected(id: string): boolean { return this.selectedNewSkills.has(id); }
 
   protected selectNewSkill(skill: Skill): void {
     if (this.isKnown(skill.id) || this.maximumSkillDegree < 1) return;
-    this.selectedNewSkill = this.isNewSelected(skill.id) ? undefined : skill.id;
+    if (this.hasSelectionLimit) {
+      if (this.isNewSelected(skill.id)) this.selectedNewSkills.clear();
+      else {
+        this.selectedNewSkills.clear();
+        this.selectedNewSkills.add(skill.id);
+      }
+    } else if (this.isNewSelected(skill.id)) {
+      this.selectedNewSkills.delete(skill.id);
+    } else {
+      this.selectedNewSkills.add(skill.id);
+    }
   }
 
   protected addDegree(id: string): void {
@@ -93,28 +106,30 @@ export class CharacterSkillsAddPage {
       : undefined;
     const equipmentIds = this.character?.equipment.filter((item) => item.equipped).map((item) => item.equipmentId) ?? [];
     return attributes
-      ? attributes[skill.attributeOne] + attributes[skill.attributeTwo] + this.equipmentService.skillBonus(skill.id, equipmentIds) + this.advantageService.skillBonus(selectedAdvantages, skill.id)
+      ? attributes[skill.attributeOne] + attributes[skill.attributeTwo] + this.equipmentService.skillBonus(skill.id, equipmentIds) + this.advantageService.skillBonus(this.character?.advantages ?? [], skill.id)
       : 0;
   }
 
   protected save(): void {
     if (
       !this.characterId
-      || this.maximumSkillDegree < 1
-      || this.allocatedDegrees !== this.maximumDegrees
+      || (this.hasSelectionLimit && this.maximumSkillDegree < 1)
+      || (this.hasSelectionLimit && this.allocatedDegrees !== this.maximumDegrees)
       || [...this.selectedDegreeSkills].some(([skillId, degree]) => {
         const currentDegree = this.character?.skills.find((skill) => skill.skillId === skillId)?.degree ?? 0;
-        return currentDegree + degree > this.maximumSkillDegree;
+        return this.hasSelectionLimit && currentDegree + degree > this.maximumSkillDegree;
       })
     ) return;
     const selectedSkills: CharacterSkill[] = (this.character?.skills ?? []).map((skill) => ({
       skillId: skill.skillId,
       degree: skill.degree + this.selectedDegreeCount(skill.skillId),
     }));
-    if (this.selectedNewSkill) {
-      selectedSkills.push({ skillId: this.selectedNewSkill, degree: 1 });
-    }
+    this.selectedNewSkills.forEach((skillId) => selectedSkills.push({ skillId, degree: 1 }));
     this.characterService.setSkills(this.characterId, selectedSkills);
+    if (this.character?.ownerCharacterId) {
+      this.router.navigate(['/characters', this.characterId, 'companion-setup'], { queryParams: { step: 4 } });
+      return;
+    }
     // on redirige vers la liste des personnages après l'ajout de l'avantage
     this.router.navigate(['/characters']);
   }

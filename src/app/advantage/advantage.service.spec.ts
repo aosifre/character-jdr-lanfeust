@@ -37,6 +37,36 @@ describe('AdvantageService', () => {
     expect(service.skillBonus([], 'bluff')).toBe(0);
   });
 
+  it('lets Talentueux grant +4 to its chosen skill', () => {
+    const talentueux = service.advantageList().find((advantage) => advantage.id === 'talentueux');
+
+    expect(talentueux?.description).toContain('Ajoutez un bonus de +4');
+    expect(talentueux?.skillChoice).toBe(true);
+    expect(talentueux?.skillChoiceBonus).toBe(4);
+    expect(service.skillBonus([{ advantageId: 'talentueux', chosenSkillId: 'bluff' }], 'bluff')).toBe(4);
+    expect(service.skillBonus([{ advantageId: 'talentueux', chosenSkillId: 'bluff' }], 'perception')).toBe(0);
+    expect(service.skillBonus(['talentueux'], 'bluff')).toBe(0);
+  });
+
+  it('migrates the former duplicate Talentueux identifier in imported catalogs', () => {
+    expect(service.importAdvantages([{
+      id: 'endurant',
+      title: 'Talentueux',
+      category: 'heroic',
+      description: 'Choisissez une compétence.',
+      conditionAttribute: null,
+      conditionMinimum: null,
+      prerequisiteId: null,
+    }])).toBe(true);
+
+    expect(service.advantageList()[0]).toMatchObject({
+      id: 'talentueux',
+      title: 'Talentueux',
+      skillChoice: true,
+      skillChoiceBonus: 4,
+    });
+  });
+
   it('applies the Dwarf defense bonus only when selected', () => {
     expect(service.combatScoreBonus(['nain'], 'defense')).toBe(2);
     expect(service.combatScoreBonus([], 'defense')).toBe(0);
@@ -90,6 +120,17 @@ describe('AdvantageService', () => {
     expect(service.energyPointsBonus(['reserves-d-energie'])).toBe(10);
     expect(service.energyPointsBonus(['reserves-d-energie', 'reserves-d-energie'])).toBe(15);
     expect(service.energyPointsBonus(['reserves-d-energie', 'reserves-d-energie', 'reserves-d-energie'])).toBe(20);
+  });
+
+  it('adds 5 hit points for every Robustesse occurrence', () => {
+    const robustesse = service.advantageList().find((advantage) => advantage.id === 'robustesse');
+
+    expect(robustesse?.repeatable).toBe(true);
+    expect(robustesse?.hitPointsBonus).toBe(5);
+    expect(robustesse?.additionalHitPointsBonus).toBe(5);
+    expect(service.hitPointsBonus([])).toBe(0);
+    expect(service.hitPointsBonus(['robustesse'])).toBe(5);
+    expect(service.hitPointsBonus(['robustesse', 'robustesse', 'robustesse'])).toBe(15);
   });
 
   it('calculates the Sage d’Eckmül emission radius with Wisdom and the Zone étendue level bonus', () => {

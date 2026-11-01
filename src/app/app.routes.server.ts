@@ -4,6 +4,7 @@ export const serverRoutes: ServerRoute[] = [
   { path: 'characters/:id/edit', renderMode: RenderMode.Server },
   { path: 'characters/:id', renderMode: RenderMode.Server },
   { path: 'characters/:id/history', renderMode: RenderMode.Server },
+  { path: 'characters/:id/companion-setup', renderMode: RenderMode.Server },
   { path: 'characters/:id/characteristics', renderMode: RenderMode.Server },
   { path: 'characters/:id/characteristics/add', renderMode: RenderMode.Server },
   { path: 'characters/:id/equipment', renderMode: RenderMode.Server },
